@@ -1,9 +1,9 @@
-[submodule "pl.deno.kir.szafir"]
-	path = pl.deno.kir.szafir
+[submodule "pl.kir.szafir"]
+	path = pl.kir.szafir
 	url = https://github.com/deno/flathub.git
 	branch = pl.deno.kir.szafir
-[submodule "pl.deno.kir.szafirhost"]
-	path = pl.deno.kir.szafirhost
+[submodule "pl.kir.szafirhost"]
+	path = pl.kir.szafirhost
 	url = https://github.com/deno/flathub.git
 	branch = pl.deno.kir.szafirhost
 [submodule "pl.deno.kir.szafirhostproxy"]

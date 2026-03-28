@@ -6,7 +6,7 @@ This repository serves primarily as an **issue tracker** for the Flatpak builds.
 
 ## Szafir (Standalone App)
 
-`pl.deno.kir.szafir` is the independent Polish qualified electronic signature desktop application.
+`pl.kir.szafir` is the independent Polish qualified electronic signature desktop application.
 
 **Configuration:**
 * Open the signing profile settings, disable the default technical component configuration, and add the Graphite PKCS#11 library from `/app/extra/libCCGraphiteP11.2.0.5.6.so`.
@@ -18,7 +18,7 @@ To use electronic signatures directly from web browsers, you need the host compo
 
 ### Core Components
 
-* **`pl.deno.kir.szafirhost`**: A thin wrapper around the official SzafirHost application. If you try to use it directly, you must manually configure browser native host manifests, and it **will not work** with Flatpaked browsers.
+* **`pl.kir.szafirhost`**: A thin wrapper around the official SzafirHost application. If you try to use it directly, you must manually configure browser native host manifests, and it **will not work** with Flatpaked browsers.
 * **`pl.deno.kir.szafirhostproxy`**: A DBus service built to manage the integration.
   * Automatically configures native host manifests for browsers.
   * Has full support for both host-installed and Flatpaked browsers.
@@ -34,7 +34,7 @@ You must also install the official KIR extension in your browser:
 
 ## Security and Permissions
 
-SzafirHostProxy employs a secure architecture. Rather than running the sensitive signing environment directly, the proxy securely launches `pl.deno.kir.szafirhost` as a separate, strictly sandboxed Flatpak environment with minimal permissions.
+SzafirHostProxy employs a secure architecture. Rather than running the sensitive signing environment directly, the proxy securely launches `pl.kir.szafirhost` as a separate, strictly sandboxed Flatpak environment with minimal permissions.
 
 ## Screenshots
 
