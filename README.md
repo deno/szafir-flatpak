@@ -44,7 +44,7 @@ SzafirHostProxy employs a secure architecture. Rather than running the sensitive
 
 ### SzafirHostProxy
 
-![SzafirHostProxy signing workflow](https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_document.png)
+![SzafirHostProxy signing workflow](https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_permission.png)
 
 ## Cloning
 
