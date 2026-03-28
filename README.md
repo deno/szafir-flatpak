@@ -40,11 +40,11 @@ SzafirHostProxy employs a secure architecture. Rather than running the sensitive
 
 ### Szafir
 
-![Szafir application home screen](pl.deno.kir.szafir/screenshots/en/home.png)
+![Szafir application home screen](https://raw.githubusercontent.com/deno/flathub/516be0b374b15331e2183221f539895c0076f0db/screenshots/en/home.png)
 
 ### SzafirHostProxy
 
-![SzafirHostProxy signing workflow](pl.deno.kir.szafirhostproxy/screenshots/sdk_document.png)
+![SzafirHostProxy signing workflow](https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_document.png)
 
 ## Cloning
 
