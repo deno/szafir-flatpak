@@ -36,6 +36,21 @@ You must also install the official KIR extension in your browser:
 
 SzafirHostProxy employs a secure architecture. Rather than running the sensitive signing environment directly, the proxy securely launches `pl.kir.szafirhost` as a separate, strictly sandboxed Flatpak environment with minimal permissions.
 
+## Installation
+
+### From the Flatpak Repository
+
+Add the repository for automatic updates:
+
+```bash
+flatpak remote-add --if-not-exists --from szafir https://deno.github.io/szafir-flatpak/szafir.flatpakrepo
+flatpak install szafir pl.kir.szafir
+flatpak install szafir pl.kir.szafirhost
+flatpak install szafir pl.deno.kir.szafirhostproxy
+```
+
+Apps update automatically with `flatpak update`.
+
 ## Screenshots
 
 ### Szafir

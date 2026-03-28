@@ -1,0 +1,142 @@
+name: Build and Release Flatpaks
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.app-id }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app-id: pl.kir.szafir
+            manifest-dir: pl.kir.szafir
+            manifest: pl.kir.szafir.yml
+            deps: >-
+              org.freedesktop.Platform/x86_64/25.08
+              org.freedesktop.Sdk/x86_64/25.08
+              org.freedesktop.Sdk.Extension.openjdk25/x86_64/25.08
+          - app-id: pl.kir.szafirhost
+            manifest-dir: pl.kir.szafirhost
+            manifest: pl.kir.szafirhost.yml
+            deps: >-
+              org.freedesktop.Platform/x86_64/25.08
+              org.freedesktop.Sdk/x86_64/25.08
+              org.freedesktop.Sdk.Extension.openjdk25/x86_64/25.08
+          - app-id: pl.deno.kir.szafirhostproxy
+            manifest-dir: pl.deno.kir.szafirhostproxy
+            manifest: pl.deno.kir.szafirhostproxy.yml
+            deps: >-
+              org.kde.Platform/x86_64/6.10
+              org.kde.Sdk/x86_64/6.10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Flatpak and flatpak-builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder elfutils
+
+      - name: Set up Flathub
+        run: |
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install runtime and SDK
+        run: |
+          flatpak install --user -y --noninteractive flathub ${{ matrix.deps }}
+
+      - name: Build
+        working-directory: ${{ matrix.manifest-dir }}
+        run: |
+          flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir ${{ matrix.manifest }}
+
+      - name: Archive repo
+        working-directory: ${{ matrix.manifest-dir }}
+        run: tar -cf ${{ matrix.app-id }}-repo.tar repo
+
+      - name: Upload repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-${{ matrix.app-id }}
+          path: ${{ matrix.manifest-dir }}/${{ matrix.app-id }}-repo.tar
+
+  deploy-repo:
+    name: Deploy Flatpak repository
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Install OSTree and Flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ostree flatpak
+
+      - name: Validate GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "Error: GPG_PRIVATE_KEY secret is not set."
+            exit 1
+          fi
+          echo "$GPG_PRIVATE_KEY" | base64 -d | gpg --batch --import
+
+      - name: Download repo artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: repo-*
+          path: app-repos
+
+      - name: Extract and merge into unified repo
+        run: |
+          ostree init --mode=archive-z2 --repo=repo
+          for tarball in app-repos/repo-*/*.tar; do
+            dir="${tarball%.tar}"
+            mkdir -p "$dir"
+            tar -xf "$tarball" -C "$dir"
+            ostree pull-local --repo=repo "$dir/repo"
+          done
+
+      - name: Sign, finalize, and generate .flatpakrepo
+        run: |
+          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec/{print $5; exit}')
+          PUBLIC_KEY_B64=$(gpg --export "$KEY_ID" | base64 -w0)
+          REPO_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+
+          # Sign each OSTree commit individually (build-update-repo only signs the summary)
+          for ref in $(ostree refs --repo=repo); do
+            ostree gpg-sign --repo=repo "$ref" "$KEY_ID"
+          done
+
+          flatpak build-update-repo --title="Szafir Flatpak Repository" --gpg-sign="$KEY_ID" --generate-static-deltas repo
+
+          printf '[Flatpak Repo]\nTitle=Szafir Flatpak Repository\nUrl=%s\nHomepage=https://github.com/%s\nComment=Stable Flatpak packages for Szafir, SzafirHost, and SzafirHostProxy\nDescription=Official release repository for szafir-flatpak.\nGPGKey=%s\n' \
+            "$REPO_URL" "$GITHUB_REPOSITORY" "$PUBLIC_KEY_B64" > repo/szafir.flatpakrepo
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: repo
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
