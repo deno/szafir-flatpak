@@ -1,72 +1,154 @@
+English version: [README.en.md](README.en.md)
+
 # szafir-flatpak
 
-Community Flatpak packaging of the Szafir electronic signature suite by KIR (Krajowa Izba Rozliczeniowa).
+<div align="center">
+  <p><strong>Nieoficjalny Flatpak dla pakietu podpisu elektronicznego Szafir od KIR.</strong></p>
+  <p>Aplikacja desktopowa do podpisu, most do integracji z przeglądarkami i obsługa native hosta przyjazna dla Flatpaka w jednym repozytorium.</p>
+  <p>
+    <a href="#screenshots">Zrzuty ekranu</a> |
+    <a href="#quick-start">Szybki start</a> |
+    <a href="#browser-signing-stack">Podpis w przeglądarce</a>
+  </p>
+</div>
 
-This repository serves primarily as an **issue tracker** for the Flatpak builds. The actual build manifests live in the submodules below.
+> [!IMPORTANT]
+> Nieoficjalna dystrybucja programu KIR Szafir i SzafirHost. Repozytorium nie zawiera żadnych plików, które naruszają prawa autorskie osób trzecich. Flatpak nie jest wspierany przez spółkę KIR, wszelkie problemy z instalacją proszę zgłaszać w tym projekcie.
 
-## Szafir (Standalone App)
+<a id="screenshots"></a>
 
-`pl.kir.szafir` is the independent Polish qualified electronic signature desktop application.
+## Zrzuty ekranu
 
-**Configuration:**
-* Open the signing profile settings, disable the default technical component configuration, and add the Graphite PKCS#11 library from `/app/extra/libCCGraphiteP11.2.0.5.6.so`.
-* The app only has access to the Documents folder by default. Run Flatseal to grant additional filesystem access if you need to sign files elsewhere.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img width="100%" src="https://raw.githubusercontent.com/deno/flathub/516be0b374b15331e2183221f539895c0076f0db/screenshots/en/home.png" alt="Ekran główny aplikacji Szafir" />
+    </td>
+    <td width="50%" valign="top">
+      <img width="100%" src="https://raw.githubusercontent.com/deno/flathub/516be0b374b15331e2183221f539895c0076f0db/screenshots/en/signing_pades.png" alt="Proces podpisu PAdES w Szafir" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Samodzielna aplikacja desktopowa</strong><br />Składaj i weryfikuj kwalifikowane podpisy elektroniczne w kliencie Szafir spakowanym jako Flatpak.</td>
+    <td align="center"><strong>Proces podpisywania dokumentu</strong><br />Główny proces podpisu pozostaje w pełni dostępny w sandboxowanej aplikacji desktopowej.</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img width="100%" src="https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_permission.png" alt="Monit uprawnień przeglądarki w SzafirHostProxy" />
+    </td>
+    <td width="50%" valign="top">
+      <img width="100%" src="https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_pin.png" alt="Monit PIN w SzafirHostProxy" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Most uprawnień dla przeglądarki</strong><br />SzafirHostProxy podpina wspierane przeglądarki do stosu podpisu, w tym przeglądarki zainstalowane jako Flatpak.</td>
+    <td align="center"><strong>Podpisywanie z poziomu WWW</strong><br />Po zainstalowaniu wymaganych komponentów procesy podpisu uruchamiane ze stron WWW nadal mogą dotrzeć do bezpiecznego hosta.</td>
+  </tr>
+</table>
 
-## Browser Integration (SzafirHost & Proxy)
+<a id="quick-start"></a>
 
-To use electronic signatures directly from web browsers, you need the host components and the browser extensions.
+## Szybki start
 
-### Core Components
-
-* **`pl.kir.szafirhost`**: A thin wrapper around the official SzafirHost application. If you try to use it directly, you must manually configure browser native host manifests, and it **will not work** with Flatpaked browsers.
-* **`pl.deno.kir.szafirhostproxy`**: A DBus service built to manage the integration.
-  * Automatically configures native host manifests for browsers.
-  * Has full support for both host-installed and Flatpaked browsers.
-  * Autostarts automatically when installed and a browser tries to use it (no need to run manually).
-  * Runs a tray icon where you can **right-click to manage HiDPI scaling options**.
-  * To uninstall integration, run: `flatpak run pl.deno.kir.szafirhostproxy --uninstall`
-
-### Browser Extensions
-
-You must also install the official KIR extension in your browser:
-* **Chrome/Chromium:** [Szafir SDK Web on Chrome Web Store](https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc)
-* **Firefox:** [Szafir SDK Web for Firefox (.xpi)](https://www.elektronicznypodpis.pl/download/webmodule/firefox/szafir_sdk_web-current.xpi)
-
-## Security and Permissions
-
-SzafirHostProxy employs a secure architecture. Rather than running the sensitive signing environment directly, the proxy securely launches `pl.kir.szafirhost` as a separate, strictly sandboxed Flatpak environment with minimal permissions.
-
-## Installation
-
-### From the Flatpak Repository
-
-Add the repository for automatic updates:
+Dodaj repozytorium Flatpak raz, a potem zainstaluj potrzebne pakiety:
 
 ```bash
 flatpak remote-add --if-not-exists --from szafir https://deno.github.io/szafir-flatpak/szafir.flatpakrepo
+```
+
+```bash
 flatpak install szafir pl.kir.szafir
 flatpak install szafir pl.kir.szafirhost
 flatpak install szafir pl.deno.kir.szafirhostproxy
 ```
 
-Apps update automatically with `flatpak update`.
+> [!TIP]
+> Jeśli potrzebujesz tylko samodzielnej aplikacji desktopowej, zainstaluj `pl.kir.szafir`. Do podpisywania w przeglądarce zainstaluj dwa ostatnie pakiety.
 
-## Screenshots
+Pakiety aktualizujesz poleceniem:
 
-### Szafir
+```bash
+flatpak update
+```
 
-![Szafir application home screen](https://raw.githubusercontent.com/deno/flathub/516be0b374b15331e2183221f539895c0076f0db/screenshots/en/home.png)
+## Przegląd pakietów
 
-### SzafirHostProxy
+| Pakiet | Opis |
+| --- | --- |
+| `pl.kir.szafir` | Aplikacja do weryfikacji i składania podpisów elektronicznych |
+| `pl.kir.szafirhost` | Minimalny wrapper dla SzafirHost z ograniczonymi uprawnieniami. Wywoływany przez helper `pl.deno.kir.szafirhostproxy` |
+| `pl.deno.kir.szafirhostproxy` | Automatyczna integracja z przeglądarkami w tym zainstalowanymi jako Flatpak. Wywołuje `pl.kir.szafirhost` i udostępnia przeglądarce. |
 
-![SzafirHostProxy signing workflow](https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_permission.png)
+## Aplikacja desktopowa
 
-## Cloning
+`pl.kir.szafir` to aplikacja do weryfikowania i składania elektronicznych podpisów wydawana przez firmę Krajową Izbę Rozliczeniową (KIR).
+
+> [!NOTE]
+> Przy pierwszym użyciu otwórz ustawienia profilu podpisu, wyłącz domyślną konfigurację komponentu technicznego i dodaj bibliotekę Graphite PKCS#11 z `/app/extra/libCCGraphiteP11.2.0.5.6.so`.
+
+> [!TIP]
+> Domyślnie aplikacja ma dostęp do folderu Dokumenty. Użyj Flatseal, jeśli chcesz podpisywać pliki z innych lokalizacji.
+
+<a id="browser-signing-stack"></a>
+
+## Podpisywanie w przeglądarce
+
+Jeśli chcesz używać podpisu elektronicznego bezpośrednio w przeglądarce, zainstaluj komponenty hosta oraz oficjalne rozszerzenie KIR.
+
+### Jak to działa
+
+| Komponent | Co robi | Uwagi |
+| --- | --- | --- |
+| `pl.kir.szafirhost` | Dostarcza właściwe środowisko hosta do podpisu po stronie systemu | Samodzielnie wymaga ręcznej konfiguracji native hosta i słabo współpracuje z przeglądarkami Flatpakowymi |
+| `pl.deno.kir.szafirhostproxy` | Obsługuje integrację z przeglądarką i manifesty native messaging | Uruchamia się na żądanie, wspiera przeglądarki systemowe i Flatpakowe oraz udostępnia sterowanie skalowaniem z ikony w zasobniku |
+
+SzafirHostProxy automatycznie instaluje wymagane manifesty. W razie potrzeby można je ręcznie usunąć poleceniem:
+
+```bash
+flatpak run pl.deno.kir.szafirhostproxy --uninstall
+```
+
+Możliwe jest też ręczne wymuszenie ponownej instalacji w razie potrzeby poleceniem:
+
+```bash
+flatpak run pl.deno.kir.szafirhostproxy --install
+```
+
+Wymagane tylko w razie problemów z integracją przeglądarki.
+
+### Wymagane rozszerzenia przeglądarki
+
+- Chrome i Chromium: [Szafir SDK Web on Chrome Web Store](https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc)
+- Firefox: [Szafir SDK Web for Firefox (.xpi)](https://www.elektronicznypodpis.pl/download/webmodule/firefox/szafir_sdk_web-current.xpi)
+
+### Wspierane przeglądarki
+
+| Przeglądarka | Host | Flatpak |
+| --- | --- | --- |
+| Mozilla Firefox | ✅ | ✅ |
+| LibreWolf | ✅ | ✅ |
+| Waterfox | ✅ | ✅ |
+| Google Chrome | ✅ | ✅ |
+| Google Chrome Dev | ✅ | ✅ |
+| Chromium | ✅ | ✅ |
+| Ungoogled Chromium | ✅ | ✅ |
+
+## Model bezpieczeństwa
+
+SzafirHostProxy nie uruchamia bezpośrednio wrażliwego środowiska podpisu. Zamiast tego uruchamia `pl.kir.szafirhost` jako osobny, mocno ograniczony Flatpak z minimalnymi uprawnieniami, dzięki czemu warstwa integracji z przeglądarką pozostaje odseparowana od runtime hosta.
+
+## Układ repozytorium
+
+To repozytorium pełni także rolę głównego issue trackera dla paczek Flatpak. Manifesty i pliki pomocnicze znajdują się w submodułach.
+
+<a id="cloning"></a>
+
+## Klonowanie
 
 ```bash
 git clone --recurse-submodules https://github.com/deno/szafir-flatpak.git
 ```
 
-## License
+## Licencja
 
-Szafir and SzafirHost are proprietary software by KIR. SzafirHostProxy is licensed under GPL-2.0-only.
+Szafir i SzafirHost są własnościowym oprogramowaniem KIR. SzafirHostProxy jest objęty licencją GPL-2.0-only.
