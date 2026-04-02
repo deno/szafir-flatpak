@@ -1,0 +1,128 @@
+app-id: {{ app_id }}
+runtime: org.kde.Platform
+runtime-version: '6.10'
+sdk: org.kde.Sdk
+command: szafir-host-proxy
+{% if bundled_host %}
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk25
+{% endif %}
+
+finish-args:
+{% if not bundled_host %}
+  - --socket=fallback-x11
+{% endif %}
+  - --socket=wayland
+  - --share=ipc
+  - --device=dri
+{% if bundled_host %}
+  - --own-name=pl.deno.kir.szafirhostproxy
+{% else %}
+  - --talk-name=org.freedesktop.Flatpak
+{% endif %}
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --filesystem=~/.mozilla:create
+  - --filesystem=~/.librewolf:create
+  - --filesystem=~/.waterfox:create
+  - --filesystem=xdg-config/google-chrome:create
+  - --filesystem=xdg-config/google-chrome-unstable:create
+  - --filesystem=xdg-config/chromium:create
+  - --filesystem=~/.local/share/flatpak/overrides:rw
+  - --filesystem=~/.local/share/flatpak/exports/share/icons:ro
+  - --filesystem=/var/lib/flatpak/exports/share/icons:ro
+  - --filesystem=~/.local/share/flatpak/app:ro
+  - --filesystem=/var/lib/flatpak/app:ro
+  - --filesystem=~/.var/app/org.mozilla.firefox:create
+  - --filesystem=~/.var/app/io.gitlab.librewolf-community:create
+  - --filesystem=~/.var/app/net.waterfox.waterfox:create
+  - --filesystem=~/.var/app/com.google.Chrome:create
+  - --filesystem=~/.var/app/com.google.ChromeDev:create
+  - --filesystem=~/.var/app/org.chromium.Chromium:create
+  - --filesystem=~/.var/app/io.github.ungoogled_software.ungoogled_chromium:create
+{% if bundled_host %}
+  - --socket=x11
+  - --socket=pcsc
+  - --share=network
+  - --persist=.java
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+
+cleanup:
+  - /include
+  - /bin/pcsc-spy
+  - /lib/libpcscspy*
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - /sbin
+{% endif %}
+
+modules:
+{% if bundled_host %}
+{% include 'fragments/openjdk_module.yml.j2' %}
+
+{% if include_pcsc_module | default(true) %}
+{% include 'fragments/pcsc_lite_module.yml.j2' %}
+
+{% endif %}
+  - name: szafirhost
+    buildsystem: simple
+    build-commands:
+      - install -D -m 755 start-szafir-host-native.sh /app/bin/start-szafir-host-native.sh
+    sources:
+      - type: file
+        path: start-szafir-host-native.sh
+{% if include_installer_extra %}
+      - type: extra-data
+        filename: {{ installer_extra_data.filename }}
+        url: {{ installer_extra_data.url }}
+        sha256: {{ installer_extra_data.sha256 }}
+        size: {{ installer_extra_data.size }}
+{% endif %}
+{% if include_library_extra %}
+{% for library in library_extra_data %}
+      - type: extra-data
+        filename: {{ library.filename }}
+        url: {{ library.url }}
+        sha256: {{ library.sha256 }}
+        size: {{ library.size }}
+{% endfor %}
+{% endif %}
+
+{% endif %}
+
+  - name: szafir-host-proxy
+    buildsystem: cmake-ninja
+    config-opts:
+{% if bundled_host %}
+      - -DBUNDLED_HOST=ON
+      - -DAPP_ID={{ app_id }}
+      - -DAPP_VERSION={{ app_version }}
+{% else %}
+      - -DAPP_ID={{ app_id }}
+      - -DAPP_VERSION={{ app_version }}
+{% endif %}
+    sources:
+      - type: dir
+        path: szafir-host-proxy
+      - type: file
+        path: LICENSE
+      - type: file
+        path: szafir_license_en.md
+      - type: file
+        path: szafir_license_pl.md
+{% if bundled_host %}
+      - type: file
+        path: components.json
+{% endif %}
+
+  - name: szafir-icons
+    buildsystem: simple
+    build-commands:
+      - install -D -m 644 proxy_icon.svg /app/share/icons/hicolor/scalable/apps/{{ app_id }}.svg
+      - install -D -m 644 {{ metainfo_file }} /app/share/metainfo/{{ metainfo_file }}
+    sources:
+      - type: file
+        path: proxy_icon.svg
+      - type: file
+        path: {{ metainfo_file }}

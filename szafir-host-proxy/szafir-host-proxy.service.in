@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=@DBUS_APP_ID@
+Exec=/app/bin/szafir-host-proxy
+Type=simple

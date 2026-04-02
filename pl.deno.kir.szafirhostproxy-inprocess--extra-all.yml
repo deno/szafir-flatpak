@@ -1,0 +1,118 @@
+app-id: pl.deno.kir.szafirhostproxy
+runtime: org.kde.Platform
+runtime-version: '6.10'
+sdk: org.kde.Sdk
+command: szafir-host-proxy
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk25
+
+finish-args:
+  - --socket=wayland
+  - --share=ipc
+  - --device=dri
+  - --own-name=pl.deno.kir.szafirhostproxy
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --filesystem=~/.mozilla:create
+  - --filesystem=~/.librewolf:create
+  - --filesystem=~/.waterfox:create
+  - --filesystem=xdg-config/google-chrome:create
+  - --filesystem=xdg-config/google-chrome-unstable:create
+  - --filesystem=xdg-config/chromium:create
+  - --filesystem=~/.local/share/flatpak/overrides:rw
+  - --filesystem=~/.local/share/flatpak/exports/share/icons:ro
+  - --filesystem=/var/lib/flatpak/exports/share/icons:ro
+  - --filesystem=~/.local/share/flatpak/app:ro
+  - --filesystem=/var/lib/flatpak/app:ro
+  - --filesystem=~/.var/app/org.mozilla.firefox:create
+  - --filesystem=~/.var/app/io.gitlab.librewolf-community:create
+  - --filesystem=~/.var/app/net.waterfox.waterfox:create
+  - --filesystem=~/.var/app/com.google.Chrome:create
+  - --filesystem=~/.var/app/com.google.ChromeDev:create
+  - --filesystem=~/.var/app/org.chromium.Chromium:create
+  - --filesystem=~/.var/app/io.github.ungoogled_software.ungoogled_chromium:create
+  - --socket=x11
+  - --socket=pcsc
+  - --share=network
+  - --persist=.java
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+
+cleanup:
+  - /include
+  - /bin/pcsc-spy
+  - /lib/libpcscspy*
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - /sbin
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk25/install.sh
+
+  - name: pcsc-lite
+    buildsystem: meson
+    config-opts:
+      - -Dlibudev=false
+      - -Dlibsystemd=false
+      - -Dusb=false
+      - -Dlibusb=false
+      - -Dpolkit=false
+      - -Dserial=false
+      - -Dipcdir=/run/pcscd
+    post-install:
+      - install -Dm644 ../COPYING /app/share/licenses/$FLATPAK_ID/pcsc-lite/COPYING
+    sources:
+      - type: archive
+        url: https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz
+        sha256: cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7
+
+  - name: szafirhost
+    buildsystem: simple
+    build-commands:
+      - install -D -m 755 start-szafir-host-native.sh /app/bin/start-szafir-host-native.sh
+    sources:
+      - type: file
+        path: start-szafir-host-native.sh
+      - type: extra-data
+        filename: szafirhost-install.jar
+        url: https://storage.googleapis.com/cdn.elektronicznypodpis.pl/SzafirHost/szafirhost-install.jar
+        sha256: b674a63d385e7392e1827c777bee7076ffed1bef7d17d900f9422635c99b2c72
+        size: 35307060
+      - type: extra-data
+        filename: libCCGraphiteP11.2.0.5.6.so
+        url: https://www.elektronicznypodpis.pl/storage/file/core_files/2024/8/29/176c2c69984e86b0af3faf041037e26b/libCCGraphiteP11.2.0.5.6.so
+        sha256: 856d00360b53457fb49a233fff5c6c568834ba3a35a4102cf540ddb0e61e011e
+        size: 6659848
+
+
+  - name: szafir-host-proxy
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUNDLED_HOST=ON
+      - -DAPP_ID=pl.deno.kir.szafirhostproxy
+      - -DAPP_VERSION=0.2.0
+    sources:
+      - type: dir
+        path: szafir-host-proxy
+      - type: file
+        path: LICENSE
+      - type: file
+        path: szafir_license_en.md
+      - type: file
+        path: szafir_license_pl.md
+      - type: file
+        path: components.json
+
+  - name: szafir-icons
+    buildsystem: simple
+    build-commands:
+      - install -D -m 644 proxy_icon.svg /app/share/icons/hicolor/scalable/apps/pl.deno.kir.szafirhostproxy.svg
+      - install -D -m 644 pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml /app/share/metainfo/pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml
+    sources:
+      - type: file
+        path: proxy_icon.svg
+      - type: file
+        path: pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml

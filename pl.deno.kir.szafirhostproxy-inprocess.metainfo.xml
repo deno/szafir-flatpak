@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>pl.deno.kir.szafirhostproxy</id>
+  <name>SzafirHostProxy</name>
+  <summary>Proxy for Szafir browser integration (Flathub version)</summary>
+  <summary xml:lang="pl">Proxy integracji przeglądarkowej dla środowiska Szafir (wersja Flathub)</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-only</project_license>
+  <developer id="pl.deno">
+    <name>deno</name>
+  </developer>
+  <releases>
+    <release version="0.2.0" date="2026-04-01" />
+  </releases>
+  <description>
+    <p>
+      SzafirHostProxy is an open-source bridge component that connects host and Flatpaked web browsers
+      to the Szafir application suite, enabling smartcard electronic signatures to function on supported
+      websites.
+    </p>
+    <p>Supported browsers include:</p>
+    <ul>
+      <li>Mozilla Firefox, LibreWolf, Waterfox</li>
+      <li>Google Chrome, Google Chrome Dev</li>
+      <li>Chromium, Ungoogled Chromium</li>
+    </ul>
+    <p>Features:</p>
+    <ul>
+      <li>Automatically installs native host definitions for all supported browsers upon its first run.</li>
+      <li>Shows a system tray icon that indicates if any browsers are actively connected to SzafirHost.</li>
+    </ul>
+    <p>
+      The integrations can be manually uninstalled at any time by running: flatpak run pl.deno.kir.szafirhostproxy --uninstall
+    </p>
+    <p xml:lang="pl">
+      SzafirHostProxy to otwartoźródłowy komponent mostkujący, który łączy przeglądarki internetowe
+      (zarówno te zainstalowane w systemie, jak i przez Flatpak) z pakietem aplikacji Szafir.
+    </p>
+    <p xml:lang="pl">Wspierane przeglądarki:</p>
+    <ul>
+      <li xml:lang="pl">Mozilla Firefox, LibreWolf, Waterfox</li>
+      <li xml:lang="pl">Google Chrome, Google Chrome Dev</li>
+      <li xml:lang="pl">Chromium, Ungoogled Chromium</li>
+    </ul>
+    <p xml:lang="pl">Funkcje:</p>
+    <ul>
+      <li xml:lang="pl">
+      Automatycznie instaluje definicje native messaging dla wszystkich wspieranych przeglądarek podczas pierwszego uruchomienia.
+      </li>
+      <li xml:lang="pl">
+      Wyświetla ikonę w zasobniku systemowym (tray), która wskazuje czy jakieś przeglądarki są aktualnie połączone z aplikacją SzafirHost.
+      </li>
+    </ul>
+    <p xml:lang="pl">
+      Integracje mogą zostać ręcznie odinstalowane w dowolnym momencie poprzez uruchomienie polecenia: flatpak run pl.deno.kir.szafirhostproxy --uninstall
+    </p>
+  </description>
+  <url type="homepage">https://github.com/deno/szafir-flatpak</url>
+  <url type="bugtracker">https://github.com/deno/szafir-flatpak/issues</url>
+  <launchable type="desktop-id">pl.deno.kir.szafirhostproxy.desktop</launchable>
+  <content_rating type="oars-1.1" />
+  <requires>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_permission.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_document.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_pin.png</image>
+    </screenshot>
+  </screenshots>
+</component>

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Regenerate all Flatpak manifests and metainfo files from templates,
+# then stage the outputs so they are always in sync with the templates.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo "[pre-commit] rendering manifests & metainfo..."
+python3 scripts/render_manifest.py all
+
+mapfile -t outputs < <(python3 scripts/render_manifest.py outputs)
+git add "${outputs[@]}"

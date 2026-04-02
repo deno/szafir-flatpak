@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SzafirHostProxy
+Comment=Proxy for Szafir browser integration
+Exec=szafir-host-proxy --show-status-window
+Icon=@APP_ID@
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=false

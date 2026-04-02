@@ -1,0 +1,49 @@
+{
+  "components": [
+    {
+      "id": "szafirhost-installer",
+      "type": "installer",
+      "version": "1.1.0",
+      "name": {
+        "en": "SzafirHost Runtime",
+        "pl": "Środowisko uruchomieniowe SzafirHost"
+      },
+      "filename": "szafirhost-install.jar",
+      "url": "https://storage.googleapis.com/cdn.elektronicznypodpis.pl/SzafirHost/szafirhost-install.jar",
+      "sha256": "b674a63d385e7392e1827c777bee7076ffed1bef7d17d900f9422635c99b2c72",
+      "size": 35307060,
+      "required": true
+    },
+    {
+      "id": "pcsc-lite",
+      "type": "bundled-source",
+      "version": "2.3.3",
+      "name": {
+        "en": "PC/SC Lite Smart Card Middleware",
+        "pl": "Oprogramowanie pośredniczące kart PC/SC Lite"
+      },
+      "filename": "pcsc-lite-2.3.3.tar.xz",
+      "source_url": "https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz",
+      "source_sha256": "cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7",
+      "library_path": "/app/lib/libpcsclite.so.1",
+      "size": 0,
+      "required": true
+    },
+    {
+      "id": "libccgraphite",
+      "type": "library",
+      "version": "11.2.0.5.6",
+      "provider_name": "libCCGraphiteP11",
+      "name": {
+        "en": "libCCGraphite Cryptographic Provider",
+        "pl": "Dostawca kryptograficzny libCCGraphite"
+      },
+      "filename": "libCCGraphiteP11.2.0.5.6.so",
+      "url": "https://www.elektronicznypodpis.pl/storage/file/core_files/2024/8/29/176c2c69984e86b0af3faf041037e26b/libCCGraphiteP11.2.0.5.6.so",
+      "sha256": "856d00360b53457fb49a233fff5c6c568834ba3a35a4102cf540ddb0e61e011e",
+      "size": 6659848,
+      "required": false,
+      "suggested": true
+    }
+  ]
+}
