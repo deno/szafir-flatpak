@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build pl.deno.kir.szafirhostproxy (extra-empty)
+    name: Build proxy bundle and repo apps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,12 +39,19 @@ jobs:
           flatpak install --user -y --noninteractive flathub \
             org.kde.Platform/x86_64/6.10 \
             org.kde.Sdk/x86_64/6.10 \
+            org.freedesktop.Platform/x86_64/25.08 \
+            org.freedesktop.Sdk/x86_64/25.08 \
             org.freedesktop.Sdk.Extension.openjdk25/x86_64/25.08
 
-      - name: Build
+      - name: Build proxy (extra-empty)
         run: |
-          flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir \
+          flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir-proxy \
             pl.deno.kir.szafirhostproxy-inprocess--extra-empty.yml
+
+      - name: Build standalone Szafir (repo only)
+        run: |
+          flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir-szafir \
+            pl.kir.szafir.yml
 
       - name: Create bundle
         run: |
@@ -53,7 +60,7 @@ jobs:
             pl.deno.kir.szafirhostproxy
 
       - name: Archive repo
-        run: tar -cf pl.deno.kir.szafirhostproxy-extra-empty-repo.tar repo
+        run: tar -cf szafir-release-repo.tar repo
 
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v4
@@ -64,8 +71,8 @@ jobs:
       - name: Upload repo artifact
         uses: actions/upload-artifact@v4
         with:
-          name: repo-pl.deno.kir.szafirhostproxy-extra-empty
-          path: pl.deno.kir.szafirhostproxy-extra-empty-repo.tar
+          name: repo-szafir-release
+          path: szafir-release-repo.tar
 
   release:
     name: Attach bundle to GitHub Release
@@ -109,7 +116,7 @@ jobs:
       - name: Download repo artifact
         uses: actions/download-artifact@v4
         with:
-          name: repo-pl.deno.kir.szafirhostproxy-extra-empty
+          name: repo-szafir-release
           path: app-repos
 
       - name: Extract and merge into unified repo
@@ -135,7 +142,7 @@ jobs:
           flatpak build-update-repo --title="Szafir Flatpak Repository" \
             --gpg-sign="$KEY_ID" --generate-static-deltas repo
 
-          printf '[Flatpak Repo]\nTitle=Szafir Flatpak Repository\nUrl=%s\nHomepage=https://github.com/%s\nComment=Stable Flatpak packages for Szafir, SzafirHost, and SzafirHostProxy\nDescription=Official release repository for szafir-flatpak.\nGPGKey=%s\n' \
+          printf '[Flatpak Repo]\nTitle=Szafir Flatpak Repository\nUrl=%s\nHomepage=https://github.com/%s\nComment=Stable Flatpak packages for Szafir and SzafirHostProxy\nDescription=Official release repository for szafir-flatpak.\nGPGKey=%s\n' \
             "$REPO_URL" "$GITHUB_REPOSITORY" "$PUBLIC_KEY_B64" > repo/szafir.flatpakrepo
 
       - name: Upload Pages artifact

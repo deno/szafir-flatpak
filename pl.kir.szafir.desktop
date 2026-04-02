@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Szafir
+Comment=Szafir application
+Exec=szafir_start.sh
+Icon=pl.kir.szafir
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=true

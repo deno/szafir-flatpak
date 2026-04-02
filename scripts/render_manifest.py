@@ -166,6 +166,14 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "pcsc_lite": DOWNLOAD_COMPONENTS["pcsc-lite"],
         },
     },
+    "szafir.manifest": {
+        "output": "pl.kir.szafir.yml",
+        "template_root": "manifests",
+        "template": "szafir.yml.j2",
+        "context": {
+            "include_pcsc_module": True,
+        },
+    },
     # Metainfo XML files
     "proxy-split.meta": {
         "output": "pl.deno.kir.szafirhostproxy-split.metainfo.xml",
