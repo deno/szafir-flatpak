@@ -39,8 +39,6 @@ finish-args:
 
 cleanup:
   - /include
-  - /bin/pcsc-spy
-  - /lib/libpcscspy*
   - /lib/pkgconfig
   - /share/doc
   - /share/man

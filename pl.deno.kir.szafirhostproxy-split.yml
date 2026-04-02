@@ -9,6 +9,7 @@ finish-args:
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  - --own-name=pl.deno.kir.szafirhostproxy
   - --talk-name=org.freedesktop.Flatpak
   - --talk-name=org.kde.StatusNotifierWatcher
   - --filesystem=~/.mozilla:create

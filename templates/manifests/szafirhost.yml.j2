@@ -19,8 +19,9 @@ finish-args:
 
 cleanup:
   - /include
-  - /bin/pcsc-spy
-  - /lib/libpcscspy*
+{% if include_pcsc_module %}
+{% include 'fragments/pcsc_cleanup.yml.j2' %}
+{% endif %}
   - /lib/pkgconfig
   - /share/doc
   - /share/man
