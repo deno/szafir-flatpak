@@ -3,6 +3,7 @@
 #include "ComponentDownloader.h"
 #include "AppSettings.h"
 
+#include <KLocalizedString>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
@@ -17,6 +18,8 @@
 #include <QUrl>
 #include <QUuid>
 #include <QXmlStreamWriter>
+
+#include <algorithm>
 
 namespace {
 
@@ -40,9 +43,9 @@ void saveComponentsState(const QJsonObject &state)
     }
 }
 
-QString computeFileSha256(const QString &path)
+QString computeFileSha256(const std::filesystem::path &path)
 {
-    QFile f(path);
+    QFile f(PathUtils::toQString(path));
     if (!f.open(QIODevice::ReadOnly))
         return {};
     QCryptographicHash hash(QCryptographicHash::Sha256);
@@ -78,7 +81,7 @@ bool cleanupDownloadDir()
 bool installComponent(const std::filesystem::path &sourcePath,
                       const QString &filename,
                       bool move,
-                      QString *installedPathOut)
+                      std::filesystem::path *installedPathOut)
 {
     std::error_code ec;
     const std::filesystem::path destination = finalComponentPath(filename);
@@ -88,7 +91,7 @@ bool installComponent(const std::filesystem::path &sourcePath,
 
     if (sourcePath == destination) {
         if (installedPathOut)
-            *installedPathOut = PathUtils::toQString(destination);
+            *installedPathOut = destination;
         return true;
     }
 
@@ -98,7 +101,7 @@ bool installComponent(const std::filesystem::path &sourcePath,
         std::filesystem::rename(sourcePath, destination, ec);
         if (!ec) {
             if (installedPathOut)
-                *installedPathOut = PathUtils::toQString(destination);
+                *installedPathOut = destination;
             return true;
         }
         ec.clear();
@@ -115,17 +118,65 @@ bool installComponent(const std::filesystem::path &sourcePath,
     }
 
     if (installedPathOut)
-        *installedPathOut = PathUtils::toQString(destination);
+        *installedPathOut = destination;
     return true;
 }
 
 } // namespace
 
 ComponentDownloader::ComponentDownloader(QObject *parent)
-    : QObject(parent)
+    : QAbstractListModel(parent)
     , m_networkManager(new QNetworkAccessManager(this))
 {
     loadManifest();
+}
+
+int ComponentDownloader::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return 0;
+    return m_components.size();
+}
+
+QVariant ComponentDownloader::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_components.size())
+        return {};
+
+    const ComponentEntry &entry = m_components[index.row()];
+    switch (role) {
+    case ComponentRole:
+        return QVariant::fromValue(entry.info);
+    case StateRole:
+        return static_cast<int>(entry.state);
+    case EnabledRole:
+        return entry.enabled;
+    case PresentRole:
+        return entry.present;
+    case BytesReceivedRole:
+        return entry.bytesReceived;
+    case DownloadableRole:
+        return entry.downloadable();
+    default:
+        return {};
+    }
+}
+
+QHash<int, QByteArray> ComponentDownloader::roleNames() const
+{
+    return {
+        {ComponentRole, "component"},
+        {StateRole, "state"},
+        {EnabledRole, "enabled"},
+        {PresentRole, "present"},
+        {BytesReceivedRole, "bytesReceived"},
+        {DownloadableRole, "downloadable"},
+    };
+}
+
+std::span<const ComponentDownloader::ComponentEntry> ComponentDownloader::components() const
+{
+    return {m_components.data(), static_cast<std::size_t>(m_components.size())};
 }
 
 void ComponentDownloader::loadManifest()
@@ -148,6 +199,8 @@ void ComponentDownloader::loadManifest()
     QJsonObject stateObj = loadComponentsState();
     QJsonObject componentsState = stateObj[QStringLiteral("components")].toObject();
     bool stateChanged = false;
+
+    QList<ComponentEntry> loadedComponents;
 
     const QJsonArray arr = doc.object()[QStringLiteral("components")].toArray();
     for (const QJsonValue &v : arr) {
@@ -178,91 +231,72 @@ void ComponentDownloader::loadManifest()
         }
         entry.info.filename    = obj[QStringLiteral("filename")].toString();
         entry.info.url         = obj[QStringLiteral("url")].toString();
-        entry.info.sha256      = obj[QStringLiteral("sha256")].toString();
-        entry.info.libraryPath = obj[QStringLiteral("library_path")].toString();
+        entry.info.hash        = obj[QStringLiteral("sha256")].toString();
+        entry.info.hashLabel   = entry.info.hash.isEmpty() ? QString{}
+            : (entry.info.type == QLatin1String("installer") ? QString{i18n("SHA256 (installer):")} : QString{i18n("SHA256:")});
         entry.info.size        = obj[QStringLiteral("size")].toInteger();
         entry.info.required    = obj[QStringLiteral("required")].toBool();
         entry.info.suggested   = obj[QStringLiteral("suggested")].toBool();
         entry.enabled          = entry.info.required || entry.info.suggested; // required/suggested components start enabled
 
-        const bool downloadable = !entry.info.url.isEmpty() && !entry.info.sha256.isEmpty();
-
-        // Bundled-source components are compiled into the Flatpak; never download them.
-        if (entry.info.type == QStringLiteral("bundled-source")) {
-            if (!entry.info.libraryPath.isEmpty()) {
-                std::error_code ec;
-                entry.present = std::filesystem::exists(PathUtils::toFsPath(entry.info.libraryPath), ec);
-                if (!entry.present)
-                    qWarning() << "ComponentDownloader: bundled-source" << entry.info.id
-                               << "- library not found at" << entry.info.libraryPath;
-                else
-                    qDebug() << "ComponentDownloader: bundled-source" << entry.info.id
-                             << "- library found at" << entry.info.libraryPath;
-            } else {
-                entry.present = true;
-            }
-            entry.state = entry.present ? Done : Missing;
-            m_components.append(entry);
-            continue;
-        }
+        const bool downloadable = entry.downloadable();
 
         bool verified = false;
         QJsonObject compState = componentsState[entry.info.id].toObject();
-        if (compState.contains(QStringLiteral("sha256")) && compState[QStringLiteral("sha256")].toString() == entry.info.sha256) {
+        if (compState.contains(QStringLiteral("sha256")) && compState[QStringLiteral("sha256")].toString() == entry.info.hash) {
             QString pathStr = compState[QStringLiteral("path")].toString();
+            const std::filesystem::path verifiedPath = PathUtils::toFsPath(pathStr);
             // Ensure the file is still present on disk
             std::error_code ec;
-            if (std::filesystem::exists(PathUtils::toFsPath(pathStr), ec)
-                && PathUtils::toFsPath(pathStr).parent_path() == verifiedComponentsPath()) {
+            if (std::filesystem::exists(verifiedPath, ec)
+                && verifiedPath.parent_path() == verifiedComponentsPath()) {
                 verified = true;
-                entry.verifiedPath = pathStr;
+                entry.verifiedPath = verifiedPath;
             }
         }
 
         if (!verified) {
             // Not in state or checksum changed or file missing, let's look for it
-            QString foundPath;
+            std::filesystem::path foundPath;
             std::error_code ec;
 
             // Check dedicated verified location first.
             const std::filesystem::path verifiedPath = finalComponentPath(entry.info.filename);
             if (std::filesystem::exists(verifiedPath, ec)) {
-                foundPath = PathUtils::toQString(verifiedPath);
+                foundPath = verifiedPath;
             } else {
                 // Legacy/bundled fallback: /app/extra and old XDG data extra dir.
                 const std::filesystem::path bundled = std::filesystem::path("/app/extra") / entry.info.filename.toStdString();
                 if (std::filesystem::exists(bundled, ec)) {
-                    foundPath = PathUtils::toQString(bundled);
+                    foundPath = bundled;
                 } else {
                     const std::filesystem::path downloaded = downloadedExtraPath() / entry.info.filename.toStdString();
                     if (std::filesystem::exists(downloaded, ec)) {
-                        foundPath = PathUtils::toQString(downloaded);
+                        foundPath = downloaded;
                     }
                 }
             }
 
-            if (!foundPath.isEmpty()) {
+            if (!foundPath.empty()) {
                 // File found on disk but not in state (or invalid state). Verify its hash.
                 qDebug() << "ComponentDownloader: verifying SHA256 for newly found component" << entry.info.id;
                 QString actualHash = computeFileSha256(foundPath);
-                if (actualHash == entry.info.sha256) {
-                    QString promotedPath;
-                    if (installComponent(PathUtils::toFsPath(foundPath), entry.info.filename, false, &promotedPath)) {
+                if (actualHash == entry.info.hash) {
+                    std::filesystem::path promotedPath;
+                    if (installComponent(foundPath, entry.info.filename, false, &promotedPath)) {
                         verified = true;
                         entry.verifiedPath = promotedPath;
                         // Save to state
                         QJsonObject newState;
-                        newState[QStringLiteral("sha256")] = entry.info.sha256;
-                        newState[QStringLiteral("path")] = promotedPath;
+                        newState[QStringLiteral("sha256")] = entry.info.hash;
+                        newState[QStringLiteral("path")] = PathUtils::toQString(promotedPath);
                         componentsState[entry.info.id] = newState;
                         stateChanged = true;
                     } else {
                         qWarning() << "ComponentDownloader: failed to promote verified component" << entry.info.id;
                     }
                 } else {
-                    qWarning() << "ComponentDownloader: checksum mismatch for" << entry.info.id << "at" << foundPath;
-                    // If downloaded, we might delete it, but let's just leave it unverified.
-                    // It will be re-downloaded if needed.
+                    qWarning() << "ComponentDownloader: checksum mismatch for" << entry.info.id << "at" << PathUtils::toQString(foundPath);
                 }
             }
         }
@@ -283,7 +317,7 @@ void ComponentDownloader::loadManifest()
                  << "enabled:" << entry.enabled
                  << "present:" << entry.present;
 
-        m_components.append(entry);
+        loadedComponents.append(entry);
     }
 
     if (stateChanged) {
@@ -291,34 +325,32 @@ void ComponentDownloader::loadManifest()
         saveComponentsState(stateObj);
     }
 
+    std::stable_sort(loadedComponents.begin(), loadedComponents.end(),
+                     [](const ComponentEntry &a, const ComponentEntry &b) {
+        if (a.present != b.present)
+            return a.present && !b.present;
+        return false;
+    });
+
+    beginResetModel();
+    m_components = std::move(loadedComponents);
+    endResetModel();
+
+    emitSummaryStateChanged();
     writeExternalProvidersXml();
 
     qDebug() << "ComponentDownloader: loaded" << m_components.size() << "component(s) from manifest";
 }
 
-QVariantList ComponentDownloader::components() const
+QList<Component> ComponentDownloader::presentDisplayEntries() const
 {
-    QVariantList result;
-    for (const ComponentEntry &e : m_components) {
-        QVariantMap m;
-        m[QStringLiteral("id")]            = e.info.id;
-        m[QStringLiteral("name")]          = e.info.name;
-        m[QStringLiteral("type")]          = e.info.type;
-        m[QStringLiteral("version")]       = e.info.version;
-        m[QStringLiteral("sha256")]        = e.info.sha256;
-        m[QStringLiteral("filename")]      = e.info.filename;
-        m[QStringLiteral("size")]          = e.info.size;
-        m[QStringLiteral("required")]      = e.info.required;
-        m[QStringLiteral("suggested")]     = e.info.suggested;
-        m[QStringLiteral("enabled")]       = e.enabled;
-        m[QStringLiteral("state")]         = static_cast<int>(e.state);
-        m[QStringLiteral("bytesReceived")] = e.bytesReceived;
-        m[QStringLiteral("present")]       = e.present;
-        m[QStringLiteral("downloadable")]   = !e.info.url.isEmpty() && !e.info.sha256.isEmpty();
-        result.append(m);
-    }
+    QList<Component> result;
+    for (const ComponentEntry &e : m_components)
+        if (e.present)
+            result.append(static_cast<const Component &>(e.info));
     return result;
 }
+
 
 bool ComponentDownloader::allRequiredComplete() const
 {
@@ -332,7 +364,7 @@ bool ComponentDownloader::allRequiredComplete() const
 bool ComponentDownloader::hasDownloadableComponents() const
 {
     for (const ComponentEntry &e : m_components) {
-        if (e.info.url.isEmpty() || e.info.sha256.isEmpty())
+        if (e.info.url.isEmpty() || e.info.hash.isEmpty())
             continue;
         if (!e.present && (e.info.required || e.info.suggested))
             return true;
@@ -344,13 +376,13 @@ bool ComponentDownloader::canStartDownload() const
 {
     for (const ComponentEntry &e : m_components) {
         if (e.enabled && !e.present
-            && !e.info.url.isEmpty() && !e.info.sha256.isEmpty())
+            && !e.info.url.isEmpty() && !e.info.hash.isEmpty())
             return true;
     }
     return false;
 }
 
-bool ComponentDownloader::hasmissingComponents() const
+bool ComponentDownloader::hasMissingComponents() const
 {
     for (const ComponentEntry &e : m_components) {
         if (e.info.required && e.state == Missing)
@@ -359,14 +391,30 @@ bool ComponentDownloader::hasmissingComponents() const
     return false;
 }
 
+void ComponentDownloader::emitRowChanged(int row, const QList<int> &roles)
+{
+    if (row < 0 || row >= m_components.size())
+        return;
+    const QModelIndex idx = index(row, 0);
+    Q_EMIT dataChanged(idx, idx, roles);
+}
+
+void ComponentDownloader::emitSummaryStateChanged()
+{
+    Q_EMIT summaryStateChanged();
+}
+
 void ComponentDownloader::setComponentEnabled(const QString &id, bool enabled)
 {
     for (int i = 0; i < m_components.size(); ++i) {
         if (m_components[i].info.id == id && !m_components[i].info.required) {
             qDebug() << "ComponentDownloader: setComponentEnabled" << id << "->"
                      << (enabled ? "enabled" : "disabled");
+            if (m_components[i].enabled == enabled)
+                return;
             m_components[i].enabled = enabled;
-            Q_EMIT componentsChanged();
+            emitRowChanged(i, {EnabledRole});
+            emitSummaryStateChanged();
             return;
         }
     }
@@ -385,8 +433,11 @@ void ComponentDownloader::startDownloads()
     Q_EMIT isDownloadingChanged();
 
     // Mark enabled but not-done components as Pending
-    for (ComponentEntry &e : m_components) {
-        if (e.info.url.isEmpty() || e.info.sha256.isEmpty())
+    bool anyStateChanged = false;
+    for (int i = 0; i < m_components.size(); ++i) {
+        ComponentEntry &e = m_components[i];
+        const ComponentState previousState = e.state;
+        if (e.info.url.isEmpty() || e.info.hash.isEmpty())
             continue; // Not downloadable — skip
         if (e.enabled && e.state != Done) {
             qDebug() << "ComponentDownloader: queuing" << e.info.id << "for download";
@@ -395,8 +446,14 @@ void ComponentDownloader::startDownloads()
             qDebug() << "ComponentDownloader: skipping" << e.info.id << "(not enabled)";
             e.state = Skipped;
         }
+
+        if (previousState != e.state) {
+            anyStateChanged = true;
+            emitRowChanged(i, {StateRole});
+        }
     }
-    Q_EMIT componentsChanged();
+    if (anyStateChanged)
+        emitSummaryStateChanged();
 
     // Ensure download directory exists
     std::error_code ec;
@@ -436,7 +493,7 @@ void ComponentDownloader::downloadNext()
         qDebug() << "ComponentDownloader: all downloads complete";
         m_downloading = false;
         Q_EMIT isDownloadingChanged();
-        Q_EMIT componentsChanged();
+        emitSummaryStateChanged();
         Q_EMIT allDownloadsComplete();
         return;
     }
@@ -447,7 +504,8 @@ void ComponentDownloader::downloadNext()
              << "expected size:" << entry.info.size << "bytes";
     entry.state = Downloading;
     entry.bytesReceived = 0;
-    Q_EMIT componentsChanged();
+    emitRowChanged(m_currentDownloadIndex, {StateRole, BytesReceivedRole});
+    emitSummaryStateChanged();
 
     const std::filesystem::path downloadSubdir =
         componentDownloadPath() / QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
@@ -456,21 +514,25 @@ void ComponentDownloader::downloadNext()
     if (ec) {
         qWarning() << "ComponentDownloader: failed to create download subdirectory:" << ec.message().c_str();
         entry.state = Error;
-        Q_EMIT componentsChanged();
+        emitRowChanged(m_currentDownloadIndex, {StateRole});
+        emitSummaryStateChanged();
         Q_EMIT downloadFailed(entry.info.id, QStringLiteral("Failed to create download subdirectory"));
         downloadNext();
         return;
     }
 
     const std::filesystem::path destPath = downloadSubdir / entry.info.filename.toStdString();
+    m_currentDownloadPath = destPath;
     m_outputFile = new QFile(PathUtils::toQString(destPath), this);
     if (!m_outputFile->open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         qWarning() << "Failed to open file for writing:" << PathUtils::toQString(destPath);
         entry.state = Error;
-        Q_EMIT componentsChanged();
+        emitRowChanged(m_currentDownloadIndex, {StateRole});
+        emitSummaryStateChanged();
         Q_EMIT downloadFailed(entry.info.id, QStringLiteral("Failed to open file for writing"));
         delete m_outputFile;
         m_outputFile = nullptr;
+        m_currentDownloadPath.clear();
         std::filesystem::remove_all(downloadSubdir, ec);
         downloadNext();
         return;
@@ -505,7 +567,7 @@ void ComponentDownloader::onReadyRead()
     if (entry.info.size > 0 && (entry.bytesReceived % (1024 * 1024)) < data.size())
         qDebug() << "ComponentDownloader:" << entry.info.id
                  << "progress:" << entry.bytesReceived << "/" << entry.info.size << "bytes";
-    Q_EMIT componentsChanged();
+    emitRowChanged(m_currentDownloadIndex, {BytesReceivedRole});
 }
 
 void ComponentDownloader::onDownloadFinished()
@@ -517,11 +579,12 @@ void ComponentDownloader::onDownloadFinished()
 
     std::filesystem::path downloadedPath;
     if (m_outputFile) {
-        downloadedPath = PathUtils::toFsPath(m_outputFile->fileName());
+        downloadedPath = m_currentDownloadPath;
         m_outputFile->close();
         delete m_outputFile;
         m_outputFile = nullptr;
     }
+    m_currentDownloadPath.clear();
 
     QNetworkReply *reply = m_currentReply;
     m_currentReply = nullptr;
@@ -530,7 +593,8 @@ void ComponentDownloader::onDownloadFinished()
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Download failed for" << entry.info.id << ":" << reply->errorString();
         entry.state = Error;
-        Q_EMIT componentsChanged();
+        emitRowChanged(m_currentDownloadIndex, {StateRole});
+        emitSummaryStateChanged();
         Q_EMIT downloadFailed(entry.info.id, reply->errorString());
 
         if (!downloadedPath.empty()) {
@@ -544,17 +608,19 @@ void ComponentDownloader::onDownloadFinished()
 
     // Verify SHA256
     entry.state = Verifying;
-    Q_EMIT componentsChanged();
+    emitRowChanged(m_currentDownloadIndex, {StateRole});
+    emitSummaryStateChanged();
 
     const QByteArray hash = QCryptographicHash::hash(m_hashAccumulator, QCryptographicHash::Sha256).toHex();
     m_hashAccumulator.clear();
 
-    if (QString::fromLatin1(hash) != entry.info.sha256) {
+    if (QString::fromLatin1(hash) != entry.info.hash) {
         qWarning() << "SHA256 mismatch for" << entry.info.id
-                   << "expected:" << entry.info.sha256
+                   << "expected:" << entry.info.hash
                    << "got:" << hash;
         entry.state = Error;
-        Q_EMIT componentsChanged();
+        emitRowChanged(m_currentDownloadIndex, {StateRole});
+        emitSummaryStateChanged();
         Q_EMIT downloadFailed(entry.info.id, QStringLiteral("SHA256 checksum mismatch"));
 
         if (!downloadedPath.empty()) {
@@ -568,7 +634,7 @@ void ComponentDownloader::onDownloadFinished()
 
     qDebug() << "ComponentDownloader: SHA256 verified for" << entry.info.id;
 
-    QString promotedPath;
+    std::filesystem::path promotedPath;
     if (!installComponent(downloadedPath, entry.info.filename, true, &promotedPath)) {
         qWarning() << "ComponentDownloader: failed to promote verified download for" << entry.info.id;
         if (!downloadedPath.empty()) {
@@ -576,7 +642,8 @@ void ComponentDownloader::onDownloadFinished()
             std::filesystem::remove_all(downloadedPath.parent_path(), ec);
         }
         entry.state = Error;
-        Q_EMIT componentsChanged();
+        emitRowChanged(m_currentDownloadIndex, {StateRole});
+        emitSummaryStateChanged();
         Q_EMIT downloadFailed(entry.info.id, QStringLiteral("Failed to move verified file into component store"));
         downloadNext();
         return;
@@ -596,14 +663,15 @@ void ComponentDownloader::onDownloadFinished()
     QJsonObject componentsState = stateObj[QStringLiteral("components")].toObject();
     
     QJsonObject newState;
-    newState[QStringLiteral("sha256")] = entry.info.sha256;
-    newState[QStringLiteral("path")] = promotedPath;
+    newState[QStringLiteral("sha256")] = entry.info.hash;
+    newState[QStringLiteral("path")] = PathUtils::toQString(promotedPath);
     componentsState[entry.info.id] = newState;
     
     stateObj[QStringLiteral("components")] = componentsState;
     saveComponentsState(stateObj);
 
-    Q_EMIT componentsChanged();
+    emitRowChanged(m_currentDownloadIndex, {StateRole, PresentRole});
+    emitSummaryStateChanged();
     writeExternalProvidersXml();
     downloadNext();
 }
@@ -621,11 +689,11 @@ void ComponentDownloader::writeExternalProvidersXml()
         for (const ComponentEntry &e : m_components) {
             if (e.info.type == QStringLiteral("library")
                     && e.present
-                    && !e.verifiedPath.isEmpty()
+                    && !e.verifiedPath.empty()
                     && !e.info.providerName.isEmpty()) {
                 xml.writeStartElement(QStringLiteral("Provider"));
                 xml.writeTextElement(QStringLiteral("Name"), e.info.providerName);
-                xml.writeTextElement(QStringLiteral("URI"), QStringLiteral("file:") + e.verifiedPath);
+                xml.writeTextElement(QStringLiteral("URI"), QStringLiteral("file:") + PathUtils::toQString(e.verifiedPath));
                 xml.writeEndElement(); // Provider
                 ++count;
             }

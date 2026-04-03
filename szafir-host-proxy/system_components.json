@@ -1,0 +1,31 @@
+{
+  "system_components": [
+    {
+      "id": "pcsc-lite",
+      "version": "2.3.3",
+      "source_url": "https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz",
+      "source_sha256": "cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7",
+      "display_name": {
+        "en": "PC/SC Lite Smart Card Middleware",
+        "pl": "Oprogramowanie pośredniczące kart PC/SC Lite"
+      },
+      "scope": "app",
+      "cleanup": [
+        "/bin/pcsc-spy",
+        "/lib/libpcscspy*"
+      ],
+      "build": {
+        "buildsystem": "meson",
+        "config_opts": [
+          "-Dlibudev=false",
+          "-Dlibsystemd=false",
+          "-Dusb=false",
+          "-Dlibusb=false",
+          "-Dpolkit=false",
+          "-Dserial=false",
+          "-Dipcdir=/run/pcscd"
+        ]
+      }
+    }
+  ]
+}

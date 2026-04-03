@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
         "/run/host/usr/share",
         "/run/host/usr/local/share",
         "/run/host/var/lib/flatpak/exports/share",
-        QByteArray::fromStdString(userFlatpakExportDir.u8string()),
+        QByteArray::fromStdString(userFlatpakExportDir.string()),
         "/var/lib/flatpak/exports/share"
     };
 

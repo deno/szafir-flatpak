@@ -15,21 +15,6 @@
       "required": true
     },
     {
-      "id": "pcsc-lite",
-      "type": "bundled-source",
-      "version": "2.3.3",
-      "name": {
-        "en": "PC/SC Lite Smart Card Middleware",
-        "pl": "Oprogramowanie pośredniczące kart PC/SC Lite"
-      },
-      "filename": "pcsc-lite-2.3.3.tar.xz",
-      "source_url": "https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz",
-      "source_sha256": "cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7",
-      "library_path": "/app/lib/libpcsclite.so.1",
-      "size": 0,
-      "required": true
-    },
-    {
       "id": "libccgraphite",
       "type": "library",
       "version": "11.2.0.5.6",

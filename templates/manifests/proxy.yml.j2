@@ -48,9 +48,11 @@ finish-args:
 
 cleanup:
   - /include
-{% if include_pcsc_module | default(true) %}
-{% include 'fragments/pcsc_cleanup.yml.j2' %}
-{% endif %}
+{% for comp in system_components %}
+{% for path in comp.cleanup %}
+  - {{ path }}
+{% endfor %}
+{% endfor %}
   - /lib/pkgconfig
   - /share/doc
   - /share/man
@@ -60,11 +62,22 @@ cleanup:
 modules:
 {% if bundled_host %}
 {% include 'fragments/openjdk_module.yml.j2' %}
+{% for comp in system_components %}
 
-{% if include_pcsc_module | default(true) %}
-{% include 'fragments/pcsc_lite_module.yml.j2' %}
+  - name: {{ comp.id }}
+    buildsystem: {{ comp.build.buildsystem }}
+    config-opts:
+{% for opt in comp.build.config_opts %}
+      - {{ opt }}
+{% endfor %}
+    post-install:
+      - install -Dm644 ../COPYING /app/share/licenses/$FLATPAK_ID/{{ comp.id }}/COPYING
+    sources:
+      - type: archive
+        url: {{ comp.source_url }}
+        sha256: {{ comp.source_sha256 }}
+{% endfor %}
 
-{% endif %}
   - name: szafirhost
     buildsystem: simple
     build-commands:

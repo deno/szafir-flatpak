@@ -413,10 +413,10 @@ bool NativeHostIntegrator::installAll(bool force)
         wrapperContent.replace(QStringLiteral("{{CLIENT_NAME}}"), browser.displayName);
         wrapperContent.replace(QStringLiteral("{{ICON}}"), browser.icon);
 
-        if (nativeWrapperPath.has_value()) {
-            if (force || installedWrapperVersion(nativeWrapperPath.value()) < WRAPPER_TEMPLATE_VERSION) {
-                allOk = writeExecutableFile(nativeWrapperPath.value(), wrapperContent, m_dryRun) && allOk;
-                allOk = installDropInTemplates(nativeWrapperPath.value(), m_dryRun) && allOk;
+        if (nativeWrapperPath) {
+            if (force || installedWrapperVersion(*nativeWrapperPath) < WRAPPER_TEMPLATE_VERSION) {
+                allOk = writeExecutableFile(*nativeWrapperPath, wrapperContent, m_dryRun) && allOk;
+                allOk = installDropInTemplates(*nativeWrapperPath, m_dryRun) && allOk;
             } else {
                 qInfo() << "Native wrapper up to date for" << browser.displayName << ", skipping";
             }
@@ -429,9 +429,8 @@ bool NativeHostIntegrator::installAll(bool force)
             qInfo() << "Flatpak wrapper up to date for" << browser.displayName << ", skipping";
         }
 
-        if (const auto hostManifest = hostManifestPath(browser);
-            hostManifest.has_value() && nativeWrapperPath.has_value()) {
-            allOk = writeJsonFile(hostManifest.value(), manifestFor(browser, nativeWrapperPath.value()), m_dryRun) && allOk;
+        if (const auto hostManifest = hostManifestPath(browser); hostManifest && nativeWrapperPath) {
+            allOk = writeJsonFile(*hostManifest, manifestFor(browser, *nativeWrapperPath), m_dryRun) && allOk;
         }
         allOk = writeJsonFile(flatpakManifestPath(browser), manifestFor(browser, sandboxWrapperPath), m_dryRun) && allOk;
 
@@ -448,10 +447,10 @@ bool NativeHostIntegrator::removeAll()
 
     std::error_code ec;
     for (const BrowserInfo &browser : browserList) {
-        if (const auto nativeWrapperPath = hostWrapperPath(browser); nativeWrapperPath.has_value()) {
-            qInfo() << "file-op:" << "remove" << PathUtils::toQString(nativeWrapperPath.value());
+        if (const auto nativeWrapperPath = hostWrapperPath(browser)) {
+            qInfo() << "file-op:" << "remove" << PathUtils::toQString(*nativeWrapperPath);
             if (!m_dryRun)
-                fs::remove(nativeWrapperPath.value(), ec);
+                fs::remove(*nativeWrapperPath, ec);
         }
 
         const fs::path sandboxWrapperPath = flatpakWrapperPath(browser.flatpakId);
@@ -461,12 +460,12 @@ bool NativeHostIntegrator::removeAll()
 
         const std::optional<fs::path> hostPath = hostManifestPath(browser);
         const fs::path flatpakPath = flatpakManifestPath(browser);
-        if (hostPath.has_value())
-            qInfo() << "file-op:" << "remove" << PathUtils::toQString(hostPath.value());
+        if (hostPath)
+            qInfo() << "file-op:" << "remove" << PathUtils::toQString(*hostPath);
         qInfo() << "file-op:" << "remove" << PathUtils::toQString(flatpakPath);
         if (!m_dryRun) {
-            if (hostPath.has_value())
-                fs::remove(hostPath.value(), ec);
+            if (hostPath)
+                fs::remove(*hostPath, ec);
             fs::remove(flatpakPath, ec);
         }
 

@@ -2,39 +2,49 @@
 
 #ifdef BUNDLED_HOST
 
-#include <QObject>
-#include <QVariantList>
+#include "Component.h"
+
+#include <QAbstractListModel>
 
 #include <filesystem>
+#include <span>
 
 class QFile;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-struct ComponentInfo
+struct DownloadableComponent : Component
 {
+    Q_GADGET
+    Q_PROPERTY(QString id           MEMBER id)
+    Q_PROPERTY(QString type         MEMBER type)
+    Q_PROPERTY(QString providerName MEMBER providerName)
+    Q_PROPERTY(QString filename     MEMBER filename)
+    Q_PROPERTY(QString url          MEMBER url)
+    Q_PROPERTY(qint64  size         MEMBER size)
+    Q_PROPERTY(bool    required     MEMBER required)
+    Q_PROPERTY(bool    suggested    MEMBER suggested)
+public:
+    // name, subtitle, version, hashLabel, hash come from Component.
     QString id;
     QString type;         // "installer", "library", etc.
     QString providerName; // for type=="library": Name entry in external_providers.xml
-    QString version;      // explicit version string (from components.json)
-    QString name;
     QString filename;
     QString url;
-    QString sha256;
-    QString libraryPath; // for type=="bundled-source": path to probe for library presence
     qint64 size = 0;
     bool required = false;
     bool suggested = false;
 };
+Q_DECLARE_METATYPE(DownloadableComponent)
 
-class ComponentDownloader : public QObject
+class ComponentDownloader : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QVariantList components READ components NOTIFY componentsChanged)
     Q_PROPERTY(bool isDownloading READ isDownloading NOTIFY isDownloadingChanged)
-    Q_PROPERTY(bool allRequiredComplete READ allRequiredComplete NOTIFY componentsChanged)
-    Q_PROPERTY(bool canStartDownload READ canStartDownload NOTIFY componentsChanged)
-    Q_PROPERTY(bool hasmissingComponents READ hasmissingComponents NOTIFY componentsChanged)
+    Q_PROPERTY(bool allRequiredComplete READ allRequiredComplete NOTIFY summaryStateChanged)
+    Q_PROPERTY(bool canStartDownload READ canStartDownload NOTIFY summaryStateChanged)
+    Q_PROPERTY(bool hasMissingComponents READ hasMissingComponents NOTIFY summaryStateChanged)
+    Q_PROPERTY(bool hasBrokenComponents READ hasMissingComponents NOTIFY summaryStateChanged)
 
 public:
     enum ComponentState {
@@ -48,21 +58,50 @@ public:
     };
     Q_ENUM(ComponentState)
 
+    struct ComponentEntry {
+        DownloadableComponent info;
+        ComponentState state = Pending;
+        bool enabled = true;
+        bool present = false;
+        qint64 bytesReceived = 0;
+        std::filesystem::path verifiedPath;
+
+        bool downloadable() const
+        {
+            return !info.url.isEmpty() && !info.hash.isEmpty();
+        }
+    };
+
+    enum Role {
+        ComponentRole = Qt::UserRole + 1,
+        StateRole,
+        EnabledRole,
+        PresentRole,
+        BytesReceivedRole,
+        DownloadableRole,
+    };
+    Q_ENUM(Role)
+
     explicit ComponentDownloader(QObject *parent = nullptr);
 
-    QVariantList components() const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    std::span<const ComponentEntry> components() const;
+    QList<Component> presentDisplayEntries() const;
     bool isDownloading() const { return m_downloading; }
     bool allRequiredComplete() const;
     bool hasDownloadableComponents() const;
     bool canStartDownload() const;
-    bool hasmissingComponents() const;
+    bool hasMissingComponents() const;
 
     Q_INVOKABLE void setComponentEnabled(const QString &id, bool enabled);
     Q_INVOKABLE void startDownloads();
 
 Q_SIGNALS:
-    void componentsChanged();
     void isDownloadingChanged();
+    void summaryStateChanged();
     void allDownloadsComplete();
     void downloadFailed(const QString &id, const QString &errorString);
 
@@ -73,18 +112,13 @@ private:
     void onDownloadFinished();
     void writeExternalProvidersXml();
 
-    struct ComponentEntry {
-        ComponentInfo info;
-        ComponentState state = Pending;
-        bool enabled = true;
-        bool present = false;
-        qint64 bytesReceived = 0;
-        QString verifiedPath; // filesystem path to the verified file on disk
-    };
+    void emitRowChanged(int row, const QList<int> &roles);
+    void emitSummaryStateChanged();
 
     QList<ComponentEntry> m_components;
     int m_currentDownloadIndex = -1;
     bool m_downloading = false;
+    std::filesystem::path m_currentDownloadPath;
 
     QNetworkAccessManager *m_networkManager = nullptr;
     QNetworkReply *m_currentReply = nullptr;

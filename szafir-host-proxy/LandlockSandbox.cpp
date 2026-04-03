@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -281,14 +282,12 @@ std::vector<BrowserConfigPath> browserConfigPaths()
     };
 }
 
-std::vector<std::string> browserVarAppPaths()
+auto browserVarAppPaths()
 {
-    const std::string home = homePath();
-    std::vector<std::string> paths;
-    for (const std::string &id : kBrowserFlatpakIds) {
-        paths.push_back(home + "/.var/app/" + id);
-    }
-    return paths;
+    return kBrowserFlatpakIds
+        | std::views::transform([home = homePath()](const std::string &id) {
+            return home + "/.var/app/" + id;
+        });
 }
 
 std::vector<PathRule> systemRules()

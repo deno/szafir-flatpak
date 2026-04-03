@@ -8,9 +8,6 @@ Kirigami.Page {
     title: i18n("About SzafirHost runtime")
     padding: 0
     property string javaTmpCacheSize: i18n("Calculating...")
-    readonly property var installedComponents: componentDownloader
-        ? componentDownloader.components.filter(function(component) { return component.present })
-        : []
 
     function refreshJavaTmpCacheSize() {
         javaTmpCacheSize = hostRuntimeController.cacheSize()
@@ -207,8 +204,9 @@ Kirigami.Page {
                 Layout.bottomMargin: Kirigami.Units.largeSpacing
             }
 
+            // System and download components
             Repeater {
-                model: installedComponents
+                model: componentInfo.buildComponentList()
 
                 delegate: ColumnLayout {
                     Layout.fillWidth: true
@@ -222,7 +220,13 @@ Kirigami.Page {
                         wrapMode: Text.WordWrap
                         font.bold: true
                         font.pixelSize: Kirigami.Theme.smallFont.pixelSize
-                        text: modelData.id === "szafirhost-installer" ? i18n("SzafirHost installer") : modelData.name
+                        text: modelData.name
+                    }
+
+                    BodyLabel {
+                        visible: modelData.subtitle.length > 0
+                        text: modelData.subtitle
+                        font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                     }
 
                     BodyLabel {
@@ -232,16 +236,14 @@ Kirigami.Page {
                     }
 
                     BodyLabel {
-                        visible: modelData.sha256.length > 0
-                        text: modelData.type === "installer" ? i18n("SHA256 (installer):") :
-                              modelData.type === "bundled-source" ? i18n("SHA256 (source):") :
-                              i18n("SHA256:")
+                        visible: modelData.hashLabel.length > 0
+                        text: modelData.hashLabel
                         font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                     }
 
                     HashField {
-                        visible: modelData.sha256.length > 0
-                        text: modelData.sha256
+                        visible: modelData.hash.length > 0
+                        text: modelData.hash
                         font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                     }
                 }

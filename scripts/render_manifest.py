@@ -44,6 +44,23 @@ def _component_field(components: dict[str, dict[str, Any]], component_id: str, f
 DOWNLOAD_COMPONENTS = _load_download_components()
 
 
+def _load_system_components() -> list[dict[str, Any]]:
+    data = json.loads(
+        (ROOT / "szafir-host-proxy" / "system_components.json").read_text(encoding="utf-8")
+    )
+    return data["system_components"]
+
+
+def _get_system_component(component_id: str) -> dict[str, Any]:
+    for comp in SYSTEM_COMPONENTS:
+        if comp.get("id") == component_id:
+            return comp
+    raise RuntimeError(f"component '{component_id}' not found in system_components.json")
+
+
+SYSTEM_COMPONENTS: list[dict[str, Any]] = _load_system_components()
+
+
 def _extra_data_entry(component: dict[str, Any]) -> dict[str, Any]:
     return {
         "filename": component["filename"],
@@ -76,6 +93,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-split.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": False,
+            "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
         },
@@ -89,6 +107,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": True,
             "installer_extra_data": _installer_extra_data_entry(),
@@ -104,11 +123,11 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
             "installer_extra_data": _installer_extra_data_entry(),
             "library_extra_data": _library_extra_data_entries(),
-            "include_pcsc_module": False
         },
     },
     "proxy-inprocess--extra-empty.manifest": {
@@ -120,6 +139,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": False,
             "include_library_extra": False,
             "installer_extra_data": _installer_extra_data_entry(),
@@ -135,6 +155,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": False,
             "installer_extra_data": _installer_extra_data_entry(),
@@ -150,11 +171,11 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "system_components": [],
             "include_installer_extra": True,
             "include_library_extra": False,
             "installer_extra_data": _installer_extra_data_entry(),
             "library_extra_data": _library_extra_data_entries(),
-            "include_pcsc_module": False
         },
     },
     "szafirhost.manifest": {
@@ -162,8 +183,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "template_root": "manifests",
         "template": "szafirhost.yml.j2",
         "context": {
-            "include_pcsc_module": True,
-            "pcsc_lite": DOWNLOAD_COMPONENTS["pcsc-lite"],
+            "system_components": [_get_system_component("pcsc-lite")],
         },
     },
     "szafir.manifest": {
@@ -171,7 +191,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "template_root": "manifests",
         "template": "szafir.yml.j2",
         "context": {
-            "include_pcsc_module": True,
+            "system_components": [_get_system_component("pcsc-lite")],
         },
     },
     # Metainfo XML files
@@ -224,8 +244,6 @@ def render_variant(name: str) -> None:
     spec = VARIANTS[name]
     env = _make_env(spec["template_root"])
     context = dict(spec["context"])
-    if (context.get("bundled_host") or context.get("include_pcsc_module")) and "pcsc_lite" not in context:
-        context["pcsc_lite"] = DOWNLOAD_COMPONENTS["pcsc-lite"]
     rendered = env.get_template(spec["template"]).render(**context)
     output_path = ROOT / spec["output"]
     output_path.write_text(rendered, encoding="utf-8")

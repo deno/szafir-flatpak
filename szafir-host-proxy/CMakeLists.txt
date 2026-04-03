@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 set(APP_VERSION "0.2.0" CACHE STRING "SzafirHostProxy application version")
 project(szafir-host-proxy VERSION ${APP_VERSION} LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
@@ -43,6 +43,9 @@ qt_standard_project_setup(REQUIRES 6.8)
 set(SZAFIR_HOST_PROXY_SOURCES
     main.cpp
     AppSettings.h
+    Component.h
+    ComponentInfo.h
+    ComponentInfo.cpp
     LandlockSandbox.h
     LandlockSandbox.cpp
     ScalingController.h
@@ -92,6 +95,7 @@ if(BUNDLED_HOST)
         PREFIX "/szafir-host-proxy"
         FILES
         components.json
+        system_components.json
     )
 endif()
 

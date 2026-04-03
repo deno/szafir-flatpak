@@ -8,47 +8,12 @@ Kirigami.Page {
     title: i18n("Download Components")
 
     property bool standalone: false  // true when opened from hamburger menu
-    property var componentOrderIds: []
-
-    function updateComponentOrder() {
-        if (!componentDownloader) return
-        var components = componentDownloader.components
-        if (!components || components.length === 0) return
-
-        if (componentOrderIds.length === 0) {
-            // First load: present items first, then not-yet-present
-            componentOrderIds = components.slice()
-                .sort((a, b) => Number(b.present) - Number(a.present))
-                .map(c => c.id)
-            return
-        }
-
-        // Append ids for newly-added components
-        var known = {}
-        componentOrderIds.forEach(id => { known[id] = true })
-        var added = components.map(c => c.id).filter(id => !known[id])
-        if (added.length > 0)
-            componentOrderIds = componentOrderIds.concat(added)
-    }
-
-    readonly property var orderedComponents: {
-        if (!componentDownloader) return []
-        var components = componentDownloader.components
-        if (!components || components.length === 0) return []
-        if (componentOrderIds.length === 0) return components
-
-        var byId = {}
-        components.forEach(c => { byId[c.id] = c })
-        return componentOrderIds.map(id => byId[id]).filter(Boolean)
-    }
-
-    Component.onCompleted: updateComponentOrder()
 
     ListView {
         id: componentList
         anchors.fill: parent
         anchors.margins: Kirigami.Units.largeSpacing
-        model: page.orderedComponents
+        model: componentDownloader
         spacing: Kirigami.Units.smallSpacing
         focus: true
         interactive: contentHeight > height
@@ -95,9 +60,9 @@ Kirigami.Page {
             }
 
             onClicked: {
-                if (!modelData.required && !modelData.present && modelData.downloadable && !componentDownloader.isDownloading) {
-                    var savedIndex = index
-                    componentDownloader.setComponentEnabled(modelData.id, !modelData.enabled)
+                if (!model.component.required && !model.present && model.downloadable && !componentDownloader.isDownloading) {
+                    const savedIndex = index
+                    componentDownloader.setComponentEnabled(model.component.id, !model.enabled)
                     ListView.view.currentIndex = savedIndex
                 }
             }
@@ -108,9 +73,9 @@ Kirigami.Page {
                 CheckBox {
                     id: compCheckbox
                     focusPolicy: Qt.NoFocus
-                    checked: !modelData.present && modelData.enabled && modelData.downloadable
-                    enabled: !modelData.required && !modelData.present && modelData.downloadable && !componentDownloader.isDownloading
-                    onToggled: componentDownloader.setComponentEnabled(modelData.id, checked)
+                    checked: !model.present && model.enabled && model.downloadable
+                    enabled: !model.component.required && !model.present && model.downloadable && !componentDownloader.isDownloading
+                    onToggled: componentDownloader.setComponentEnabled(model.component.id, checked)
                 }
 
                 ColumnLayout {
@@ -119,7 +84,7 @@ Kirigami.Page {
 
                     Label {
                         Layout.fillWidth: true
-                        text: modelData.name
+                        text: model.component.name
                         font.bold: true
                         elide: Text.ElideRight
                     }
@@ -127,12 +92,12 @@ Kirigami.Page {
                     Label {
                         Layout.fillWidth: true
                         text: {
-                            if (modelData.present) return i18n("Already installed")
-                            var sizeMb = (modelData.size / 1048576).toFixed(1)
-                            switch (modelData.state) {
+                            if (model.present) return i18n("Already installed")
+                            const sizeMb = (model.component.size / 1048576).toFixed(1)
+                            switch (model.state) {
                             case 0: return i18n("%1 MB", sizeMb)               // Pending
                             case 1: {                                           // Downloading
-                                var recvMb = (modelData.bytesReceived / 1048576).toFixed(1)
+                                const recvMb = (model.bytesReceived / 1048576).toFixed(1)
                                 return i18n("Downloading... %1 / %2 MB", recvMb, sizeMb)
                             }
                             case 2: return i18n("Verifying checksum...")        // Verifying
@@ -144,19 +109,19 @@ Kirigami.Page {
                             }
                         }
                         font.pointSize: Kirigami.Theme.smallFont.pointSize
-                        color: (modelData.state === 5 || modelData.state === 6) ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.disabledTextColor
+                        color: (model.state === 5 || model.state === 6) ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.disabledTextColor
                     }
                 }
 
                 BusyIndicator {
-                    visible: modelData.state === 1 || modelData.state === 2
+                    visible: model.state === 1 || model.state === 2
                     running: visible
                     Layout.preferredWidth: Kirigami.Units.iconSizes.small
                     Layout.preferredHeight: Kirigami.Units.iconSizes.small
                 }
 
                 Kirigami.Icon {
-                    visible: modelData.state === 3
+                    visible: model.state === 3
                     source: "emblem-ok-symbolic"
                     Layout.preferredWidth: Kirigami.Units.iconSizes.small
                     Layout.preferredHeight: Kirigami.Units.iconSizes.small
@@ -164,7 +129,7 @@ Kirigami.Page {
                 }
 
                 Kirigami.Icon {
-                    visible: modelData.state === 5 || modelData.state === 6
+                    visible: model.state === 5 || model.state === 6
                     source: "emblem-error"
                     Layout.preferredWidth: Kirigami.Units.iconSizes.small
                     Layout.preferredHeight: Kirigami.Units.iconSizes.small
@@ -229,7 +194,6 @@ Kirigami.Page {
 
     Connections {
         target: componentDownloader
-        function onComponentsChanged() { page.updateComponentOrder() }
         function onIsDownloadingChanged() {
             if (componentDownloader.isDownloading)
                 componentList.focus = false

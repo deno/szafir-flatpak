@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "ComponentInfo.h"
 #include "HostRuntimeController.h"
 #include "ScalingController.h"
 #include "SetupController.h"
@@ -85,15 +86,14 @@ int MainWindow::activeHostCount() const
 QVariantList MainWindow::clients() const
 {
     QVariantList result;
-    const auto list = m_service->clients();
-    for (const ClientInfo &ci : list) {
+    for (const ClientInfo &ci : m_service->clients()) {
         QVariantMap m;
         m[QStringLiteral("clientName")] = ci.clientName;
-        m[QStringLiteral("icon")] = ci.icon;
+        m[QStringLiteral("icon")]       = ci.icon;
         m[QStringLiteral("browserType")] = ci.browserType;
-        m[QStringLiteral("flatpakId")] = ci.flatpakId;
+        m[QStringLiteral("flatpakId")]  = ci.flatpakId;
         m[QStringLiteral("executable")] = ci.executable;
-        m[QStringLiteral("pid")] = ci.pid;
+        m[QStringLiteral("pid")]        = ci.pid;
         m[QStringLiteral("dbusHandle")] = ci.dbusHandle;
         result.append(m);
     }
@@ -156,11 +156,9 @@ void MainWindow::ensureWindow()
             QVariant::fromValue(createSzafirHostAboutData(
 #ifdef BUNDLED_HOST
                 [this]() -> QString {
-                    const QVariantList comps = m_componentDownloader->components();
-                    for (const QVariant &v : comps) {
-                        const QVariantMap m = v.toMap();
-                        if (m.value(QStringLiteral("id")).toString() == QLatin1String("szafirhost-installer"))
-                            return m.value(QStringLiteral("version")).toString();
+                    for (const auto &e : m_componentDownloader->components()) {
+                        if (e.info.id == QLatin1String("szafirhost-installer"))
+                            return e.info.version;
                     }
                     return {};
                 }()
@@ -168,6 +166,13 @@ void MainWindow::ensureWindow()
                 QString{}
 #endif
             )));
+
+        m_engine->rootContext()->setContextProperty(
+            QStringLiteral("componentInfo"), new AboutPageComponentInfo(
+#ifdef BUNDLED_HOST
+                m_componentDownloader,
+#endif
+                m_engine));
 
         m_engine->rootContext()->setContextProperty(
             QStringLiteral("szafirHostLicenseText"), HostRuntimeController::loadLicenseText());
