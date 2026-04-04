@@ -78,6 +78,7 @@ constexpr __u64 kFsAccessV5 = kFsAccessV3 | LANDLOCK_ACCESS_FS_IOCTL_DEV;
 constexpr __u64 kFsAccessV5 = kFsAccessV3;
 #endif
 
+
 __u64 handledAccessForAbi(int abi)
 {
     if (abi >= 5) return kFsAccessV5;
@@ -86,15 +87,25 @@ __u64 handledAccessForAbi(int abi)
     return kFsAccessV1;
 }
 
-// Common access right combinations
+// Common access right combinations.
+// *File variants omit directory bits (READ_DIR, MAKE_*, REMOVE_*); use them
+// when the target path is a known regular file — Landlock returns EINVAL if
+// directory-only bits are set for a non-directory inode.
 constexpr __u64 kReadExec =
     LANDLOCK_ACCESS_FS_EXECUTE |
     LANDLOCK_ACCESS_FS_READ_FILE |
     LANDLOCK_ACCESS_FS_READ_DIR;
 
+constexpr __u64 kReadExecFile =
+    LANDLOCK_ACCESS_FS_EXECUTE |
+    LANDLOCK_ACCESS_FS_READ_FILE;
+
 constexpr __u64 kReadOnly =
     LANDLOCK_ACCESS_FS_READ_FILE |
     LANDLOCK_ACCESS_FS_READ_DIR;
+
+constexpr __u64 kReadOnlyFile =
+    LANDLOCK_ACCESS_FS_READ_FILE;
 
 constexpr __u64 kReadWrite =
     LANDLOCK_ACCESS_FS_READ_FILE |
@@ -447,7 +458,7 @@ bool dropBrowserAccess()
 // silencing the warning here is intentional.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
-void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
+void applyLauncherRestrictions(const char *home, const char *xdgDataHome, const char *xauthority)
 {
     // Applies strict Landlock restrictions for the SzafirHost runtime child.
     // Async-signal-safe: uses only syscall, open, close, prctl, write, snprintf.
@@ -486,9 +497,19 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
     char verifiedComponentsDir[4096];
     snprintf(verifiedComponentsDir, sizeof(verifiedComponentsDir), "%s/szafir-host-proxy/components", xdgDataHome);
 
+    // ~/.Xauthority fallback path (used when xauthority param is empty)
+    char xauthorityFallback[4096];
+    const char *xauthorityPath;
+    if (xauthority && xauthority[0] != '\0') {
+        xauthorityPath = xauthority;
+    } else {
+        snprintf(xauthorityFallback, sizeof(xauthorityFallback), "%s/.Xauthority", home);
+        xauthorityPath = xauthorityFallback;
+    }
+
     struct { const char *path; __u64 access; } rules[] = {
         {"/app/jre",                               kReadExec},
-        {"/app/bin/start-szafir-host-native.sh",   kReadExec},
+        {"/app/bin/start-szafir-host-native.sh",   kReadExecFile},
         {"/usr",                                   kReadExec},
         {"/etc",                                   kReadOnly},
         {"/run/pcscd",                             kReadWriteCreate},
@@ -497,7 +518,9 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
         {"/proc",                                  kReadWrite},
         {"/sys",                                   kReadOnly},
         // external_providers.xml (read by SzafirHost)
-        {extProviders,                             kReadOnly},
+        {extProviders,                             kReadOnlyFile},
+        // XWayland MIT-MAGIC-COOKIE authentication
+        {xauthorityPath,                           kReadOnlyFile},
         // Dedicated verified component store (read-only for runtime).
         {verifiedComponentsDir,                    kReadOnly},
         // SzafirHost install dir and lock file parent area.
@@ -508,8 +531,13 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
 
     bool allOk = true;
     for (const auto &rule : rules) {
-        if (!addRuleRaw(rulesetFd, rule.path, rule.access, handled))
+        if (!addRuleRaw(rulesetFd, rule.path, rule.access, handled)) {
+            const char prefix[] = "LandlockLauncher: rule failed for: ";
+            (void)::write(STDERR_FILENO, prefix, sizeof(prefix) - 1);
+            (void)::write(STDERR_FILENO, rule.path, strlen(rule.path));
+            (void)::write(STDERR_FILENO, "\n", 1);
             allOk = false;
+        }
     }
 
     if (!allOk) {

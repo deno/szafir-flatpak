@@ -8,6 +8,7 @@
 #include <QDBusConnection>
 #include <QDebug>
 #include <QIcon>
+#include <QLoggingCategory>
 #include <QMenu>
 #include <QStandardPaths>
 
@@ -180,12 +181,16 @@ int main(int argc, char *argv[])
     app.setQuitOnLastWindowClosed(false);
     app.setWindowIcon(QIcon::fromTheme(QStringLiteral(APP_ID)));
 
+    QLoggingCategory::setFilterRules(QStringLiteral("*.debug=false"));
+
     QCommandLineParser parser;
     parser.setApplicationDescription(aboutData.shortDescription());
-    
 
     aboutData.setupCommandLine(&parser);
 
+    const QCommandLineOption debugOpt(
+        QStringLiteral("debug"),
+        i18n("Enable debug logging."));
     const QCommandLineOption installOpt(
         QStringLiteral("install"),
         i18n("Install native host definitions and wrappers, then exit."));
@@ -202,6 +207,7 @@ int main(int argc, char *argv[])
         QStringLiteral("wizard"),
         i18n("Show the first-run setup wizard even if all checks already pass."));
 
+    parser.addOption(debugOpt);
     parser.addOption(installOpt);
     parser.addOption(uninstallOpt);
     parser.addOption(dryRunOpt);
@@ -210,6 +216,9 @@ int main(int argc, char *argv[])
 
     parser.process(app);
     aboutData.processCommandLine(&parser);
+
+    if (parser.isSet(debugOpt) || qgetenv("SZAFIR_DEBUG") == "1")
+        QLoggingCategory::setFilterRules(QStringLiteral("*.debug=true"));
 
     const bool doInstall = parser.isSet(installOpt);
     const bool doUninstall = parser.isSet(uninstallOpt);

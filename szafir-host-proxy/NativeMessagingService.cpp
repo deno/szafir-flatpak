@@ -7,6 +7,8 @@
 #include "LandlockSandbox.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QLoggingCategory>
 #include <QProcess>
 #include <QProcessEnvironment>
 
@@ -174,13 +176,15 @@ void NativeMessagingService::spawnHost(const QStringList &args,
     // Pre-capture paths in the parent before fork
     const QByteArray homeEnv = qgetenv("HOME");
     const QByteArray xdgDataHomeEnv = qgetenv("XDG_DATA_HOME");
+    const QByteArray xauthorityEnv = qgetenv("XAUTHORITY");
     const std::string launcherHome = homeEnv.isEmpty() ? std::string("/") : homeEnv.toStdString();
     const std::string launcherXdgDataHome = xdgDataHomeEnv.isEmpty()
         ? (launcherHome + "/.local/share")
         : xdgDataHomeEnv.toStdString();
+    const std::string launcherXauthority = xauthorityEnv.toStdString(); // empty = use ~/.Xauthority fallback
 
-    process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome]() {
-        LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str());
+    process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome, launcherXauthority]() {
+        LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str(), launcherXauthority.c_str());
 
         dup2OrExit(inFd, STDIN_FILENO, "stdin");
         dup2OrExit(outFd, STDOUT_FILENO, "stdout");
@@ -192,12 +196,24 @@ void NativeMessagingService::spawnHost(const QStringList &args,
             qDebug() << "SzafirHost process" << process->processId()
                      << "finished:" << exitStatus << "exit code:" << exitCode;
 
+            // Capture pre-dup2 stderr (Landlock / dup2 errors written before exec).
+            const QByteArray stderrOutput = process->readAllStandardError();
+            if (!stderrOutput.isEmpty()) {
+                qWarning() << "SzafirHost stderr:" << stderrOutput.trimmed();
+            }
+
             if (m_activeClients.remove(process) > 0) {
                 Q_EMIT activeHostCountChanged(m_activeClients.size());
                 Q_EMIT clientsChanged();
             }
             process->deleteLater();
         });
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+    env.insert(QStringLiteral("SZAFIR_HOST_DEBUG"),
+               QLoggingCategory::defaultCategory()->isDebugEnabled()
+                   ? QStringLiteral("1") : QStringLiteral("0"));
 
     // Apply GDK_SCALE preference stored in the local override file.
     {
@@ -206,11 +222,14 @@ void NativeMessagingService::spawnHost(const QStringList &args,
         const QString gdkScale = envGroup.readEntry(QStringLiteral("GDK_SCALE"), QString());
         if (!gdkScale.isEmpty()) {
             qDebug() << "Applying GDK_SCALE=" << gdkScale << "to bundled SzafirHost";
-            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             env.insert(QStringLiteral("GDK_SCALE"), gdkScale);
-            process->setProcessEnvironment(env);
         }
     }
+
+    process->setProcessEnvironment(env);
+
+    // Ensure the install dir exists before the child runs
+    QDir().mkpath(QString::fromStdString(launcherXdgDataHome + "/szafir_host"));
 
     process->start();
     if (!process->waitForStarted()) {

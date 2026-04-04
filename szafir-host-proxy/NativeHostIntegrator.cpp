@@ -120,7 +120,7 @@ bool ensureParentDir(const fs::path &filePath, bool dryRun)
     if (dirPath.empty() || fs::exists(dirPath))
         return true;
 
-    qInfo() << "file-op:" << "mkdir -p" << PathUtils::toQString(dirPath);
+    qDebug() << "file-op:" << "mkdir -p" << PathUtils::toQString(dirPath);
     if (dryRun)
         return true;
 
@@ -137,7 +137,7 @@ bool setBrowserTalkPermission(const QString &browserId, bool allowTalk, bool dry
         return false;
     }
 
-    qInfo() << "perm-op:" << (allowTalk ? "grant" : "revoke") << QString::fromLatin1(kDbusService.data(), static_cast<qsizetype>(kDbusService.size()))
+    qDebug() << "perm-op:" << (allowTalk ? "grant" : "revoke") << QString::fromLatin1(kDbusService.data(), static_cast<qsizetype>(kDbusService.size()))
             << "for" << browserId << "via" << PathUtils::toQString(path);
     if (dryRun)
         return true;
@@ -167,8 +167,8 @@ bool writeExecutableFile(const fs::path &path, const QString &content, bool dryR
         return false;
     }
 
-    qInfo() << "file-op:" << "write" << PathUtils::toQString(path);
-    qInfo() << "perm-op:" << "chmod 755" << PathUtils::toQString(path);
+    qDebug() << "file-op:" << "write" << PathUtils::toQString(path);
+    qDebug() << "perm-op:" << "chmod 755" << PathUtils::toQString(path);
     if (dryRun)
         return true;
 
@@ -226,7 +226,7 @@ bool installDropInTemplates(const fs::path &wrapperPath, bool dryRun)
             continue;
         }
 
-        qInfo() << "file-op:" << "write" << PathUtils::toQString(dstPath);
+        qDebug() << "file-op:" << "write" << PathUtils::toQString(dstPath);
         if (dryRun)
             continue;
 
@@ -257,7 +257,7 @@ bool writeJsonFile(const fs::path &path, const QJsonObject &obj, bool dryRun)
         return false;
     }
 
-    qInfo() << "file-op:" << "write" << PathUtils::toQString(path);
+    qDebug() << "file-op:" << "write" << PathUtils::toQString(path);
     if (dryRun)
         return true;
 
@@ -448,21 +448,21 @@ bool NativeHostIntegrator::removeAll()
     std::error_code ec;
     for (const BrowserInfo &browser : browserList) {
         if (const auto nativeWrapperPath = hostWrapperPath(browser)) {
-            qInfo() << "file-op:" << "remove" << PathUtils::toQString(*nativeWrapperPath);
+                    qDebug() << "file-op:" << "remove" << PathUtils::toQString(*nativeWrapperPath);
             if (!m_dryRun)
                 fs::remove(*nativeWrapperPath, ec);
         }
 
         const fs::path sandboxWrapperPath = flatpakWrapperPath(browser.flatpakId);
-        qInfo() << "file-op:" << "remove" << PathUtils::toQString(sandboxWrapperPath);
+        qDebug() << "file-op:" << "remove" << PathUtils::toQString(sandboxWrapperPath);
         if (!m_dryRun)
             fs::remove(sandboxWrapperPath, ec);
 
         const std::optional<fs::path> hostPath = hostManifestPath(browser);
         const fs::path flatpakPath = flatpakManifestPath(browser);
         if (hostPath)
-            qInfo() << "file-op:" << "remove" << PathUtils::toQString(*hostPath);
-        qInfo() << "file-op:" << "remove" << PathUtils::toQString(flatpakPath);
+            qDebug() << "file-op:" << "remove" << PathUtils::toQString(*hostPath);
+        qDebug() << "file-op:" << "remove" << PathUtils::toQString(flatpakPath);
         if (!m_dryRun) {
             if (hostPath)
                 fs::remove(*hostPath, ec);
@@ -481,7 +481,7 @@ bool NativeHostIntegrator::ensureWrapperTemplateLoaded()
         return true;
 
     const fs::path installedPath{std::string(kInstalledWrapperPath)};
-    qInfo() << "file-op:" << "read" << PathUtils::toQString(installedPath);
+    qDebug() << "file-op:" << "read" << PathUtils::toQString(installedPath);
     QFile f(installedPath);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Failed to read wrapper template:" << f.fileName();
@@ -491,3 +491,4 @@ bool NativeHostIntegrator::ensureWrapperTemplateLoaded()
     m_wrapperTemplate = QString::fromUtf8(f.readAll());
     return !m_wrapperTemplate.isEmpty();
 }
+
