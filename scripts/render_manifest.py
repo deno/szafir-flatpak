@@ -13,11 +13,27 @@ import json
 from pathlib import Path
 from typing import Any
 
+import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_VERSION = "0.2.0"
-APP_RELEASE_DATE = "2026-04-01"
+
+
+def _load_releases() -> list[dict[str, Any]]:
+    data = yaml.safe_load(
+        (ROOT / "szafir-host-proxy" / "releases.yml").read_text(encoding="utf-8")
+    )
+    releases = data["releases"]
+    if not isinstance(releases, list) or not releases:
+        raise RuntimeError("missing releases in szafir-host-proxy/releases.yml")
+    first_release = releases[0]
+    if "version" not in first_release:
+        raise RuntimeError("missing version in first release entry in releases.yml")
+    return releases
+
+
+RELEASES: list[dict[str, Any]] = _load_releases()
+APP_VERSION: str = RELEASES[0]["version"]
 
 
 def _load_download_components() -> dict[str, dict[str, Any]]:
@@ -201,8 +217,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "template": "proxy.metainfo.xml.j2",
         "context": {
             "app_id": "pl.deno.kir.szafirhostproxy",
-            "app_version": APP_VERSION,
-            "app_release_date": APP_RELEASE_DATE,
+            "releases": RELEASES,
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
@@ -213,8 +228,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "template": "proxy.metainfo.xml.j2",
         "context": {
             "app_id": "pl.deno.kir.szafirhostproxy",
-            "app_version": APP_VERSION,
-            "app_release_date": APP_RELEASE_DATE,
+            "releases": RELEASES,
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },

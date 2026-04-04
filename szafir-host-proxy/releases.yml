@@ -1,0 +1,11 @@
+releases:
+  - version: 0.2.1
+    date: 2026-04-04
+    description:
+      en: Bug fixes and README updates.
+      pl: Poprawki błędów i aktualizacja README.
+  - version: 0.2.0
+    date: 2026-04-01
+    description:
+      en: Metadata refresh for the GitHub-hosted Flatpak repository release.
+      pl: Odświeżenie metadanych dla wydania repozytorium Flatpak hostowanego na GitHubie.

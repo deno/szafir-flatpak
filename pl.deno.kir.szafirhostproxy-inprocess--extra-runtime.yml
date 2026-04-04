@@ -88,7 +88,7 @@ modules:
     config-opts:
       - -DBUNDLED_HOST=ON
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.2.0
+      - -DAPP_VERSION=0.2.1
     sources:
       - type: dir
         path: szafir-host-proxy
@@ -105,9 +105,12 @@ modules:
     buildsystem: simple
     build-commands:
       - install -D -m 644 proxy_icon.svg /app/share/icons/hicolor/scalable/apps/pl.deno.kir.szafirhostproxy.svg
-      - install -D -m 644 pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml /app/share/metainfo/pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml
+      - install -D -m 644 pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml /app/share/metainfo/pl.deno.kir.szafirhostproxy.metainfo.xml
+      - install -D -m 644 pl.deno.kir.szafirhostproxy.desktop /app/share/applications/pl.deno.kir.szafirhostproxy.desktop
     sources:
       - type: file
         path: proxy_icon.svg
       - type: file
         path: pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml
+      - type: file
+        path: pl.deno.kir.szafirhostproxy.desktop

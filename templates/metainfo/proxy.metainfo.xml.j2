@@ -10,11 +10,16 @@
     <name>deno</name>
   </developer>
   <releases>
-    <release version="{{ app_version }}" date="{{ app_release_date }}">
+{% for release in releases %}
+    <release version="{{ release.version }}" date="{{ release.date }}">
       <description>
-        <p>Metadata refresh for the GitHub-hosted Flatpak repository release.</p>
+        <p>{{ release.description.en }}</p>
+{% if release.description.pl is defined %}
+        <p xml:lang="pl">{{ release.description.pl }}</p>
+{% endif %}
       </description>
     </release>
+{% endfor %}
   </releases>
   <description>
     <p>

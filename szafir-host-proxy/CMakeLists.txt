@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-set(APP_VERSION "0.2.0" CACHE STRING "SzafirHostProxy application version")
+set(APP_VERSION "0.0.0" CACHE STRING "SzafirHostProxy application version")
 project(szafir-host-proxy VERSION ${APP_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 26)

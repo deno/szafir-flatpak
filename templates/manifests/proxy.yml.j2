@@ -130,9 +130,12 @@ modules:
     buildsystem: simple
     build-commands:
       - install -D -m 644 proxy_icon.svg /app/share/icons/hicolor/scalable/apps/{{ app_id }}.svg
-      - install -D -m 644 {{ metainfo_file }} /app/share/metainfo/{{ metainfo_file }}
+      - install -D -m 644 {{ metainfo_file }} /app/share/metainfo/{{ app_id }}.metainfo.xml
+      - install -D -m 644 {{ app_id }}.desktop /app/share/applications/{{ app_id }}.desktop
     sources:
       - type: file
         path: proxy_icon.svg
       - type: file
         path: {{ metainfo_file }}
+      - type: file
+        path: {{ app_id }}.desktop
