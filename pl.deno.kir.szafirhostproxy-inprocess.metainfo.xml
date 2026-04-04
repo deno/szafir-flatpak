@@ -2,21 +2,30 @@
 <component type="desktop-application">
   <id>pl.deno.kir.szafirhostproxy</id>
   <name>SzafirHostProxy</name>
-  <summary>Proxy for Szafir browser integration (Flathub version)</summary>
-  <summary xml:lang="pl">Proxy integracji przeglądarkowej dla środowiska Szafir (wersja Flathub)</summary>
+  <summary>Browser bridge for Szafir website signing</summary>
+  <summary xml:lang="pl">Most przeglądarkowy dla podpisu Szafir na stronach WWW</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-only</project_license>
   <developer id="pl.deno">
     <name>deno</name>
   </developer>
   <releases>
-    <release version="0.2.0" date="2026-04-01" />
+    <release version="0.2.0" date="2026-04-01">
+      <description>
+        <p>Metadata refresh for the GitHub-hosted Flatpak repository release.</p>
+      </description>
+    </release>
   </releases>
   <description>
     <p>
-      SzafirHostProxy is an open-source bridge component that connects host and Flatpaked web browsers
-      to the Szafir application suite, enabling smartcard electronic signatures to function on supported
-      websites.
+      SzafirHostProxy is an open-source Native Messaging bridge for Szafir on Linux. It connects
+      supported browsers with the Szafir signing environment so qualified signatures can work on
+      supported websites.
+    </p>
+    <p>
+      The GitHub repository publishes a proxy build that keeps copyrighted runtime components out of
+      the Flatpak image. The bridge downloads required upstream runtime components during first-run
+      setup instead of bundling them inside the image.
     </p>
     <p>Supported browsers include:</p>
     <ul>
@@ -26,15 +35,23 @@
     </ul>
     <p>Features:</p>
     <ul>
-      <li>Automatically installs native host definitions for all supported browsers upon its first run.</li>
-      <li>Shows a system tray icon that indicates if any browsers are actively connected to SzafirHost.</li>
+      <li>Guides first-run setup with a welcome screen, component download step, and license screen.</li>
+      <li>Installs browser integration files for supported host and Flatpak browsers.</li>
+      <li>Shows a live status window that waits for browser activity and links to browser extensions.</li>
+      <li>Lets you remove installed browser integrations at any time.</li>
     </ul>
     <p>
-      The integrations can be manually uninstalled at any time by running: flatpak run pl.deno.kir.szafirhostproxy --uninstall
+      Browser integrations can be removed manually at any time by running: flatpak run pl.deno.kir.szafirhostproxy --uninstall
     </p>
     <p xml:lang="pl">
-      SzafirHostProxy to otwartoźródłowy komponent mostkujący, który łączy przeglądarki internetowe
-      (zarówno te zainstalowane w systemie, jak i przez Flatpak) z pakietem aplikacji Szafir.
+      SzafirHostProxy to otwartoźródłowy most Native Messaging dla środowiska Szafir na Linuksie.
+      Łączy wspierane przeglądarki z aplikacjami Szafir, aby kwalifikowany podpis elektroniczny
+      działał na wspieranych stronach internetowych.
+    </p>
+    <p xml:lang="pl">
+      Repozytorium GitHub publikuje wydanie proxy, które nie zawiera komponentów objętych prawami
+      autorskimi wewnątrz obrazu Flatpak. Sam most komunikacyjny może pobrać wymagane komponenty
+      środowiska producenta podczas pierwszej konfiguracji zamiast dołączać je do obrazu aplikacji.
     </p>
     <p xml:lang="pl">Wspierane przeglądarki:</p>
     <ul>
@@ -44,12 +61,10 @@
     </ul>
     <p xml:lang="pl">Funkcje:</p>
     <ul>
-      <li xml:lang="pl">
-      Automatycznie instaluje definicje native messaging dla wszystkich wspieranych przeglądarek podczas pierwszego uruchomienia.
-      </li>
-      <li xml:lang="pl">
-      Wyświetla ikonę w zasobniku systemowym (tray), która wskazuje czy jakieś przeglądarki są aktualnie połączone z aplikacją SzafirHost.
-      </li>
+      <li xml:lang="pl">Prowadzi użytkownika przez pierwszą konfigurację z ekranem powitalnym, pobieraniem komponentów i akceptacją licencji.</li>
+      <li xml:lang="pl">Instaluje integrację przeglądarkową dla wspieranych przeglądarek systemowych i Flatpak.</li>
+      <li xml:lang="pl">Wyświetla ekran statusu oczekujący na aktywność przeglądarki oraz odsyłacze do rozszerzeń.</li>
+      <li xml:lang="pl">Pozwala w dowolnym momencie usunąć zainstalowaną integrację przeglądarkową.</li>
     </ul>
     <p xml:lang="pl">
       Integracje mogą zostać ręcznie odinstalowane w dowolnym momencie poprzez uruchomienie polecenia: flatpak run pl.deno.kir.szafirhostproxy --uninstall
@@ -66,13 +81,24 @@
   </requires>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_permission.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/en/wizard.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/pl/wizard.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_document.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/en/components.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/pl/components.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/deno/flathub/67e5b61c60a8e0788c552b73af4c60df8eead385/screenshots/sdk_pin.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/en/status.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/pl/status.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/en/browsers.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/pl/browsers.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/en/scaling.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/6928942e7ca19e18f5f2753ae13db304f84dac33/screenshots/proxy/pl/scaling.png</image>
     </screenshot>
   </screenshots>
 </component>

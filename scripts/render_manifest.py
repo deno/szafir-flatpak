@@ -203,8 +203,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_id": "pl.deno.kir.szafirhostproxy",
             "app_version": APP_VERSION,
             "app_release_date": APP_RELEASE_DATE,
-            "summary_en": "Proxy for Szafir browser integration",
-            "summary_pl": "Proxy integracji przeglądarkowej dla środowiska Szafir",
+            "summary_en": "Browser bridge for Szafir website signing",
+            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
     },
     "proxy-inprocess.meta": {
@@ -215,8 +215,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_id": "pl.deno.kir.szafirhostproxy",
             "app_version": APP_VERSION,
             "app_release_date": APP_RELEASE_DATE,
-            "summary_en": "Proxy for Szafir browser integration (Flathub version)",
-            "summary_pl": "Proxy integracji przeglądarkowej dla środowiska Szafir (wersja Flathub)",
+            "summary_en": "Browser bridge for Szafir website signing",
+            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
     },
     "szafirhost.meta": {

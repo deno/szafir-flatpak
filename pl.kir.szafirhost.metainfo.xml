@@ -2,8 +2,8 @@
 <component type="console-application">
   <id>pl.kir.szafirhost</id>
   <name>SzafirHost</name>
-  <summary>Native Messaging host for Szafir</summary>
-  <summary xml:lang="pl">Komponent Native Messaging dla aplikacji Szafir</summary>
+  <summary>Native Messaging runtime for Szafir browser integration</summary>
+  <summary xml:lang="pl">Środowisko Native Messaging dla integracji przeglądarkowej Szafir</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary=https://www.elektronicznypodpis.pl/</project_license>
   <developer id="pl.kir">
@@ -11,16 +11,25 @@
   </developer>
   <description>
     <p>
-      This is a community package of SzafirHost and not officially supported by Krajowa Izba Rozliczeniowa (KIR).
+      SzafirHost is the upstream runtime used for browser integration with Szafir.
     </p>
     <p>
-      SzafirHost is the native messaging host component that enables communication between web browsers and the Szafir application for Polish qualified electronic signatures.
+      In this repository, browser signing is primarily exposed through SzafirHostProxy, which can
+      download and launch the required runtime components during its first-run setup.
     </p>
     <p xml:lang="pl">
-      Uwaga: Wersja Flatpak nie jest oficjalnie wspierana przez KIR.
+      SzafirHost to środowisko producenta używane do integracji przeglądarkowej z aplikacją Szafir.
     </p>
     <p xml:lang="pl">
-      SzafirHost to komponent typu native messaging, który umożliwia komunikację pomiędzy przeglądarkami internetowymi a aplikacją Szafir w celu obsługi polskich kwalifikowanych podpisów elektronicznych.
+      W tym repozytorium funkcja podpisu w przeglądarce jest udostępniana przede wszystkim przez
+      SzafirHostProxy, który podczas pierwszej konfiguracji może pobrać i uruchamiać wymagane
+      komponenty środowiska.
+    </p>
+    <p>
+      This is a community-maintained Flatpak package and not an official KIR release channel.
+    </p>
+    <p xml:lang="pl">
+      Jest to społecznościowy pakiet Flatpak, a nie oficjalny kanał dystrybucji KIR.
     </p>
   </description>
   <url type="homepage">https://www.elektronicznypodpis.pl/</url>
