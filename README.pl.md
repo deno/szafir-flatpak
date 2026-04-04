@@ -122,5 +122,4 @@ Po konfiguracji proxy pozostaje aktywne i czeka na aktywność przeglądarki.
 ## Uwagi
 
 - To repozytorium jest utrzymywane społecznościowo i nie stanowi oficjalnego kanału dystrybucji KIR.
-- Obecna automatyzacja wydawnicza buduje artefakty Linuksa dla architektury `x86_64`.
 - Proxy może usunąć integracje przeglądarkowe poleceniem `flatpak run pl.deno.kir.szafirhostproxy --uninstall`.

@@ -42,11 +42,11 @@ modules:
       - type: dir
         path: szafir-host-proxy
       - type: file
-        path: LICENSE
+        path: szafir-host-proxy/LICENSE
       - type: file
-        path: szafir_license_en.md
+        path: szafir-host-proxy/szafir_license_en.md
       - type: file
-        path: szafir_license_pl.md
+        path: szafir-host-proxy/szafir_license_pl.md
 
   - name: szafir-icons
     buildsystem: simple
@@ -56,8 +56,8 @@ modules:
       - install -D -m 644 pl.deno.kir.szafirhostproxy.desktop /app/share/applications/pl.deno.kir.szafirhostproxy.desktop
     sources:
       - type: file
-        path: proxy_icon.svg
+        path: szafir-host-proxy/proxy_icon.svg
       - type: file
-        path: pl.deno.kir.szafirhostproxy-split.metainfo.xml
+        path: szafir-host-proxy/pl.deno.kir.szafirhostproxy-split.metainfo.xml
       - type: file
         path: pl.deno.kir.szafirhostproxy.desktop

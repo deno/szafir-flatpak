@@ -122,6 +122,5 @@ After setup, the proxy stays available and waits for browser activity.
 ## Notes
 
 - This repository is community-maintained and is not an official KIR release channel.
-- Current release automation builds Linux `x86_64` artifacts.
 - The proxy can remove its browser integrations with `flatpak run pl.deno.kir.szafirhostproxy --uninstall`.
 

@@ -84,7 +84,7 @@ modules:
       - install -D -m 755 start-szafir-host-native.sh /app/bin/start-szafir-host-native.sh
     sources:
       - type: file
-        path: start-szafir-host-native.sh
+        path: szafir-host-proxy/start-szafir-host-native.sh
 {% if include_installer_extra %}
       - type: extra-data
         filename: {{ installer_extra_data.filename }}
@@ -116,14 +116,14 @@ modules:
       - type: dir
         path: szafir-host-proxy
       - type: file
-        path: LICENSE
+        path: szafir-host-proxy/LICENSE
       - type: file
-        path: szafir_license_en.md
+        path: szafir-host-proxy/szafir_license_en.md
       - type: file
-        path: szafir_license_pl.md
+        path: szafir-host-proxy/szafir_license_pl.md
 {% if bundled_host %}
       - type: file
-        path: components.json
+        path: szafir-host-proxy/components.json
 {% endif %}
 
   - name: szafir-icons
@@ -134,8 +134,8 @@ modules:
       - install -D -m 644 {{ app_id }}.desktop /app/share/applications/{{ app_id }}.desktop
     sources:
       - type: file
-        path: proxy_icon.svg
+        path: szafir-host-proxy/proxy_icon.svg
       - type: file
-        path: {{ metainfo_file }}
+        path: szafir-host-proxy/{{ metainfo_file }}
       - type: file
         path: {{ app_id }}.desktop

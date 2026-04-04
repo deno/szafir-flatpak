@@ -37,7 +37,9 @@ APP_VERSION: str = RELEASES[0]["version"]
 
 
 def _load_download_components() -> dict[str, dict[str, Any]]:
-    data = json.loads((ROOT / "components.json").read_text(encoding="utf-8"))
+    data = json.loads(
+        (ROOT / "szafir-host-proxy" / "components.json").read_text(encoding="utf-8")
+    )
     components: dict[str, dict[str, Any]] = {}
     for component in data.get("components", []):
         component_id = component.get("id")
@@ -48,11 +50,13 @@ def _load_download_components() -> dict[str, dict[str, Any]]:
 
 def _component_field(components: dict[str, dict[str, Any]], component_id: str, field: str) -> Any:
     if component_id not in components:
-        raise RuntimeError(f"missing component '{component_id}' in components.json")
+        raise RuntimeError(
+            f"missing component '{component_id}' in szafir-host-proxy/components.json"
+        )
     component = components[component_id]
     if field not in component:
         raise RuntimeError(
-            f"missing field '{field}' for component '{component_id}' in components.json"
+            f"missing field '{field}' for component '{component_id}' in szafir-host-proxy/components.json"
         )
     return component[field]
 
@@ -222,8 +226,30 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
     },
+    "proxy-split.meta.local": {
+        "output": "szafir-host-proxy/pl.deno.kir.szafirhostproxy-split.metainfo.xml",
+        "template_root": "metainfo",
+        "template": "proxy.metainfo.xml.j2",
+        "context": {
+            "app_id": "pl.deno.kir.szafirhostproxy",
+            "releases": RELEASES,
+            "summary_en": "Browser bridge for Szafir website signing",
+            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
+        },
+    },
     "proxy-inprocess.meta": {
         "output": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
+        "template_root": "metainfo",
+        "template": "proxy.metainfo.xml.j2",
+        "context": {
+            "app_id": "pl.deno.kir.szafirhostproxy",
+            "releases": RELEASES,
+            "summary_en": "Browser bridge for Szafir website signing",
+            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
+        },
+    },
+    "proxy-inprocess.meta.local": {
+        "output": "szafir-host-proxy/pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
         "template_root": "metainfo",
         "template": "proxy.metainfo.xml.j2",
         "context": {

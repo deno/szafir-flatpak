@@ -11,6 +11,7 @@ set(CMAKE_AUTOMOC ON)
 set(APP_ID "pl.deno.kir.szafirhostproxy" CACHE STRING "Flatpak application ID")
 option(BUNDLED_HOST "Bundle SzafirHost inside the Flatpak instead of delegating to a separate one" OFF)
 option(ENABLE_FLATPAK_HOST_ICONS_LOOKUP "Add host icons to path" ON)
+option(SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY "Configure only source packaging (skip build deps/targets)" OFF)
 set(CHROME_EXTENSION_URL "https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc" CACHE STRING "URL to Chrome extension")
 set(FIREFOX_EXTENSION_URL "https://www.elektronicznypodpis.pl/download/webmodule/firefox/szafir_sdk_web-current.xpi" CACHE STRING "URL to Firefox extension")
 
@@ -27,7 +28,26 @@ configure_file(flatpak-host-wrapper.in flatpak-host-wrapper @ONLY)
 configure_file(szafir-host-proxy.service.in ${DBUS_APP_ID}.service @ONLY)
 configure_file(szafir-host-proxy.desktop.in ${APP_ID}.desktop @ONLY)
 configure_file(szafirhost-integration.xml.in szafirhost-integration.xml @ONLY)
+
+set(SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES
+    LICENSE
+    szafir_license_en.md
+    szafir_license_pl.md
+)
+
+if(BUNDLED_HOST)
+    list(APPEND SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES components.json)
+endif()
+
+foreach(required_file IN LISTS SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${required_file}")
+        message(FATAL_ERROR "Missing required local source file: ${required_file}. Keep proxy build inputs in szafir-host-proxy/.")
+    endif()
+endforeach()
+
 # -----------------------------------------------------------------------------
+
+if(NOT SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY)
 
 find_package(Qt6 REQUIRED COMPONENTS Core DBus Network Widgets Qml Quick QuickControls2)
 find_package(KF6CoreAddons REQUIRED)
@@ -138,3 +158,22 @@ install(FILES LICENSE DESTINATION share/licenses/${APP_ID}/szafir-host-proxy)
 include(GNUInstallDirs)
 set(KDE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale")
 ki18n_install(translations)
+endif()
+
+set(CPACK_PACKAGE_NAME "szafir-host-proxy")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "szafir-host-proxy-${PROJECT_VERSION}-source")
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_SOURCE_IGNORE_FILES
+    "/\\.git/"
+    "/build/"
+    "/build-.*/"
+    "/_CPack_Packages/"
+    "/\\.vscode/"
+    "/\\.idea/"
+    "~$"
+    "\\\\.swp$"
+)
+
+include(CPack)

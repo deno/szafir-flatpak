@@ -28,7 +28,34 @@ jobs:
       - name: Install Flatpak and flatpak-builder
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder elfutils
+          sudo apt-get install -y flatpak flatpak-builder elfutils cmake
+
+      - name: Determine proxy source version
+        id: proxy_version
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(scripts/get_proxy_version.sh)
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "Failed to determine proxy version" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build proxy source release archive (CPack)
+        run: |
+          cmake -S szafir-host-proxy -B build-source-release \
+            -DSZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY=ON \
+            -DAPP_VERSION=${{ steps.proxy_version.outputs.version }}
+          cmake --build build-source-release --target package_source
+          SOURCE_ARCHIVE="build-source-release/szafir-host-proxy-${{ steps.proxy_version.outputs.version }}-source.tar.gz"
+          if [ ! -f "$SOURCE_ARCHIVE" ]; then
+            echo "Missing source archive: $SOURCE_ARCHIVE" >&2
+            exit 1
+          fi
+          sha256sum "$SOURCE_ARCHIVE" > "$SOURCE_ARCHIVE.sha256"
 
       - name: Set up Flathub
         run: |
@@ -68,6 +95,14 @@ jobs:
           name: bundle-pl.deno.kir.szafirhostproxy-extra-empty
           path: pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak
 
+      - name: Upload proxy source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-szafir-host-proxy
+          path: |
+            build-source-release/szafir-host-proxy-${{ steps.proxy_version.outputs.version }}-source.tar.gz
+            build-source-release/szafir-host-proxy-${{ steps.proxy_version.outputs.version }}-source.tar.gz.sha256
+
       - name: Upload repo artifact
         uses: actions/upload-artifact@v4
         with:
@@ -85,10 +120,18 @@ jobs:
         with:
           name: bundle-pl.deno.kir.szafirhostproxy-extra-empty
 
+      - name: Download proxy source
+        uses: actions/download-artifact@v4
+        with:
+          name: source-szafir-host-proxy
+
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
-          files: pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak
+          files: |
+            pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak
+            szafir-host-proxy-*-source.tar.gz
+            szafir-host-proxy-*-source.tar.gz.sha256
 
   deploy-repo:
     name: Deploy Flatpak repository
