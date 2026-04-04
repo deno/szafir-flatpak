@@ -152,7 +152,10 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     // Drop any host flatpak override access we don't need at all
-    LandlockSandbox::limitOverrides();
+    if (!LandlockSandbox::limitOverrides()) {
+        qCritical() << "Landlock Phase 1 (limitOverrides) failed; aborting.";
+        return 1;
+    }
 
     KLocalizedString::setApplicationDomain("szafir-host-proxy");
 
@@ -267,7 +270,10 @@ int main(int argc, char *argv[])
     }
 
     // Manifests and wrapper setup finished
-    LandlockSandbox::dropBrowserAccess();
+    if (!LandlockSandbox::dropBrowserAccess()) {
+        qCritical() << "Landlock Phase 2 (dropBrowserAccess) failed; aborting.";
+        return 1;
+    }
 
     // Scaling override paths
     const std::filesystem::path szafirOverride = hostOverridePath(QString::fromLatin1(kSzafirAppId));

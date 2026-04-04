@@ -112,7 +112,11 @@ constexpr __u64 kReadWrite =
 constexpr __u64 kReadWriteCreate =
     kReadWrite |
     LANDLOCK_ACCESS_FS_MAKE_SOCK |
-    LANDLOCK_ACCESS_FS_MAKE_FIFO;
+    LANDLOCK_ACCESS_FS_MAKE_FIFO |
+#ifdef LANDLOCK_ACCESS_FS_REFER
+    LANDLOCK_ACCESS_FS_REFER |
+#endif
+    0;
 
 // For the overrides directory: allow creating temp files (for KConfig and QSaveFile atomic writes),
 // listing contents (for inotify), writing/removing files.
@@ -368,8 +372,8 @@ bool limitOverrides()
 {
     const int abi = abiVersion();
     if (abi <= 0) {
-        qWarning() << "Landlock: not available on this kernel, skipping Phase 1 restriction";
-        return true;
+        qCritical() << "Landlock: not available on this kernel, refusing to continue";
+        return false;
     }
     qInfo() << "Landlock: applying Phase 1 (limitOverrides), ABI version" << abi;
 
@@ -410,8 +414,8 @@ bool dropBrowserAccess()
 {
     const int abi = abiVersion();
     if (abi <= 0) {
-        qWarning() << "Landlock: not available on this kernel, skipping Phase 2 restriction";
-        return true;
+        qCritical() << "Landlock: not available on this kernel, refusing to continue";
+        return false;
     }
     qInfo() << "Landlock: applying Phase 2 (dropBrowserAccess), ABI version" << abi;
 
@@ -452,9 +456,9 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
     int abi = static_cast<int>(syscall(__NR_landlock_create_ruleset, nullptr, 0,
                                        LANDLOCK_CREATE_RULESET_VERSION));
     if (abi < 0) {
-        const char msg[] = "LandlockLauncher: not available, continuing unrestricted\n";
+        const char msg[] = "LandlockLauncher: not available, aborting child\n";
         (void)::write(STDERR_FILENO, msg, sizeof(msg) - 1);
-        return;
+        _exit(1);
     }
 
     const __u64 handled = handledAccessForAbi(abi);
@@ -465,9 +469,9 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
     int rulesetFd = static_cast<int>(syscall(__NR_landlock_create_ruleset,
                                              &attr, sizeof(attr), 0));
     if (rulesetFd < 0) {
-        const char msg[] = "LandlockLauncher: create_ruleset failed\n";
+        const char msg[] = "LandlockLauncher: create_ruleset failed, aborting child\n";
         (void)::write(STDERR_FILENO, msg, sizeof(msg) - 1);
-        return;
+        _exit(1);
     }
 
     char javaTmp[4096];
@@ -509,22 +513,24 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome)
     }
 
     if (!allOk) {
-        const char msg[] = "LandlockLauncher: some rules failed, continuing unrestricted\n";
+        const char msg[] = "LandlockLauncher: some rules failed, aborting child\n";
         (void)::write(STDERR_FILENO, msg, sizeof(msg) - 1);
         close(rulesetFd);
-        return;
+        _exit(1);
     }
 
     if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+        const char msg[] = "LandlockLauncher: prctl(PR_SET_NO_NEW_PRIVS) failed, aborting child\n";
+        (void)::write(STDERR_FILENO, msg, sizeof(msg) - 1);
         close(rulesetFd);
-        return;
+        _exit(1);
     }
 
     if (syscall(__NR_landlock_restrict_self, rulesetFd, 0) < 0) {
-        const char msg[] = "LandlockLauncher: restrict_self failed\n";
+        const char msg[] = "LandlockLauncher: restrict_self failed, aborting child\n";
         (void)::write(STDERR_FILENO, msg, sizeof(msg) - 1);
         close(rulesetFd);
-        return;
+        _exit(1);
     }
 
     close(rulesetFd);
