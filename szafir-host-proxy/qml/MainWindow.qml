@@ -10,9 +10,9 @@ Kirigami.ApplicationWindow {
     height: 420
     minimumWidth: 400
     minimumHeight: 300
-    title: setupController && !setupController.isWizardComplete
-           ? i18n("SzafirHost Proxy — Setup")
-           : i18n("SzafirHost Proxy")
+        title: setupController && !setupController.isWizardComplete
+            ? i18n("Setup")
+            : i18n("SzafirHost Proxy")
     visible: false
 
     Kirigami.Theme.colorSet: Kirigami.Theme.View
