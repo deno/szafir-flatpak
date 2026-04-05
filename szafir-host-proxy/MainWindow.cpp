@@ -69,8 +69,6 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
 {
     connect(m_service, &NativeMessagingService::activeHostCountChanged,
             this, &MainWindow::setActiveHostCount);
-    connect(m_service, &NativeMessagingService::clientsChanged,
-            this, &MainWindow::clientsChanged);
 }
 
 MainWindow::~MainWindow()
@@ -83,21 +81,9 @@ int MainWindow::activeHostCount() const
     return m_activeHostCount;
 }
 
-QVariantList MainWindow::clients() const
+NativeMessagingService *MainWindow::clientsModel() const
 {
-    QVariantList result;
-    for (const ClientInfo &ci : m_service->clients()) {
-        QVariantMap m;
-        m[QStringLiteral("clientName")] = ci.clientName;
-        m[QStringLiteral("icon")]       = ci.icon;
-        m[QStringLiteral("browserType")] = ci.browserType;
-        m[QStringLiteral("flatpakId")]  = ci.flatpakId;
-        m[QStringLiteral("executable")] = ci.executable;
-        m[QStringLiteral("pid")]        = ci.pid;
-        m[QStringLiteral("dbusHandle")] = ci.dbusHandle;
-        result.append(m);
-    }
-    return result;
+    return m_service;
 }
 
 void MainWindow::show()

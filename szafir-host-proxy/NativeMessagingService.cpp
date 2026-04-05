@@ -40,7 +40,7 @@ Q_DECLARE_METATYPE(FdMap)
 // ---- NativeMessagingService ------------------------------------------------
 
 NativeMessagingService::NativeMessagingService(QObject *parent)
-    : QObject(parent)
+    : QAbstractListModel(parent)
 {
 #ifndef BUNDLED_HOST
     qDBusRegisterMetaType<FdMap>();
@@ -106,9 +106,52 @@ static void logFd(const char *label, const QDBusUnixFileDescriptor &fd)
              << "F_GETFD:" << fdflags;
 }
 
-QList<ClientInfo> NativeMessagingService::clients() const
+// ---- QAbstractListModel ---------------------------------------------------
+
+int NativeMessagingService::rowCount(const QModelIndex &parent) const
 {
-    return m_activeClients.values();
+    if (parent.isValid())
+        return 0;
+    return m_clientList.size();
+}
+
+QVariant NativeMessagingService::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_clientList.size())
+        return {};
+    const ClientInfo &ci = m_clientList.at(index.row());
+    switch (role) {
+    case ClientNameRole:  return ci.clientName;
+    case IconRole:        return ci.icon;
+    case FlatpakIdRole:   return ci.flatpakId;
+    case ExecutableRole:  return ci.executable;
+    case BrowserTypeRole: return ci.browserType;
+    case DbusHandleRole:  return ci.dbusHandle;
+    case PidRole:         return ci.pid;
+    default:              return {};
+    }
+}
+
+QHash<int, QByteArray> NativeMessagingService::roleNames() const
+{
+    return {
+        { ClientNameRole,  "clientName"  },
+        { IconRole,        "browserIcon" },
+        { FlatpakIdRole,   "flatpakId"   },
+        { ExecutableRole,  "executable"  },
+        { BrowserTypeRole, "browserType" },
+        { DbusHandleRole,  "dbusHandle"  },
+        { PidRole,         "pid"         },
+    };
+}
+
+int NativeMessagingService::clientListIndexByPid(qint64 pid) const
+{
+    for (int i = 0; i < m_clientList.size(); ++i) {
+        if (m_clientList.at(i).pid == pid)
+            return i;
+    }
+    return -1;
 }
 
 QString NativeMessagingService::currentDbusSender() const
@@ -202,9 +245,16 @@ void NativeMessagingService::spawnHost(const QStringList &args,
                 qWarning() << "SzafirHost stderr:" << stderrOutput.trimmed();
             }
 
-            if (m_activeClients.remove(process) > 0) {
+            if (m_activeClients.contains(process)) {
+                const qint64 pid = m_activeClients.value(process).pid;
+                m_activeClients.remove(process);
+                const int idx = clientListIndexByPid(pid);
+                if (idx >= 0) {
+                    beginRemoveRows({}, idx, idx);
+                    m_clientList.removeAt(idx);
+                    endRemoveRows();
+                }
                 Q_EMIT activeHostCountChanged(m_activeClients.size());
-                Q_EMIT clientsChanged();
             }
             process->deleteLater();
         });
@@ -241,9 +291,12 @@ void NativeMessagingService::spawnHost(const QStringList &args,
     ClientInfo ci = clientInfo;
     ci.pid = process->processId();
     m_activeClients.insert(process, ci);
+    const int pos = m_clientList.size();
+    beginInsertRows({}, pos, pos);
+    m_clientList.append(ci);
+    endInsertRows();
     qDebug() << "SzafirHost spawned, PID:" << process->processId();
     Q_EMIT activeHostCountChanged(m_activeClients.size());
-    Q_EMIT clientsChanged();
 
 #else // !BUNDLED_HOST
     // Build the Flatpak Development HostCommand call.
@@ -330,8 +383,11 @@ void NativeMessagingService::spawnHost(const QStringList &args,
                 ClientInfo ci = clientInfo;
                 ci.pid = pid;
                 m_activeClients.insert(pid, ci);
+                const int pos = m_clientList.size();
+                beginInsertRows({}, pos, pos);
+                m_clientList.append(ci);
+                endInsertRows();
                 Q_EMIT activeHostCountChanged(m_activeClients.size());
-                Q_EMIT clientsChanged();
             }
             self->deleteLater();
         });
@@ -381,8 +437,13 @@ void NativeMessagingService::onSpawnExited(quint32 pid, quint32 exitStatus)
     }
 
     if (m_activeClients.remove(pid) > 0) {
+        const int idx = clientListIndexByPid(qint64(pid));
+        if (idx >= 0) {
+            beginRemoveRows({}, idx, idx);
+            m_clientList.removeAt(idx);
+            endRemoveRows();
+        }
         Q_EMIT activeHostCountChanged(m_activeClients.size());
-        Q_EMIT clientsChanged();
     }
 }
 #endif // !BUNDLED_HOST

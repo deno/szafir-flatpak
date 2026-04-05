@@ -6,6 +6,7 @@ import org.kde.kirigami as Kirigami
 Kirigami.Page {
     id: page
     title: i18n("Status")
+    state: mainWindowController.activeHostCount > 0 ? "browsers" : "placeholder"
 
     Component {
         id: aboutPageComponent
@@ -141,10 +142,94 @@ Kirigami.Page {
     }
     // ─────────────────────────────────────────────────────────────────────
 
+    states: [
+        State {
+            name: "placeholder"
+            PropertyChanges {
+                target: placeholderView
+                opacity: 1
+                scale: 1
+            }
+            PropertyChanges {
+                target: browsersList
+                opacity: 0
+                scale: 1
+            }
+        },
+        State {
+            name: "browsers"
+            PropertyChanges {
+                target: placeholderView
+                opacity: 0
+                scale: 0.85
+            }
+            PropertyChanges {
+                target: browsersList
+                opacity: 1
+                scale: 1
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "placeholder"
+            to: "browsers"
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target: placeholderView
+                    properties: "opacity,scale"
+                    duration: 250
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: browsersList
+                    property: "opacity"
+                    duration: 250
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: browsersList
+                    property: "scale"
+                    from: 1.1
+                    to: 1.0
+                    duration: 250
+                    easing.type: Easing.OutCubic
+                }
+            }
+        },
+        Transition {
+            from: "browsers"
+            to: "placeholder"
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target: placeholderView
+                    property: "opacity"
+                    duration: 250
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: browsersList
+                    property: "opacity"
+                    duration: 250
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+    ]
+
     ColumnLayout {
+        id: placeholderView
         anchors.centerIn: parent
         width: parent.width - Kirigami.Units.gridUnit * 4
-        visible: mainWindowController.activeHostCount <= 0
+        visible: opacity > 0
+        opacity: 1
+        scale: 1
         spacing: Kirigami.Units.largeSpacing
 
         Kirigami.PlaceholderMessage {
@@ -171,10 +256,40 @@ Kirigami.Page {
     }
 
     ListView {
+        id: browsersList
         anchors.fill: parent
-        visible: mainWindowController.activeHostCount > 0
-        model: mainWindowController.clients
+        visible: opacity > 0
+        opacity: 0
+        scale: 1
+        model: mainWindowController.clientsModel
         spacing: Kirigami.Units.smallSpacing
+
+        add: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        remove: Transition {
+            NumberAnimation {
+                property: "opacity"
+                to: 0
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        displaced: Transition {
+            NumberAnimation {
+                properties: "x,y"
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
 
         delegate: ItemDelegate {
             width: ListView.view.width
@@ -183,7 +298,7 @@ Kirigami.Page {
                 spacing: Kirigami.Units.largeSpacing
 
                 Kirigami.Icon {
-                    source: modelData.icon || "web-browser"
+                    source: browserIcon || "web-browser"
                     Layout.preferredWidth: Kirigami.Units.iconSizes.medium
                     Layout.preferredHeight: Kirigami.Units.iconSizes.medium
                     Layout.alignment: Qt.AlignVCenter
@@ -195,20 +310,20 @@ Kirigami.Page {
 
                     Label {
                         Layout.fillWidth: true
-                        text: modelData.clientName
+                        text: clientName
                         font.bold: true
                         elide: Text.ElideRight
                     }
 
                     Label {
                         Layout.fillWidth: true
-                        text: modelData.flatpakId
-                              ? modelData.flatpakId
-                              : (modelData.executable ? modelData.executable : modelData.dbusHandle)
+                        text: flatpakId
+                              ? flatpakId
+                              : (executable ? executable : dbusHandle)
                         font.family: Kirigami.Theme.smallFont.family
                         font.pointSize: Kirigami.Theme.smallFont.pointSize
                         font.weight: Kirigami.Theme.smallFont.weight
-                        font.italic: !modelData.flatpakId && !modelData.executable
+                        font.italic: !flatpakId && !executable
                         color: Kirigami.Theme.disabledTextColor
                         elide: Text.ElideRight
                     }
@@ -221,7 +336,7 @@ Kirigami.Page {
                     Layout.alignment: Qt.AlignVCenter
                     ToolTip.text: text
                     ToolTip.visible: hovered
-                    onClicked: mainWindowController.stopClient(modelData.pid)
+                    onClicked: mainWindowController.stopClient(pid)
                 }
             }
         }

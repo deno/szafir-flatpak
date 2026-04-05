@@ -2,11 +2,11 @@
 
 #include "config.h"
 
+#include <QAbstractListModel>
 #include <QDBusAbstractAdaptor>
 #include <QDBusContext>
 #include <QDBusUnixFileDescriptor>
 #include <QMap>
-#include <QObject>
 #include <QList>
 #include <QStringList>
 #include <QVariantMap>
@@ -34,12 +34,27 @@ struct ClientInfo
 // D-Bus infrastructure detects automatically when the object is registered
 // via QDBusConnection::registerObject().
 // ---------------------------------------------------------------------------
-class NativeMessagingService : public QObject, protected QDBusContext
+class NativeMessagingService : public QAbstractListModel, protected QDBusContext
 {
     Q_OBJECT
 public:
+    enum Role {
+        ClientNameRole = Qt::UserRole + 1,
+        IconRole,
+        FlatpakIdRole,
+        ExecutableRole,
+        BrowserTypeRole,
+        DbusHandleRole,
+        PidRole,
+    };
+
     explicit NativeMessagingService(QObject *parent = nullptr);
     ~NativeMessagingService() override;
+
+    // QAbstractListModel
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     bool isAcceptingConnections() const { return m_acceptingConnections; }
     void setAcceptingConnections(bool accepting);
@@ -54,18 +69,12 @@ public:
                    const QDBusUnixFileDescriptor &fdErr,
                    const ClientInfo &clientInfo);
 
-#ifdef BUNDLED_HOST
     int activeHostCount() const { return m_activeClients.size(); }
-#else
-    int activeHostCount() const { return m_activeClients.size(); }
-#endif
-    QList<ClientInfo> clients() const;
     QString currentDbusSender() const;
     void stopClient(qint64 pid);
 
 Q_SIGNALS:
     void activeHostCountChanged(int count);
-    void clientsChanged();
 
 #ifndef BUNDLED_HOST
 private Q_SLOTS:
@@ -80,6 +89,9 @@ private:
 #else
     QMap<quint32, ClientInfo> m_activeClients;
 #endif
+    QList<ClientInfo> m_clientList; // ordered list mirroring m_activeClients for the model
+
+    int clientListIndexByPid(qint64 pid) const;
 };
 
 // ---------------------------------------------------------------------------

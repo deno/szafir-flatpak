@@ -1,8 +1,9 @@
 #pragma once
 
+#include "NativeMessagingService.h"
+
 #include <QObject>
 #include <QPointer>
-#include <QVariantList>
 
 class HostRuntimeController;
 class ScalingController;
@@ -18,7 +19,7 @@ class MainWindow : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int activeHostCount READ activeHostCount WRITE setActiveHostCount NOTIFY activeHostCountChanged)
-    Q_PROPERTY(QVariantList clients READ clients NOTIFY clientsChanged)
+    Q_PROPERTY(NativeMessagingService* clientsModel READ clientsModel CONSTANT)
 
 public:
     explicit MainWindow(NativeMessagingService *service, ScalingController *scalingController,
@@ -30,7 +31,7 @@ public:
     ~MainWindow() override;
 
     int activeHostCount() const;
-    QVariantList clients() const;
+    NativeMessagingService *clientsModel() const;
 
     void show();
     void raise();
@@ -48,7 +49,6 @@ public slots:
 
 signals:
     void activeHostCountChanged(int activeHostCount);
-    void clientsChanged();
 
 private:
     void ensureWindow();
