@@ -171,6 +171,8 @@ permission_groups:
       Flatpak per-app sandbox data directories for each supported browser
       (~/.var/app/<flatpak-id>). Required to read and write the native messaging
       host manifest inside the browser's Flatpak sandbox.
+      Permissions dropped after verifying & installing manifests early at runtime in 
+      Landlock Phase 2 (dropBrowserAccess). 
       [fe]All browsers are included regardless of the install_in_host setting.[/fe]
     derived_from_browsers: true
     landlock_access: read_write_create
@@ -248,8 +250,7 @@ permission_groups:
 
   java_runtime:
     description: >-
-      Java runtime working data: persistent ~/.java cache directory (shared
-      between the Flatpak sandbox and the host via --persist=.java) and the
+      Java runtime working data: persistent ~/.java cache directory and the
       required environment variables for the bundled OpenJDK runtime.
       [fe]Landlock grants read_write_create on ~/.java in both phases so the JVM
       can read/write its cache throughout the sandbox lifecycle. Also covers the
