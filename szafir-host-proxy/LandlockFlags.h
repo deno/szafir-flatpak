@@ -103,6 +103,11 @@ inline constexpr __u64 kReadWriteCreate =
 #endif
     0;
 
+// Union of read+exec and read+write — used for /app which needs execute access
+// (JRE, bundled binaries) and full write access (JRE extraction, extra-data).
+inline constexpr __u64 kReadExecWrite =
+    kReadExec | kReadWrite;
+
 // For the overrides directory: allow creating temp files (for KConfig and QSaveFile atomic writes),
 // listing contents (for inotify), writing/removing files.
 // Note: QSaveFile uses O_RDWR internally often, so READ_FILE and TRUNCATE are required.

@@ -9,7 +9,6 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
-#include <filesystem>
 #include <ranges>
 #include <string>
 #include <vector>
@@ -22,7 +21,6 @@
 
 namespace {
 
-namespace fs = std::filesystem;
 using namespace Landlock;
 
 // ---- Landlock syscall wrappers (no libc wrappers exist) --------------------
@@ -185,40 +183,17 @@ auto browserVarAppPaths()
 std::vector<PathRule> systemRules()
 {
     const std::string home = homePath();
-    const std::string appId = APP_ID;
 
-    std::vector<PathRule> rules = {
-        // App binaries, JRE, libs, extra-data
-        {"/app",        kReadExec | kReadWrite},
-        // Runtime (Qt, KDE, glibc, etc.)
-        {"/usr",        kReadExec},
-        // System/runtime config
-        {"/etc",        kReadOnly},
-        // Wayland, X11, D-Bus, pcscd sockets
-        {"/run",        kReadWriteCreate},
-        // X11 sockets, temp files
-        {"/tmp",        kReadWriteCreate},
-        // Process info (Java needs /proc/self)
-        {"/proc",       kReadWrite},
-        // DRI, urandom, null, etc.
-        {"/dev",        kReadWriteCreate},
-        // Required by JVM and Qt
-        {"/sys",        kReadOnly},
-        // Host flatpak icon dirs
-        {"/var/lib/flatpak/exports/share/icons",   kReadOnly},
-        {"/var/lib/flatpak/app",                   kReadOnly},
-        // User flatpak icon dirs
-        {home + "/.local/share/flatpak/exports/share/icons", kReadOnly},
-        {home + "/.local/share/flatpak/app",                 kReadOnly},
-        // App's XDG dirs (config, data, cache)
-        {home + "/.var/app/" + appId,              kReadWriteCreate},
-        // Java temp (via --persist)
-        {home + "/.java",                          kReadWriteCreate},
-        // Allow QSaveFile to create a temp file in $HOME and atomically rename
-        // it to external_providers.xml (MAKE_REG + REMOVE_FILE needed on the dir)
-        {home,                                     kOverridesDirOps},
-        {home + "/external_providers.xml",         kOverrideFileAccess},
-    };
+    std::vector<PathRule> rules;
+    rules.reserve(Permissions::kSystemStaticRules.size() + 8);
+
+    for (const auto &r : Permissions::kSystemStaticRules)
+        rules.push_back({r.path, r.access});
+
+    Permissions::forEachSystemDynamicRule(home.c_str(), APP_ID,
+        [&rules](const char *path, __u64 access) {
+            rules.push_back({std::string(path), access});
+        });
 
     return rules;
 }
@@ -226,8 +201,8 @@ std::vector<PathRule> systemRules()
 // Overrides directory + specific override file rules
 void addOverrideRules(std::vector<PathRule> &rules, const std::vector<std::string> &overrideFiles)
 {
-    const std::string home = homePath();
-    const std::string overridesDir = home + "/.local/share/flatpak/overrides";
+    const std::string overridesDir =
+        homePath() + std::string(Permissions::kOverridesDirSuffix);
 
     // Directory-level: allow KConfig temp file operations + inotify
     rules.push_back({overridesDir, kOverridesDirOps});

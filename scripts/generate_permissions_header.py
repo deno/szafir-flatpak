@@ -75,12 +75,35 @@ _ACCESS_TO_FLAG: dict[str, str] = {
     "read_write":        "Landlock::kReadWrite",
     "read_write_create": "Landlock::kReadWriteCreate",
     "read_dir_only":     "Landlock::kReadDirOnly",
+    "read_exec_write":   "Landlock::kReadExecWrite",
+    "overrides_dir":     "Landlock::kOverridesDirOps",
+    "override_file":     "Landlock::kOverrideFileAccess",
 }
 
 # Maps YAML template tokens → C parameter names in forEachLauncherDynamicRule.
 _TEMPLATE_PARAMS: dict[str, str] = {
     "{home}":          "home",
     "{xdg_data_home}": "xdgDataHome",
+}
+
+# ── System rule generation ───────────────────────────────────────────────────
+
+# Permission groups whose paths form the base system rules (Phase 1 & Phase 2).
+_SYSTEM_RULE_GROUPS: list[str] = [
+    "system_sandbox",
+    "flatpak_metadata",
+    "app_xdg_data",
+    "external_providers",
+    "java_runtime",
+]
+
+# Template tokens that may appear inside system-rule paths (after ~ stripping).
+_SYSTEM_TEMPLATE_PARAMS: dict[str, str] = {
+    "{app_id}": "appId",
+}
+
+_CONDITION_TO_MACRO: dict[str, str] = {
+    "bundled": "BUNDLED_HOST",
 }
 
 
@@ -141,6 +164,111 @@ def _render_dynamic_rule(entry: dict[str, Any], buf_idx: int) -> str:
     )
 
 
+# ── System rule helpers ──────────────────────────────────────────────────────
+
+
+def _collect_system_rules(data: dict[str, Any]) -> tuple[list[dict], list[dict]]:
+    """Partition system-rule paths into static (absolute) and dynamic (home-relative)."""
+    groups = data["permission_groups"]
+    static_rules: list[dict[str, Any]] = []
+    dynamic_rules: list[dict[str, Any]] = []
+
+    for group_name in _SYSTEM_RULE_GROUPS:
+        group = groups[group_name]
+        condition = group.get("condition")
+
+        for path_entry in group.get("paths", []):
+            path = path_entry["path"]
+            access_token = path_entry["landlock_access"]
+            if access_token not in _ACCESS_TO_FLAG:
+                raise ValueError(
+                    f"Unknown landlock_access '{access_token}' in {group_name}.paths")
+            rule = {
+                "path": path,
+                "flag": _ACCESS_TO_FLAG[access_token],
+                "condition": condition,
+                "group": group_name,
+            }
+            if path.startswith("/"):
+                static_rules.append(rule)
+            elif path.startswith("~"):
+                dynamic_rules.append(rule)
+            else:
+                raise ValueError(f"Unsupported path format '{path}' in {group_name}")
+
+    return static_rules, dynamic_rules
+
+
+def _build_system_static_entries(rules: list[dict]) -> str:
+    """Render constexpr array entries for static system rules."""
+    lines: list[str] = []
+    current_group = None
+    for rule in rules:
+        if rule["group"] != current_group:
+            lines.append(f"    // {rule['group']}")
+            current_group = rule["group"]
+        escaped = rule["path"].replace("\\", "\\\\").replace('"', '\\"')
+        lines.append(f'    {{"{escaped}", {rule["flag"]}}},')
+    # Strip trailing comma from last data line
+    for i in range(len(lines) - 1, -1, -1):
+        if lines[i].endswith(","):
+            lines[i] = lines[i][:-1]
+            break
+    return "\n".join(lines)
+
+
+def _build_system_dynamic_body(rules: list[dict]) -> str:
+    """Render the function body for forEachSystemDynamicRule."""
+    parts: list[str] = []
+    buf_idx = 0
+    current_condition = None
+    current_group = None
+
+    for rule in rules:
+        condition = rule.get("condition")
+        # Open/close #ifdef blocks on condition transitions
+        if condition != current_condition:
+            if current_condition is not None:
+                parts.append("#endif")
+                parts.append("")
+            if condition is not None:
+                macro = _CONDITION_TO_MACRO[condition]
+                parts.append(f"#ifdef {macro}")
+            current_condition = condition
+
+        if rule["group"] != current_group:
+            parts.append(f"    // {rule['group']}")
+            current_group = rule["group"]
+
+        suffix = rule["path"][1:]  # strip leading ~
+        flag = rule["flag"]
+
+        if not suffix:
+            # Bare ~ → pass home directly
+            parts.append(f"    fn(home, {flag});")
+        else:
+            fmt = suffix
+            args = ["home"]
+            for tok, param in _SYSTEM_TEMPLATE_PARAMS.items():
+                if tok in fmt:
+                    fmt = fmt.replace(tok, "%s")
+                    args.append(param)
+            buf = f"_buf{buf_idx}"
+            parts.append(f"    char {buf}[4096];")
+            parts.append(f'    snprintf({buf}, sizeof({buf}), "%s{fmt}", {", ".join(args)});')
+            parts.append(f"    fn({buf}, {flag});")
+            buf_idx += 1
+        parts.append("")  # blank line between rules
+
+    if current_condition is not None:
+        parts.append("#endif")
+
+    # Remove trailing blank lines
+    while parts and parts[-1] == "":
+        parts.pop()
+    return "\n".join(parts)
+
+
 def generate(input_path: Path, output_path: Path) -> None:
     data = yaml.safe_load(input_path.read_text(encoding="utf-8"))
 
@@ -196,6 +324,19 @@ def generate(input_path: Path, output_path: Path) -> None:
         if entry["template"] != "{xauthority}" and entry["template"] not in _TEMPLATE_PARAMS:
             buf_idx += 1
     dynamic_body = "\n\n".join(dynamic_parts)
+
+    # ── System rules ─────────────────────────────────────────────────────────
+    system_static, system_dynamic = _collect_system_rules(data)
+    num_system_static = len(system_static)
+    system_static_entries = _build_system_static_entries(system_static)
+    system_dynamic_body = _build_system_dynamic_body(system_dynamic)
+    system_groups_str = ", ".join(_SYSTEM_RULE_GROUPS)
+
+    # ── Overrides directory suffix ───────────────────────────────────────────
+    overrides_path = data["permission_groups"]["flatpak_overrides"]["paths"][0]["path"]
+    if not overrides_path.startswith("~"):
+        raise ValueError(f"Expected flatpak_overrides path to start with '~', got '{overrides_path}'")
+    overrides_suffix = overrides_path[1:]
 
     rel_input = input_path.relative_to(ROOT) if input_path.is_relative_to(ROOT) else input_path
     rel_output = output_path.relative_to(ROOT) if output_path.is_relative_to(ROOT) else output_path
@@ -288,12 +429,38 @@ inline void forEachLauncherDynamicRule(
 {dynamic_body}
 }}
 
+// ── System rules ────────────────────────────────────────────────────────────
+// Source: permissions.yml — {system_groups_str}
+
+/// One static (absolute, compile-time-constant path) system Landlock rule.
+struct SystemStaticRule {{
+    const char *path;
+    __u64       access;
+}};
+
+/// Static-path Landlock rules for the proxy process (Phase 1 & 2 base rules).
+inline constexpr std::array<SystemStaticRule, {num_system_static}> kSystemStaticRules = {{{{
+{system_static_entries}
+}}}};
+
+/// Calls fn(path, access) for each home-relative system Landlock rule.
+/// home and appId must remain valid for the duration of the call.
+template<typename Fn>
+inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
+{{
+{system_dynamic_body}
+}}
+
+/// Suffix appended to $HOME to form the Flatpak overrides directory path.
+inline constexpr std::string_view kOverridesDirSuffix = "{overrides_suffix}"sv;
+
 }} // namespace Permissions
 """
 
     output_path.write_text(header, encoding="utf-8")
     print(f"  generated  {rel_output}  "
-          f"({num_browsers} browsers, {num_unique} config dirs, {num_static} launcher static rules)")
+          f"({num_browsers} browsers, {num_unique} config dirs, "
+          f"{num_static} launcher static rules, {num_system_static} system static rules)")
 
 
 def main() -> None:

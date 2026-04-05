@@ -132,4 +132,67 @@ inline void forEachLauncherDynamicRule(
     fn(_buf3, Landlock::kReadWriteCreate);
 }
 
+// ── System rules ────────────────────────────────────────────────────────────
+// Source: permissions.yml — system_sandbox, flatpak_metadata, app_xdg_data, external_providers, java_runtime
+
+/// One static (absolute, compile-time-constant path) system Landlock rule.
+struct SystemStaticRule {
+    const char *path;
+    __u64       access;
+};
+
+/// Static-path Landlock rules for the proxy process (Phase 1 & 2 base rules).
+inline constexpr std::array<SystemStaticRule, 10> kSystemStaticRules = {{
+    // system_sandbox
+    {"/app", Landlock::kReadExecWrite},
+    {"/usr", Landlock::kReadExec},
+    {"/etc", Landlock::kReadOnly},
+    {"/run", Landlock::kReadWriteCreate},
+    {"/tmp", Landlock::kReadWriteCreate},
+    {"/proc", Landlock::kReadWrite},
+    {"/dev", Landlock::kReadWriteCreate},
+    {"/sys", Landlock::kReadOnly},
+    // flatpak_metadata
+    {"/var/lib/flatpak/exports/share/icons", Landlock::kReadOnly},
+    {"/var/lib/flatpak/app", Landlock::kReadOnly}
+}};
+
+/// Calls fn(path, access) for each home-relative system Landlock rule.
+/// home and appId must remain valid for the duration of the call.
+template<typename Fn>
+inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
+{
+    // flatpak_metadata
+    char _buf0[4096];
+    snprintf(_buf0, sizeof(_buf0), "%s/.local/share/flatpak/exports/share/icons", home);
+    fn(_buf0, Landlock::kReadOnly);
+
+    char _buf1[4096];
+    snprintf(_buf1, sizeof(_buf1), "%s/.local/share/flatpak/app", home);
+    fn(_buf1, Landlock::kReadOnly);
+
+    // app_xdg_data
+    char _buf2[4096];
+    snprintf(_buf2, sizeof(_buf2), "%s/.var/app/%s", home, appId);
+    fn(_buf2, Landlock::kReadWriteCreate);
+
+    // external_providers
+    fn(home, Landlock::kOverridesDirOps);
+
+    char _buf3[4096];
+    snprintf(_buf3, sizeof(_buf3), "%s/external_providers.xml", home);
+    fn(_buf3, Landlock::kOverrideFileAccess);
+
+#ifdef BUNDLED_HOST
+    // java_runtime
+    char _buf4[4096];
+    snprintf(_buf4, sizeof(_buf4), "%s/.java", home);
+    fn(_buf4, Landlock::kReadWriteCreate);
+
+#endif
+}
+
+/// Suffix appended to $HOME to form the Flatpak overrides directory path.
+inline constexpr std::string_view kOverridesDirSuffix = "/.local/share/flatpak/overrides"sv;
+
 } // namespace Permissions

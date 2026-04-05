@@ -198,6 +198,7 @@ permission_groups:
         type: dir
         landlock_access: overrides_dir
         flatpak_permission: rw
+    landlock_phases: [phase1, phase2]
 
   flatpak_metadata:
     description: >-
@@ -253,9 +254,7 @@ permission_groups:
       Java runtime working data: persistent ~/.java cache directory and the
       required environment variables for the bundled OpenJDK runtime.
       [fe]Landlock grants read_write_create on ~/.java in both phases so the JVM
-      can read/write its cache throughout the sandbox lifecycle. Also covers the
-      proxy app's own XDG sandbox dir (~/.var/app/<APP_ID>) which is included in
-      systemRules() in C++.[/fe]
+      can read/write its cache throughout the sandbox lifecycle.[/fe]
     condition: bundled
     paths:
       - path: ~/.java
@@ -269,6 +268,20 @@ permission_groups:
 
   # Landlock-only groups (no explicit Flatpak --filesystem entry needed)
 
+  app_xdg_data:
+    description: >-
+      The proxy application's own XDG sandbox directory (~/.var/app/<APP_ID>),
+      which Flatpak automatically creates and bind-mounts into the container.
+      [fe]Landlock grants read_write_create on the directory so the app can
+      store configuration, data, and cache. The APP_ID is substituted at
+      compile time from config.h.[/fe]
+    paths:
+      - path: ~/.var/app/{app_id}
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
+    landlock_phases: [phase1, phase2]
+
   external_providers:
     description: >-
       The external_providers.xml file written to $HOME by the component
@@ -278,7 +291,7 @@ permission_groups:
       restriction layer on top of the Flatpak sandbox. (via QSaveFile — requires
       MAKE_REG + REMOVE_FILE on the $HOME directory)[/fe]
     paths:
-      - path: ~
+      - path: "~"
         type: dir
         landlock_access: overrides_dir
         flatpak_note: "covered by sandbox $HOME bind-mount — no --filesystem entry needed"
