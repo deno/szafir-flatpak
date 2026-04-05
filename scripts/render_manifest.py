@@ -10,6 +10,7 @@ Usage:
 """
 import sys
 import json
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -25,8 +26,25 @@ def _load_permissions() -> dict[str, Any]:
     )
 
 
-def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[str]:
-    """Build the ordered finish-args list for a proxy manifest variant."""
+
+import re
+
+
+def _strip_flatpak_exclude(text: str) -> str:
+    """Remove [fe]...[/fe] blocks from text."""
+    return re.sub(r"\[fe\].*?\[/fe\]", "", text, flags=re.DOTALL)
+
+def _comment_lines(description: str, width: int = 90) -> list[str]:
+    """Render a block description into wrapped single-line YAML comments, skipping flatpak-exclude blocks."""
+    filtered = _strip_flatpak_exclude(description)
+    normalized = " ".join(filtered.split())
+    if not normalized:
+        return []
+    return textwrap.wrap(normalized, width=width)
+
+
+def _build_finish_arg_groups(permissions: dict[str, Any], bundled_host: bool) -> list[dict[str, Any]]:
+    """Build ordered finish-args grouped by permission group with comment text."""
     condition = "bundled" if bundled_host else "split"
     groups = permissions["permission_groups"]
     browsers: list[dict[str, Any]] = permissions["browsers"]
@@ -54,16 +72,29 @@ def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[
                 result.append(f"--persist={persist}")
         return result
 
-    args: list[str] = []
+    finish_groups: list[dict[str, Any]] = []
+
+    def add_group(group_name: str, args: list[str]) -> None:
+        if not args:
+            return
+        description = groups[group_name].get("description", "")
+        finish_groups.append(
+            {
+                "group_name": group_name,
+                "description_lines": _comment_lines(description),
+                "args": args,
+            }
+        )
 
     # Display / IPC sockets
-    args += flatpak_args("display_ipc")
+    add_group("display_ipc", flatpak_args("display_ipc"))
 
     # D-Bus name ownership and talk permissions
-    args += flatpak_args("dbus_names")
+    add_group("dbus_names", flatpak_args("dbus_names"))
 
     # Browser config dirs — unique (config_dir, config_layout) pairs, in browser order
     seen_dirs: set[tuple[str, str]] = set()
+    browser_config_args: list[str] = []
     for browser in browsers:
         key = (browser["config_dir"], browser["config_layout"])
         if key not in seen_dirs:
@@ -76,26 +107,32 @@ def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[
                 fp = f"xdg-config/{config_dir}"
             else:
                 raise ValueError(f"Unknown config_layout: {layout!r} for browser {browser['id']!r}")
-            args.append(f"--filesystem={fp}:create")
+            browser_config_args.append(f"--filesystem={fp}:create")
+    add_group("browser_config", browser_config_args)
 
     # Flatpak overrides directory
-    args += filesystem_args("flatpak_overrides")
+    add_group("flatpak_overrides", filesystem_args("flatpak_overrides"))
 
     # Flatpak icon and app metadata (read-only)
-    args += filesystem_args("flatpak_metadata")
+    add_group("flatpak_metadata", filesystem_args("flatpak_metadata"))
 
     # Browser Flatpak sandbox dirs (~/.var/app/<id>) — all browsers
-    for browser in browsers:
-        args.append(f"--filesystem=~/.var/app/{browser['id']}:create")
+    browser_var_app_args = [f"--filesystem=~/.var/app/{browser['id']}:create" for browser in browsers]
+    add_group("browser_var_app", browser_var_app_args)
 
     # Bundled-only extras: x11 socket, pcsc, network (post-filesystem, bundled only)
-    args += flatpak_args("bundled_extras")
+    add_group("bundled_extras", flatpak_args("bundled_extras"))
 
     # Java runtime: --persist + --env (post-filesystem, bundled only)
-    args += filesystem_args("java_runtime")
-    args += flatpak_args("java_runtime")
+    java_args = filesystem_args("java_runtime") + flatpak_args("java_runtime")
+    add_group("java_runtime", java_args)
 
-    return args
+    return finish_groups
+
+
+def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[str]:
+    """Build the ordered finish-args list for a proxy manifest variant."""
+    return [arg for group in _build_finish_arg_groups(permissions, bundled_host) for arg in group["args"]]
 
 
 PERMISSIONS: dict[str, Any] = _load_permissions()
@@ -196,6 +233,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": False,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=False),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=False),
             "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -211,6 +249,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": True,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": True,
@@ -228,6 +267,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": True,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
             "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -245,6 +285,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": True,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -262,6 +303,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": True,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": False,
@@ -279,6 +321,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "app_version": APP_VERSION,
             "bundled_host": True,
             "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
             "system_components": [],
             "include_installer_extra": True,
             "include_library_extra": False,

@@ -9,8 +9,13 @@ sdk-extensions:
 {% endif %}
 
 finish-args:
-{% for arg in finish_args %}
+{% for group in finish_arg_groups %}
+{% for line in group.description_lines %}
+  # {{ line }}
+{% endfor %}
+{% for arg in group.args %}
   - {{ arg }}
+{% endfor %}
 {% endfor %}
 {% if bundled_host %}
 

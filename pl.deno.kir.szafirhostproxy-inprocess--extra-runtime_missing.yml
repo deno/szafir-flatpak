@@ -7,22 +7,42 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk25
 
 finish-args:
+  # Display server connections and IPC: Wayland socket, X11 fallback socket (split variant
+  # only), GPU device access (DRI), and POSIX shared memory (--share=ipc).
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  # D-Bus name ownership and talk permissions for the proxy's well-known D-Bus service name,
+  # Flatpak host process spawning (split only), and system tray integration.
   - --own-name=pl.deno.kir.szafirhostproxy
   - --talk-name=org.kde.StatusNotifierWatcher
+  # Browser configuration directories for native messaging host installation. Access required
+  # during Landlock Phase 1 (limitOverrides) to install the native messaging manifest and
+  # wrapper; dropped in Phase 2 (dropBrowserAccess) after installation completes.
   - --filesystem=~/.mozilla:create
   - --filesystem=~/.librewolf:create
   - --filesystem=~/.waterfox:create
   - --filesystem=xdg-config/google-chrome:create
   - --filesystem=xdg-config/google-chrome-unstable:create
   - --filesystem=xdg-config/chromium:create
+  # Flatpak per-app override keyfiles directory (~/.local/share/flatpak/overrides). Required
+  # for granting flatpak browsers installed on host access to proxy's Link interface to
+  # facilitate seamless native host integration. Access is restricted to only specific
+  # override files early in the runtime: Landlock Phase 1 covers all override files (browsers
+  # + szafir apps); Phase 2 narrows to szafir app overrides only (browser files dropped).
   - --filesystem=~/.local/share/flatpak/overrides:rw
+  # Read-only Flatpak icon export directories and application metadata paths. The
+  # exports/share/icons directories are added to XDG_DATA_DIRS so that KIconLoader and Qt's
+  # platform theme can resolve browser icons (e.g. firefox, google-chrome) in the system tray
+  # and browser list. The flatpak/app directories are required because the icon export
+  # directories contain symlinks that point back into flatpak/app/<id>/current/active/export/.
   - --filesystem=~/.local/share/flatpak/exports/share/icons:ro
   - --filesystem=/var/lib/flatpak/exports/share/icons:ro
   - --filesystem=~/.local/share/flatpak/app:ro
   - --filesystem=/var/lib/flatpak/app:ro
+  # Flatpak per-app sandbox data directories for each supported browser (~/.var/app/<flatpak-
+  # id>). Required to read and write the native messaging host manifest inside the browser's
+  # Flatpak sandbox.
   - --filesystem=~/.var/app/org.mozilla.firefox:create
   - --filesystem=~/.var/app/io.gitlab.librewolf-community:create
   - --filesystem=~/.var/app/net.waterfox.waterfox:create
@@ -30,9 +50,16 @@ finish-args:
   - --filesystem=~/.var/app/com.google.ChromeDev:create
   - --filesystem=~/.var/app/org.chromium.Chromium:create
   - --filesystem=~/.var/app/io.github.ungoogled_software.ungoogled_chromium:create
+  # Additional permissions required in the bundled/in-process variant where szafir-host-proxy
+  # directly runs the SzafirHost JVM process: X11 socket for the JVM Swing UI, PC/SC smartcard
+  # daemon for direct smartcard access, and network access for component downloads and JVM
+  # communication.
   - --socket=x11
   - --socket=pcsc
   - --share=network
+  # Java runtime working data: persistent ~/.java cache directory (shared between the Flatpak
+  # sandbox and the host via --persist=.java) and the required environment variables for the
+  # bundled OpenJDK runtime.
   - --persist=.java
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --env=JAVA_HOME=/app/jre
