@@ -1,6 +1,7 @@
 #include "NativeHostIntegrator.h"
 #include "AppSettings.h"
 #include "config.h"
+#include "generated_permissions.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -75,29 +76,19 @@ struct BrowserInfo {
 
 QList<BrowserInfo> browsers()
 {
-    const QList<BrowserInfo> list = {
-        {BrowserBase::Firefox,  ConfigRootLayout::HomeRelative, QStringLiteral("org.mozilla.firefox"),
-            fs::path(".mozilla"),               true,
-            QStringLiteral("Mozilla Firefox"),        QStringLiteral("firefox")},
-        {BrowserBase::Firefox,  ConfigRootLayout::HomeRelative, QStringLiteral("io.gitlab.librewolf-community"),
-            fs::path(".librewolf"),              true,
-            QStringLiteral("LibreWolf"),               QStringLiteral("firefox")},
-        {BrowserBase::Firefox,  ConfigRootLayout::HomeRelative, QStringLiteral("net.waterfox.waterfox"),
-            fs::path(".waterfox"),               true,
-            QStringLiteral("Waterfox"),                QStringLiteral("firefox")},
-        {BrowserBase::Chromium, ConfigRootLayout::XdgConfig,    QStringLiteral("com.google.Chrome"),
-            fs::path("google-chrome"),           true,
-            QStringLiteral("Google Chrome"),           QStringLiteral("google-chrome")},
-        {BrowserBase::Chromium, ConfigRootLayout::XdgConfig,    QStringLiteral("com.google.ChromeDev"),
-            fs::path("google-chrome-unstable"),  true,
-            QStringLiteral("Google Chrome Dev"),       QStringLiteral("google-chrome")},
-        {BrowserBase::Chromium, ConfigRootLayout::XdgConfig,    QStringLiteral("org.chromium.Chromium"),
-            fs::path("chromium"),                true,
-            QStringLiteral("Chromium"),                QStringLiteral("chromium-browser")},
-        {BrowserBase::Chromium, ConfigRootLayout::XdgConfig,    QStringLiteral("io.github.ungoogled_software.ungoogled_chromium"),
-            fs::path("chromium"),                false,
-            QStringLiteral("Ungoogled Chromium"),      QStringLiteral("chromium-browser")},
-    };
+    QList<BrowserInfo> list;
+    list.reserve(static_cast<qsizetype>(Permissions::kBrowsers.size()));
+    for (const Permissions::BrowserEntry &b : Permissions::kBrowsers) {
+        list.push_back({
+            b.base == Permissions::BrowserBase::Firefox ? BrowserBase::Firefox : BrowserBase::Chromium,
+            b.configLayout == Permissions::ConfigLayout::HomeRelative ? ConfigRootLayout::HomeRelative : ConfigRootLayout::XdgConfig,
+            QString::fromLatin1(b.flatpakId.data(), static_cast<qsizetype>(b.flatpakId.size())),
+            fs::path{b.configDir},
+            b.installInHost,
+            QString::fromLatin1(b.displayName.data(), static_cast<qsizetype>(b.displayName.size())),
+            QString::fromLatin1(b.icon.data(), static_cast<qsizetype>(b.icon.size())),
+        });
+    }
 
     QSet<QString> seenHostConfigDirs;
     for (const BrowserInfo &browser : list) {

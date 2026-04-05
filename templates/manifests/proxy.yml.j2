@@ -9,42 +9,10 @@ sdk-extensions:
 {% endif %}
 
 finish-args:
-{% if not bundled_host %}
-  - --socket=fallback-x11
-{% endif %}
-  - --socket=wayland
-  - --share=ipc
-  - --device=dri
-  - --own-name=pl.deno.kir.szafirhostproxy
-{% if not bundled_host %}
-  - --talk-name=org.freedesktop.Flatpak
-{% endif %}
-  - --talk-name=org.kde.StatusNotifierWatcher
-  - --filesystem=~/.mozilla:create
-  - --filesystem=~/.librewolf:create
-  - --filesystem=~/.waterfox:create
-  - --filesystem=xdg-config/google-chrome:create
-  - --filesystem=xdg-config/google-chrome-unstable:create
-  - --filesystem=xdg-config/chromium:create
-  - --filesystem=~/.local/share/flatpak/overrides:rw
-  - --filesystem=~/.local/share/flatpak/exports/share/icons:ro
-  - --filesystem=/var/lib/flatpak/exports/share/icons:ro
-  - --filesystem=~/.local/share/flatpak/app:ro
-  - --filesystem=/var/lib/flatpak/app:ro
-  - --filesystem=~/.var/app/org.mozilla.firefox:create
-  - --filesystem=~/.var/app/io.gitlab.librewolf-community:create
-  - --filesystem=~/.var/app/net.waterfox.waterfox:create
-  - --filesystem=~/.var/app/com.google.Chrome:create
-  - --filesystem=~/.var/app/com.google.ChromeDev:create
-  - --filesystem=~/.var/app/org.chromium.Chromium:create
-  - --filesystem=~/.var/app/io.github.ungoogled_software.ungoogled_chromium:create
+{% for arg in finish_args %}
+  - {{ arg }}
+{% endfor %}
 {% if bundled_host %}
-  - --socket=x11
-  - --socket=pcsc
-  - --share=network
-  - --persist=.java
-  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
-  - --env=JAVA_HOME=/app/jre
 
 cleanup:
   - /include

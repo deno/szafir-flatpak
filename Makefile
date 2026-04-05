@@ -4,6 +4,11 @@ PROXY_VERSION := $(shell python3 scripts/query_releases.py --current-version)
 SOURCE_BUILD_DIR := buildsrc
 SOURCE_ARCHIVE := $(SOURCE_BUILD_DIR)/szafir-host-proxy-$(PROXY_VERSION)-source.tar.gz
 
+.PHONY: permissions
+permissions:
+	python3 scripts/generate_permissions_header.py
+	python3 scripts/render_manifest.py all
+
 .PHONY: dist
 dist:
 	cmake -S szafir-host-proxy -B $(SOURCE_BUILD_DIR) \

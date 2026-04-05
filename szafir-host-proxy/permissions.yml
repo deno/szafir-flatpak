@@ -1,0 +1,339 @@
+# szafir-host-proxy/permissions.yml
+#
+# Single source of truth for browser definitions and permission sets.
+#
+# Consumed by:
+#   scripts/render_manifest.py               → Flatpak manifest finish-args (via Jinja2 templates)
+#   scripts/generate_permissions_header.py   → szafir-host-proxy/generated_permissions.h (C++ build artifact)
+#
+# Regenerate after editing this file:
+#   make permissions
+#
+# ── Access type nomenclature (fine-grained Landlock flag sets) ───────────────
+# read_only          READ_FILE | READ_DIR
+# read_only_file     READ_FILE
+# read_exec          EXECUTE | READ_FILE | READ_DIR
+# read_exec_file     EXECUTE | READ_FILE
+# read_write         READ_FILE | READ_DIR | WRITE_FILE | REMOVE_FILE | REMOVE_DIR |
+#                    MAKE_DIR | MAKE_REG | [TRUNCATE] | MAKE_SYM
+# read_write_create  read_write | MAKE_SOCK | MAKE_FIFO | [REFER]
+# read_exec_write    read_exec | read_write  (union; used for /app which needs both execute
+#                    and full write access for JRE extraction)
+# overrides_dir      READ_DIR | READ_FILE | WRITE_FILE | REMOVE_FILE | MAKE_REG | [TRUNCATE]
+#                    (for KConfig/QSaveFile atomic writes — no sub-directory creation needed)
+# override_file      READ_FILE | WRITE_FILE
+# read_dir_only      READ_DIR
+#
+# Flatpak --filesystem permission mapping:
+#   read_only / read_only_file / read_exec / read_exec_file → :ro
+#   read_write / overrides_dir / override_file              → :rw
+#   read_write_create                                       → :create
+# ────────────────────────────────────────────────────────────────────────────
+
+browsers:
+  - id: org.mozilla.firefox
+    base: firefox
+    # Native messaging directory: ~/.mozilla/native-messaging-hosts/
+    config_dir: .mozilla
+    config_layout: home_relative
+    install_in_host: true
+    display_name: Mozilla Firefox
+    icon: firefox
+
+  - id: io.gitlab.librewolf-community
+    base: firefox
+    # Native messaging directory: ~/.librewolf/native-messaging-hosts/
+    config_dir: .librewolf
+    config_layout: home_relative
+    install_in_host: true
+    display_name: LibreWolf
+    icon: firefox
+
+  - id: net.waterfox.waterfox
+    base: firefox
+    # Native messaging directory: ~/.waterfox/native-messaging-hosts/
+    config_dir: .waterfox
+    config_layout: home_relative
+    install_in_host: true
+    display_name: Waterfox
+    icon: firefox
+
+  - id: com.google.Chrome
+    base: chromium
+    # Native messaging directory: ~/.config/google-chrome/NativeMessagingHosts/
+    config_dir: google-chrome
+    config_layout: xdg_config
+    install_in_host: true
+    display_name: Google Chrome
+    icon: google-chrome
+
+  - id: com.google.ChromeDev
+    base: chromium
+    # Native messaging directory: ~/.config/google-chrome-unstable/NativeMessagingHosts/
+    config_dir: google-chrome-unstable
+    config_layout: xdg_config
+    install_in_host: true
+    display_name: Google Chrome Dev
+    icon: google-chrome
+
+  - id: org.chromium.Chromium
+    base: chromium
+    # Native messaging directory: ~/.config/chromium/NativeMessagingHosts/
+    config_dir: chromium
+    config_layout: xdg_config
+    install_in_host: true
+    display_name: Chromium
+    icon: chromium-browser
+
+  - id: io.github.ungoogled_software.ungoogled_chromium
+    base: chromium
+    # Shares config_dir with org.chromium.Chromium; install_in_host: false means
+    # only the Flatpak-side manifest is installed (no host ~/.config/chromium entry).
+    config_dir: chromium
+    config_layout: xdg_config
+    install_in_host: false
+    display_name: Ungoogled Chromium
+    icon: chromium-browser
+
+# ── Permission groups ────────────────────────────────────────────────────────
+#
+# Each group describes a logical set of permissions with:
+#   description       : human-readable purpose
+#   paths             : explicit filesystem paths (omit if derived_from_browsers)
+#   derived_from_browsers: true  : paths are derived from the browsers list
+#   flatpak_args      : Flatpak finish-args not expressible as --filesystem
+#                       (sockets, D-Bus names, --share, --persist, --env)
+#   condition         : "bundled" | "split" | absent (= always applicable)
+#                       When set at group level, entire group is conditional.
+#   landlock_access   : Landlock permission token for derived-browser groups
+#   flatpak_permission: ro | rw | create  (for derived-browser groups)
+#   landlock_phases   : Landlock phases that include this group (documentation)
+#
+# Per-path fields:
+#   path              : filesystem path (~ = $HOME, xdg-config/ = $XDG_CONFIG_HOME)
+#   type              : file | dir
+#   landlock_access   : Landlock permission token (see nomenclature above)
+#   flatpak_permission: ro | rw | create  → generates --filesystem=<path>:<perm>
+#   flatpak_persist   : ".java"           → generates --persist=<value>
+#   flatpak_note      : informational; no Flatpak output is generated for this path
+#
+# Per flatpak_args entry:
+#   arg               : Flatpak finish-arg string (e.g. "--socket=wayland")
+#   condition         : "bundled" | "split" | absent (= always)
+# ────────────────────────────────────────────────────────────────────────────
+
+permission_groups:
+
+  # Flatpak sockets / display / IPC
+
+  display_ipc:
+    description: >-
+      Display server connections and IPC: Wayland socket, X11 fallback socket
+      (split variant only — bundled uses direct X11 via bundled_extras), GPU
+      device access (DRI), and POSIX shared memory (--share=ipc).
+    flatpak_args:
+      - {arg: "--socket=fallback-x11", condition: split}
+      - {arg: "--socket=wayland"}
+      - {arg: "--share=ipc"}
+      - {arg: "--device=dri"}
+
+  dbus_names:
+    description: >-
+      D-Bus name ownership and talk permissions.
+      --own-name: proxy's well-known D-Bus service name.
+      --talk-name=org.freedesktop.Flatpak: spawn host processes (split only).
+      --talk-name=org.kde.StatusNotifierWatcher: system tray integration.
+      Flatpak D-Bus names — no filesystem path; Landlock does not apply.
+    flatpak_args:
+      - {arg: "--own-name=pl.deno.kir.szafirhostproxy"}
+      - {arg: "--talk-name=org.freedesktop.Flatpak", condition: split}
+      - {arg: "--talk-name=org.kde.StatusNotifierWatcher"}
+
+  # Browser filesystem permissions
+
+  browser_config:
+    description: >-
+      Browser configuration directories for native messaging host installation.
+      Paths are derived from browsers[].config_dir and browsers[].config_layout;
+      unique (config_dir, config_layout) pairs are used (deduplication applied —
+      org.chromium.Chromium and io.github.ungoogled_software.ungoogled_chromium
+      share config_dir "chromium" and produce a single entry).
+      Access required during Landlock Phase 1 (limitOverrides) to install the
+      native messaging manifest and wrapper; dropped in Phase 2 (dropBrowserAccess)
+      after installation completes.
+    derived_from_browsers: true
+    landlock_access: read_write_create
+    flatpak_permission: create
+    landlock_phases: [phase1]
+
+  browser_var_app:
+    description: >-
+      Flatpak per-app sandbox data directories for each supported browser
+      (~/.var/app/<flatpak-id>). Required to read and write the native messaging
+      host manifest inside the browser's Flatpak sandbox.
+      All browsers are included regardless of the install_in_host setting.
+    derived_from_browsers: true
+    landlock_access: read_write_create
+    flatpak_permission: create
+    landlock_phases: [phase1]
+
+  # Flatpak host metadata
+
+  flatpak_overrides:
+    description: >-
+      Flatpak per-app override keyfiles directory (~/.local/share/flatpak/overrides).
+      szafir-host-proxy writes override files to grant D-Bus session bus talk
+      permissions to browser Flatpak apps and to store GDK_SCALE settings.
+      Landlock Phase 1 covers all override files (browsers + szafir apps);
+      Phase 2 narrows to szafir app overrides only (browser files dropped).
+      overrides_dir access allows KConfig temp file operations and QSaveFile
+      atomic writes (needs MAKE_REG + REMOVE_FILE + TRUNCATE on the directory).
+    paths:
+      - path: ~/.local/share/flatpak/overrides
+        type: dir
+        landlock_access: overrides_dir
+        flatpak_permission: rw
+    landlock_phases: [phase1, phase2]
+
+  flatpak_metadata:
+    description: >-
+      Read-only Flatpak icon export directories and application metadata paths.
+      The exports/share/icons directories are added to XDG_DATA_DIRS so that
+      KIconLoader and Qt's platform theme can resolve browser icons (e.g. firefox,
+      google-chrome) in the system tray and browser list.
+      The flatpak/app directories are required because the icon export directories
+      contain symlinks that point back into flatpak/app/<id>/current/active/export/;
+      Landlock must grant read access to the symlink targets as well as the export dirs.
+      Note: we do NOT check whether a browser Flatpak app is installed before
+      writing its native messaging manifest or override file — installation is
+      unconditional for all browsers in the list to account for future installation.
+    paths:
+      - path: ~/.local/share/flatpak/exports/share/icons
+        type: dir
+        landlock_access: read_only
+        flatpak_permission: ro
+      - path: /var/lib/flatpak/exports/share/icons
+        type: dir
+        landlock_access: read_only
+        flatpak_permission: ro
+      - path: ~/.local/share/flatpak/app
+        type: dir
+        landlock_access: read_only
+        flatpak_permission: ro
+      - path: /var/lib/flatpak/app
+        type: dir
+        landlock_access: read_only
+        flatpak_permission: ro
+    landlock_phases: [phase1, phase2]
+
+  # ── Bundled-host-only permissions ───────────────────────────────────────────
+
+  bundled_extras:
+    description: >-
+      Additional permissions required in the bundled/in-process variant where
+      szafir-host-proxy directly runs the SzafirHost JVM process.
+      --socket=x11: X11 socket for the JVM Swing UI (direct X11, not fallback).
+      --socket=pcsc: PC/SC smartcard daemon for direct smartcard access.
+      --share=network: network access for component downloads and JVM communication.
+      Flatpak sockets/share — no filesystem path; Landlock does not apply.
+    condition: bundled
+    flatpak_args:
+      - {arg: "--socket=x11"}
+      - {arg: "--socket=pcsc"}
+      - {arg: "--share=network"}
+
+  java_runtime:
+    description: >-
+      Java runtime working data: persistent ~/.java cache directory (shared
+      between the Flatpak sandbox and the host via --persist=.java) and the
+      required environment variables for the bundled OpenJDK runtime.
+      Landlock grants read_write_create on ~/.java in both phases so the JVM
+      can read/write its cache throughout the sandbox lifecycle.
+      Also covers the proxy app's own XDG sandbox dir (~/.var/app/<APP_ID>)
+      which is included in systemRules() in C++.
+    condition: bundled
+    paths:
+      - path: ~/.java
+        type: dir
+        landlock_access: read_write_create
+        flatpak_persist: ".java"
+    flatpak_args:
+      - {arg: "--env=PATH=/app/jre/bin:/app/bin:/usr/bin"}
+      - {arg: "--env=JAVA_HOME=/app/jre"}
+    landlock_phases: [phase1, phase2]
+
+  # Landlock-only groups (no explicit Flatpak --filesystem entry needed)
+
+  external_providers:
+    description: >-
+      The external_providers.xml file written to $HOME by the component
+      downloader (via QSaveFile — requires MAKE_REG + REMOVE_FILE on the $HOME
+      directory), then read by the launched SzafirHost child process.
+      No Flatpak --filesystem entry is needed: the sandbox $HOME is already
+      bind-mounted into the container. Landlock provides an additional access
+      restriction layer on top of the Flatpak sandbox.
+    paths:
+      - path: ~
+        type: dir
+        landlock_access: overrides_dir
+        flatpak_note: "covered by sandbox $HOME bind-mount — no --filesystem entry needed"
+      - path: ~/external_providers.xml
+        type: file
+        landlock_access: override_file
+        flatpak_note: "covered by sandbox $HOME bind-mount — no --filesystem entry needed"
+    landlock_phases: [phase1, phase2]
+
+  system_sandbox:
+    description: >-
+      Core filesystem paths managed by the Flatpak sandbox itself. No explicit
+      --filesystem entries are required; these are part of the standard Flatpak
+      sandbox environment. Landlock rules shadow the Flatpak sandbox to provide
+      an additional deny-by-default access control layer within the container.
+      /app : app binaries, JRE, bundled libraries, and extra-data.
+      /usr : runtime (Qt, KDE, glibc, system libraries).
+      /etc : system and runtime configuration.
+      /run : Wayland, X11, D-Bus, pcscd sockets and runtime state.
+      /tmp : temporary files and X11 sockets.
+      /proc: process info (required by the JVM via /proc/self).
+      /dev : DRI device nodes, urandom, null, and other character devices.
+      /sys : hardware and CPU topology (required by JVM and Qt DPI detection).
+    paths:
+      - {path: /app,  type: dir, landlock_access: read_exec_write,   flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /usr,  type: dir, landlock_access: read_exec,         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /etc,  type: dir, landlock_access: read_only,         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /run,  type: dir, landlock_access: read_write_create, flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /tmp,  type: dir, landlock_access: read_write_create, flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /proc, type: dir, landlock_access: read_write,        flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /dev,  type: dir, landlock_access: read_write_create, flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+      - {path: /sys,  type: dir, landlock_access: read_only,         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"}
+    landlock_phases: [phase1, phase2]
+
+  launcher_sandbox:
+    description: >-
+      Strictly restricted paths for the SzafirHost child process launched via
+      fork+exec. Applied by LandlockSandbox::applyLauncherRestrictions()
+      immediately after fork, before exec (async-signal-safe).
+      Static absolute paths are generated into kLauncherStaticRules (a constexpr
+      std::array in generated_permissions.h — lives in .rodata, safe post-fork).
+      Runtime-computed paths that depend on home/xdg_data_home/xauthority are
+      generated into forEachLauncherDynamicRule() (stack buffers + snprintf only;
+      both are POSIX async-signal-safe). LandlockSandbox.cpp provides the
+      launcherAccessToFlags() mapping from LauncherAccess enum to __u64 constants.
+    paths:
+      - {path: /app/jre,                             type: dir,  landlock_access: read_exec,          note: "JRE binaries and libraries"}
+      - {path: /app/bin/start-szafir-host-native.sh, type: file, landlock_access: read_exec_file,     note: "startup script"}
+      - {path: /usr,                                 type: dir,  landlock_access: read_exec}
+      - {path: /etc,                                 type: dir,  landlock_access: read_only}
+      - {path: /run/pcscd,                           type: dir,  landlock_access: read_write_create,  note: "smartcard daemon socket"}
+      - {path: /tmp,                                 type: dir,  landlock_access: read_write_create}
+      - {path: /dev,                                 type: dir,  landlock_access: read_write_create}
+      - {path: /proc,                                type: dir,  landlock_access: read_write}
+      - {path: /sys,                                 type: dir,  landlock_access: read_only}
+    dynamic_paths:
+      - {template: "{home}/external_providers.xml",                  landlock_access: read_only_file,    note: "crypto provider list (read by SzafirHost)"}
+      - {template: "{xauthority}", fallback: "{home}/.Xauthority",   landlock_access: read_only_file,    note: "X11 auth ($XAUTHORITY if set, else $HOME/.Xauthority)"}
+      - {template: "{xdg_data_home}/szafir-host-proxy/components",   landlock_access: read_only,         note: "verified component store"}
+      - {template: "{xdg_data_home}/szafir_host",                    landlock_access: read_write_create, note: "SzafirHost install dir"}
+      - {template: "{xdg_data_home}",                                landlock_access: read_dir_only,     note: "parent dir listing only"}
+      - {template: "{home}/.java",                                    landlock_access: read_write_create, note: "Java cache"}
+    landlock_phases: [launcher]

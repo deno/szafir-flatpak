@@ -19,6 +19,88 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _load_permissions() -> dict[str, Any]:
+    return yaml.safe_load(
+        (ROOT / "szafir-host-proxy" / "permissions.yml").read_text(encoding="utf-8")
+    )
+
+
+def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[str]:
+    """Build the ordered finish-args list for a proxy manifest variant."""
+    condition = "bundled" if bundled_host else "split"
+    groups = permissions["permission_groups"]
+    browsers: list[dict[str, Any]] = permissions["browsers"]
+
+    def matches(cond: str | None) -> bool:
+        return cond is None or cond == condition
+
+    def flatpak_args(group_name: str) -> list[str]:
+        g = groups[group_name]
+        if not matches(g.get("condition")):
+            return []
+        return [e["arg"] for e in g.get("flatpak_args", []) if matches(e.get("condition"))]
+
+    def filesystem_args(group_name: str) -> list[str]:
+        g = groups[group_name]
+        if not matches(g.get("condition")):
+            return []
+        result = []
+        for p in g.get("paths", []):
+            if "flatpak_note" in p:
+                continue  # Landlock-only path; no Flatpak --filesystem entry
+            if perm := p.get("flatpak_permission"):
+                result.append(f"--filesystem={p['path']}:{perm}")
+            if persist := p.get("flatpak_persist"):
+                result.append(f"--persist={persist}")
+        return result
+
+    args: list[str] = []
+
+    # Display / IPC sockets
+    args += flatpak_args("display_ipc")
+
+    # D-Bus name ownership and talk permissions
+    args += flatpak_args("dbus_names")
+
+    # Browser config dirs — unique (config_dir, config_layout) pairs, in browser order
+    seen_dirs: set[tuple[str, str]] = set()
+    for browser in browsers:
+        key = (browser["config_dir"], browser["config_layout"])
+        if key not in seen_dirs:
+            seen_dirs.add(key)
+            layout = browser["config_layout"]
+            config_dir = browser["config_dir"]
+            if layout == "home_relative":
+                fp = f"~/{config_dir}"
+            elif layout == "xdg_config":
+                fp = f"xdg-config/{config_dir}"
+            else:
+                raise ValueError(f"Unknown config_layout: {layout!r} for browser {browser['id']!r}")
+            args.append(f"--filesystem={fp}:create")
+
+    # Flatpak overrides directory
+    args += filesystem_args("flatpak_overrides")
+
+    # Flatpak icon and app metadata (read-only)
+    args += filesystem_args("flatpak_metadata")
+
+    # Browser Flatpak sandbox dirs (~/.var/app/<id>) — all browsers
+    for browser in browsers:
+        args.append(f"--filesystem=~/.var/app/{browser['id']}:create")
+
+    # Bundled-only extras: x11 socket, pcsc, network (post-filesystem, bundled only)
+    args += flatpak_args("bundled_extras")
+
+    # Java runtime: --persist + --env (post-filesystem, bundled only)
+    args += filesystem_args("java_runtime")
+    args += flatpak_args("java_runtime")
+
+    return args
+
+
+PERMISSIONS: dict[str, Any] = _load_permissions()
+
+
 def _load_releases() -> list[dict[str, Any]]:
     data = yaml.safe_load(
         (ROOT / "szafir-host-proxy" / "releases.yml").read_text(encoding="utf-8")
@@ -113,6 +195,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-split.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": False,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=False),
             "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -127,6 +210,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": True,
@@ -143,6 +227,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
             "system_components": [],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -159,6 +244,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": False,
             "include_library_extra": False,
@@ -175,6 +261,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": True,
             "include_library_extra": False,
@@ -191,6 +278,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
             "app_version": APP_VERSION,
             "bundled_host": True,
+            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
             "system_components": [],
             "include_installer_extra": True,
             "include_library_extra": False,

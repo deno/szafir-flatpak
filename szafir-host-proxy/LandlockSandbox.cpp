@@ -1,5 +1,7 @@
 #include "LandlockSandbox.h"
 #include "config.h"
+#include "generated_permissions.h"
+#include "LandlockFlags.h"
 
 #include <QDebug>
 #include <QStandardPaths>
@@ -21,6 +23,7 @@
 namespace {
 
 namespace fs = std::filesystem;
+using namespace Landlock;
 
 // ---- Landlock syscall wrappers (no libc wrappers exist) --------------------
 
@@ -38,115 +41,6 @@ int landlockRestrictSelf(int rulesetFd, __u32 flags)
 {
     return static_cast<int>(syscall(__NR_landlock_restrict_self, rulesetFd, flags));
 }
-
-// ---- Access right sets for different ABI versions --------------------------
-
-// ABI v1 (kernel 5.13)
-constexpr __u64 kFsAccessV1 =
-    LANDLOCK_ACCESS_FS_EXECUTE |
-    LANDLOCK_ACCESS_FS_WRITE_FILE |
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_READ_DIR |
-    LANDLOCK_ACCESS_FS_REMOVE_DIR |
-    LANDLOCK_ACCESS_FS_REMOVE_FILE |
-    LANDLOCK_ACCESS_FS_MAKE_CHAR |
-    LANDLOCK_ACCESS_FS_MAKE_DIR |
-    LANDLOCK_ACCESS_FS_MAKE_REG |
-    LANDLOCK_ACCESS_FS_MAKE_SOCK |
-    LANDLOCK_ACCESS_FS_MAKE_FIFO |
-    LANDLOCK_ACCESS_FS_MAKE_BLOCK |
-    LANDLOCK_ACCESS_FS_MAKE_SYM;
-
-// ABI v2 adds LANDLOCK_ACCESS_FS_REFER
-#ifdef LANDLOCK_ACCESS_FS_REFER
-constexpr __u64 kFsAccessV2 = kFsAccessV1 | LANDLOCK_ACCESS_FS_REFER;
-#else
-constexpr __u64 kFsAccessV2 = kFsAccessV1;
-#endif
-
-// ABI v3 adds LANDLOCK_ACCESS_FS_TRUNCATE
-#ifdef LANDLOCK_ACCESS_FS_TRUNCATE
-constexpr __u64 kFsAccessV3 = kFsAccessV2 | LANDLOCK_ACCESS_FS_TRUNCATE;
-#else
-constexpr __u64 kFsAccessV3 = kFsAccessV2;
-#endif
-
-// ABI v5 adds LANDLOCK_ACCESS_FS_IOCTL_DEV
-#ifdef LANDLOCK_ACCESS_FS_IOCTL_DEV
-constexpr __u64 kFsAccessV5 = kFsAccessV3 | LANDLOCK_ACCESS_FS_IOCTL_DEV;
-#else
-constexpr __u64 kFsAccessV5 = kFsAccessV3;
-#endif
-
-
-__u64 handledAccessForAbi(int abi)
-{
-    if (abi >= 5) return kFsAccessV5;
-    if (abi >= 3) return kFsAccessV3;
-    if (abi >= 2) return kFsAccessV2;
-    return kFsAccessV1;
-}
-
-// Common access right combinations.
-// *File variants omit directory bits (READ_DIR, MAKE_*, REMOVE_*); use them
-// when the target path is a known regular file — Landlock returns EINVAL if
-// directory-only bits are set for a non-directory inode.
-constexpr __u64 kReadExec =
-    LANDLOCK_ACCESS_FS_EXECUTE |
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_READ_DIR;
-
-constexpr __u64 kReadExecFile =
-    LANDLOCK_ACCESS_FS_EXECUTE |
-    LANDLOCK_ACCESS_FS_READ_FILE;
-
-constexpr __u64 kReadOnly =
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_READ_DIR;
-
-constexpr __u64 kReadOnlyFile =
-    LANDLOCK_ACCESS_FS_READ_FILE;
-
-constexpr __u64 kReadWrite =
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_READ_DIR |
-    LANDLOCK_ACCESS_FS_WRITE_FILE |
-    LANDLOCK_ACCESS_FS_REMOVE_FILE |
-    LANDLOCK_ACCESS_FS_REMOVE_DIR |
-    LANDLOCK_ACCESS_FS_MAKE_DIR |
-    LANDLOCK_ACCESS_FS_MAKE_REG |
-#ifdef LANDLOCK_ACCESS_FS_TRUNCATE
-    LANDLOCK_ACCESS_FS_TRUNCATE |
-#endif
-    LANDLOCK_ACCESS_FS_MAKE_SYM;
-
-constexpr __u64 kReadWriteCreate =
-    kReadWrite |
-    LANDLOCK_ACCESS_FS_MAKE_SOCK |
-    LANDLOCK_ACCESS_FS_MAKE_FIFO |
-#ifdef LANDLOCK_ACCESS_FS_REFER
-    LANDLOCK_ACCESS_FS_REFER |
-#endif
-    0;
-
-// For the overrides directory: allow creating temp files (for KConfig and QSaveFile atomic writes),
-// listing contents (for inotify), writing/removing files.
-// Note: QSaveFile uses O_RDWR internally often, so READ_FILE and TRUNCATE are required.
-constexpr __u64 kOverridesDirOps =
-    LANDLOCK_ACCESS_FS_READ_DIR |
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_WRITE_FILE |
-    LANDLOCK_ACCESS_FS_REMOVE_FILE |
-    LANDLOCK_ACCESS_FS_MAKE_REG |
-#ifdef LANDLOCK_ACCESS_FS_TRUNCATE
-    LANDLOCK_ACCESS_FS_TRUNCATE |
-#endif
-    0;
-
-// For individual override files: read + write
-constexpr __u64 kOverrideFileAccess =
-    LANDLOCK_ACCESS_FS_READ_FILE |
-    LANDLOCK_ACCESS_FS_WRITE_FILE;
 
 struct PathRule {
     std::string path;
@@ -265,43 +159,26 @@ bool applyRuleset(int abi, const std::vector<PathRule> &rules)
     return true;
 }
 
-// Browser Flatpak IDs — kept in sync with NativeHostIntegrator.cpp browsers()
-const std::vector<std::string> kBrowserFlatpakIds = {
-    "org.mozilla.firefox",
-    "io.gitlab.librewolf-community",
-    "net.waterfox.waterfox",
-    "com.google.Chrome",
-    "com.google.ChromeDev",
-    "org.chromium.Chromium",
-    "io.github.ungoogled_software.ungoogled_chromium",
-};
-
-// Host browser config directories (relative to $HOME or $XDG_CONFIG_HOME)
-struct BrowserConfigPath {
-    std::string path;       // Full path
-    bool isHomeRelative;    // true = under $HOME, false = under $XDG_CONFIG_HOME
-};
-
-std::vector<BrowserConfigPath> browserConfigPaths()
+// generated from permissions.yml.
+std::vector<PathRule> browserConfigRules()
 {
     const std::string home = homePath();
     const std::string xdgConfig = xdgConfigHome();
-
-    return {
-        {home + "/.mozilla",                       true},
-        {home + "/.librewolf",                     true},
-        {home + "/.waterfox",                      true},
-        {xdgConfig + "/google-chrome",             false},
-        {xdgConfig + "/google-chrome-unstable",    false},
-        {xdgConfig + "/chromium",                  false},
-    };
+    std::vector<PathRule> result;
+    result.reserve(Permissions::kUniqueConfigDirs.size());
+    for (const Permissions::ConfigDirEntry &cd : Permissions::kUniqueConfigDirs) {
+        const std::string &base =
+            (cd.configLayout == Permissions::ConfigLayout::HomeRelative) ? home : xdgConfig;
+        result.push_back({base + "/" + std::string(cd.configDir), kReadWriteCreate});
+    }
+    return result;
 }
 
 auto browserVarAppPaths()
 {
-    return kBrowserFlatpakIds
-        | std::views::transform([home = homePath()](const std::string &id) {
-            return home + "/.var/app/" + id;
+    return Permissions::kBrowsers
+        | std::views::transform([home = homePath()](const Permissions::BrowserEntry &b) {
+            return home + "/.var/app/" + std::string(b.flatpakId);
         });
 }
 
@@ -392,8 +269,8 @@ bool limitOverrides()
     std::vector<PathRule> rules = systemRules();
 
     // Browser config directories (needed for NativeHostIntegrator)
-    for (const BrowserConfigPath &bcp : browserConfigPaths()) {
-        rules.push_back({bcp.path, kReadWriteCreate});
+    for (const PathRule &rule : browserConfigRules()) {
+        rules.push_back(rule);
     }
 
     // Browser .var/app directories (Flatpak browser data)
@@ -403,8 +280,8 @@ bool limitOverrides()
 
     // Override files: browsers + szafir + szafirhost (if unbundled)
     std::vector<std::string> overrideFiles;
-    for (const std::string &id : kBrowserFlatpakIds) {
-        overrideFiles.push_back(id);
+    for (const Permissions::BrowserEntry &b : Permissions::kBrowsers) {
+        overrideFiles.emplace_back(b.flatpakId);
     }
     overrideFiles.emplace_back("pl.kir.szafir");
 #ifndef BUNDLED_HOST
@@ -485,60 +362,21 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome, const 
         _exit(1);
     }
 
-    char javaTmp[4096];
-    snprintf(javaTmp, sizeof(javaTmp), "%s/.java", home);
-
-    char extProviders[4096];
-    snprintf(extProviders, sizeof(extProviders), "%s/external_providers.xml", home);
-
-    char szafirInstallDir[4096];
-    snprintf(szafirInstallDir, sizeof(szafirInstallDir), "%s/szafir_host", xdgDataHome);
-
-    char verifiedComponentsDir[4096];
-    snprintf(verifiedComponentsDir, sizeof(verifiedComponentsDir), "%s/szafir-host-proxy/components", xdgDataHome);
-
-    // ~/.Xauthority fallback path (used when xauthority param is empty)
-    char xauthorityFallback[4096];
-    const char *xauthorityPath;
-    if (xauthority && xauthority[0] != '\0') {
-        xauthorityPath = xauthority;
-    } else {
-        snprintf(xauthorityFallback, sizeof(xauthorityFallback), "%s/.Xauthority", home);
-        xauthorityPath = xauthorityFallback;
-    }
-
-    struct { const char *path; __u64 access; } rules[] = {
-        {"/app/jre",                               kReadExec},
-        {"/app/bin/start-szafir-host-native.sh",   kReadExecFile},
-        {"/usr",                                   kReadExec},
-        {"/etc",                                   kReadOnly},
-        {"/run/pcscd",                             kReadWriteCreate},
-        {"/tmp",                                   kReadWriteCreate},
-        {"/dev",                                   kReadWriteCreate},
-        {"/proc",                                  kReadWrite},
-        {"/sys",                                   kReadOnly},
-        // external_providers.xml (read by SzafirHost)
-        {extProviders,                             kReadOnlyFile},
-        // XWayland MIT-MAGIC-COOKIE authentication
-        {xauthorityPath,                           kReadOnlyFile},
-        // Dedicated verified component store (read-only for runtime).
-        {verifiedComponentsDir,                    kReadOnly},
-        // SzafirHost install dir and lock file parent area.
-        {szafirInstallDir,                         kReadWriteCreate},
-        {xdgDataHome,                              LANDLOCK_ACCESS_FS_READ_DIR},
-        {javaTmp,                                  kReadWriteCreate},
-    };
-
     bool allOk = true;
-    for (const auto &rule : rules) {
-        if (!addRuleRaw(rulesetFd, rule.path, rule.access, handled)) {
+    auto applyRule = [rulesetFd, handled, &allOk](const char *path, __u64 access) {
+        if (!addRuleRaw(rulesetFd, path, access, handled)) {
             const char prefix[] = "LandlockLauncher: rule failed for: ";
             (void)::write(STDERR_FILENO, prefix, sizeof(prefix) - 1);
-            (void)::write(STDERR_FILENO, rule.path, strlen(rule.path));
+            (void)::write(STDERR_FILENO, path, strlen(path));
             (void)::write(STDERR_FILENO, "\n", 1);
             allOk = false;
         }
-    }
+    };
+
+    for (const Permissions::LauncherStaticRule &rule : Permissions::kLauncherStaticRules)
+        applyRule(rule.path, rule.access);
+
+    Permissions::forEachLauncherDynamicRule(home, xdgDataHome, xauthority, applyRule);
 
     if (!allOk) {
         const char msg[] = "LandlockLauncher: some rules failed, aborting child\n";
