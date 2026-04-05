@@ -1,4 +1,9 @@
 releases:
+  - version: 0.2.2
+    date: 2026-04-05
+    description:
+      en: Added animations to the status page.
+      pl: Dodano animacje do strony statusu.
   - version: 0.2.1
     date: 2026-04-04
     description:
