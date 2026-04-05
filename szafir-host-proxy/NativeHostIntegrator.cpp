@@ -275,6 +275,33 @@ bool writeJsonFile(const fs::path &path, const QJsonObject &obj, bool dryRun)
     return true;
 }
 
+int installedWrapperVersion(const fs::path &wrapperPath);
+
+void ensureWrapperInstalledForBrowser(const fs::path &wrapperPath,
+                                      const QString &kindLabel,
+                                      const QString &upToDateLabel,
+                                      const BrowserInfo &browser,
+                                      int requiredVersion,
+                                      bool force,
+                                      const QString &wrapperContent,
+                                      bool dryRun,
+                                      bool &allOk)
+{
+    const int installedVersion = installedWrapperVersion(wrapperPath);
+    qDebug() << "manifest-op:" << browser.displayName
+             << kindLabel << "wrapper version=" << installedVersion
+             << "required=" << requiredVersion
+             << "force=" << force
+             << "path=" << PathUtils::toQString(wrapperPath);
+
+    if (force || installedVersion < requiredVersion) {
+        allOk = writeExecutableFile(wrapperPath, wrapperContent, dryRun) && allOk;
+        allOk = installDropInTemplates(wrapperPath, dryRun) && allOk;
+    } else {
+        qInfo() << upToDateLabel << browser.displayName << ", skipping";
+    }
+}
+
 int installedWrapperVersion(const fs::path &wrapperPath)
 {
     QFile f(wrapperPath);
@@ -402,10 +429,14 @@ bool NativeHostIntegrator::installAll(bool force)
 {
     bool allOk = true;
     const auto browserList = browsers();
+    const fs::path installedTemplatePath{std::string(kInstalledWrapperPath)};
+    const int requiredVersion = installedWrapperVersion(installedTemplatePath);
 
     for (const BrowserInfo &browser : browserList) {
         const std::optional<fs::path> nativeWrapperPath = hostWrapperPath(browser);
         const fs::path sandboxWrapperPath = flatpakWrapperPath(browser.flatpakId);
+        const std::optional<fs::path> hostManifest = hostManifestPath(browser);
+        const fs::path sandboxManifest = flatpakManifestPath(browser);
 
         // Create wrapper content with browser-specific values
         QString wrapperContent = m_wrapperTemplate;
@@ -413,26 +444,29 @@ bool NativeHostIntegrator::installAll(bool force)
         wrapperContent.replace(QStringLiteral("{{CLIENT_NAME}}"), browser.displayName);
         wrapperContent.replace(QStringLiteral("{{ICON}}"), browser.icon);
 
-        if (nativeWrapperPath) {
-            if (force || installedWrapperVersion(*nativeWrapperPath) < WRAPPER_TEMPLATE_VERSION) {
-                allOk = writeExecutableFile(*nativeWrapperPath, wrapperContent, m_dryRun) && allOk;
-                allOk = installDropInTemplates(*nativeWrapperPath, m_dryRun) && allOk;
-            } else {
-                qInfo() << "Native wrapper up to date for" << browser.displayName << ", skipping";
-            }
-        }
+        if (nativeWrapperPath)
+            ensureWrapperInstalledForBrowser(*nativeWrapperPath, QStringLiteral("native"), 
+                                            QStringLiteral("Native wrapper up to date for"),
+                                            browser, requiredVersion, force, wrapperContent, m_dryRun, allOk);
 
-        if (force || installedWrapperVersion(sandboxWrapperPath) < WRAPPER_TEMPLATE_VERSION) {
-            allOk = writeExecutableFile(sandboxWrapperPath, wrapperContent, m_dryRun) && allOk;
-            allOk = installDropInTemplates(sandboxWrapperPath, m_dryRun) && allOk;
-        } else {
-            qInfo() << "Flatpak wrapper up to date for" << browser.displayName << ", skipping";
-        }
+        ensureWrapperInstalledForBrowser(sandboxWrapperPath, QStringLiteral("flatpak"), 
+                                        QStringLiteral("Flatpak wrapper up to date for"),
+                                        browser, requiredVersion, force, wrapperContent, m_dryRun, allOk);
 
-        if (const auto hostManifest = hostManifestPath(browser); hostManifest && nativeWrapperPath) {
+        if (hostManifest && nativeWrapperPath) {
+            qDebug() << "manifest-op:" << browser.displayName
+                     << "host manifest" << PathUtils::toQString(*hostManifest)
+                     << "will be written (unconditional refresh)";
             allOk = writeJsonFile(*hostManifest, manifestFor(browser, *nativeWrapperPath), m_dryRun) && allOk;
+        } else if (!nativeWrapperPath) {
+            qDebug() << "manifest-op:" << browser.displayName
+                     << "host manifest skipped (no host install for this browser)";
         }
-        allOk = writeJsonFile(flatpakManifestPath(browser), manifestFor(browser, sandboxWrapperPath), m_dryRun) && allOk;
+
+        qDebug() << "manifest-op:" << browser.displayName
+                 << "flatpak manifest" << PathUtils::toQString(sandboxManifest)
+                 << "will be written (unconditional refresh)";
+        allOk = writeJsonFile(sandboxManifest, manifestFor(browser, sandboxWrapperPath), m_dryRun) && allOk;
 
         allOk = setBrowserTalkPermission(browser.flatpakId, true, m_dryRun) && allOk;
     }
