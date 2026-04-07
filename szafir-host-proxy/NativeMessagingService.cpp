@@ -4,6 +4,7 @@
 
 #ifdef BUNDLED_HOST
 #include "AppSettings.h"
+#include "LandlockEnv.h"
 #include "LandlockSandbox.h"
 
 #include <QDebug>
@@ -226,8 +227,14 @@ void NativeMessagingService::spawnHost(const QStringList &args,
         : xdgDataHomeEnv.toStdString();
     const std::string launcherXauthority = xauthorityEnv.toStdString(); // empty = use ~/.Xauthority fallback
 
-    process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome, launcherXauthority]() {
-        LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str(), launcherXauthority.c_str());
+    const bool launcherLandlockEnabled = LandlockEnv::isModuleEnabled("LANDLOCK_LAUNCHER");
+    if (!launcherLandlockEnabled)
+        qInfo() << "Landlock launcher restrictions disabled by environment.";
+
+    process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome, launcherXauthority, launcherLandlockEnabled]() {
+        if (launcherLandlockEnabled) {
+            LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str(), launcherXauthority.c_str());
+        }
 
         dup2OrExit(inFd, STDIN_FILENO, "stdin");
         dup2OrExit(outFd, STDOUT_FILENO, "stdout");

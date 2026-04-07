@@ -66,6 +66,7 @@ set(SZAFIR_HOST_PROXY_SOURCES
     Component.h
     ComponentInfo.h
     ComponentInfo.cpp
+    LandlockEnv.h
     LandlockSandbox.h
     LandlockSandbox.cpp
     ScalingController.h

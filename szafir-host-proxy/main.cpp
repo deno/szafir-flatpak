@@ -28,6 +28,7 @@
 #include "MainWindow.h"
 #include "SetupController.h"
 #include "LandlockSandbox.h"
+#include "LandlockEnv.h"
 
 #ifdef BUNDLED_HOST
 #include "ComponentDownloader.h"
@@ -152,10 +153,14 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
-    // Drop any host flatpak override access we don't need at all
-    if (!LandlockSandbox::limitOverrides()) {
-        qCritical() << "Landlock Phase 1 (limitOverrides) failed; aborting.";
-        return 1;
+    // Drop any host flatpak override access we don't need at all.
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_1")) {
+        if (!LandlockSandbox::limitOverrides()) {
+            qCritical() << "Landlock Phase 1 (limitOverrides) failed; aborting.";
+            return 1;
+        }
+    } else {
+        qInfo() << "Landlock Phase 1 disabled by environment.";
     }
 
     KLocalizedString::setApplicationDomain("szafir-host-proxy");
@@ -278,10 +283,14 @@ int main(int argc, char *argv[])
         qWarning().noquote() << i18n("Failed to fully install native host integration; continuing startup.");
     }
 
-    // Manifests and wrapper setup finished
-    if (!LandlockSandbox::dropBrowserAccess()) {
-        qCritical() << "Landlock Phase 2 (dropBrowserAccess) failed; aborting.";
-        return 1;
+    // Manifests and wrapper setup finished.
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_2")) {
+        if (!LandlockSandbox::dropBrowserAccess()) {
+            qCritical() << "Landlock Phase 2 (dropBrowserAccess) failed; aborting.";
+            return 1;
+        }
+    } else {
+        qInfo() << "Landlock Phase 2 disabled by environment.";
     }
 
     // Scaling override paths
