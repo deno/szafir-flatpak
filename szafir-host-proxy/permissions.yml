@@ -367,6 +367,10 @@ permission_groups:
         type: dir
         landlock_access: read_exec
         note: "JRE binaries and libraries"
+      - path: /app/lib
+        type: dir
+        landlock_access: read_exec
+        note: "Flatpak app libraries, including libpcsclite.so.1 for smartcard access"
       - path: /app/bin/start-szafir-host-native.sh
         type: file
         landlock_access: read_exec_file
