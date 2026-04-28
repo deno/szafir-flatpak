@@ -1,4 +1,9 @@
 releases:
+  - version: 0.2.4
+    date: 2026-04-28
+    description:
+      en: Update to new version of SzafirHost (1.2.2)
+      pl: Zaktualizuj do nowej wersji SzafirHost (1.2.2)
   - version: 0.2.3
     date: 2026-04-07
     description:

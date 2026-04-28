@@ -91,7 +91,7 @@ modules:
     config-opts:
       - -DBUNDLED_HOST=ON
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.2.3
+      - -DAPP_VERSION=0.2.4
     sources:
       - type: dir
         path: szafir-host-proxy

@@ -87,8 +87,8 @@ modules:
       - type: extra-data
         filename: szafirhost-install.jar
         url: https://storage.googleapis.com/cdn.elektronicznypodpis.pl/SzafirHost/szafirhost-install.jar
-        sha256: b674a63d385e7392e1827c777bee7076ffed1bef7d17d900f9422635c99b2c72
-        size: 35307060
+        sha256: aac0826ab06d56282327d9e3000f056cecf751c04e6d681365edcabacb5be78d
+        size: 37900059
 
 
   - name: szafir-host-proxy
@@ -96,7 +96,7 @@ modules:
     config-opts:
       - -DBUNDLED_HOST=ON
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.2.3
+      - -DAPP_VERSION=0.2.4
     sources:
       - type: dir
         path: szafir-host-proxy
