@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.2.3" date="2026-04-07">
+      <description>
+        <p>fixed: Landlock launcher sandbox was too restrictive</p>
+        <p xml:lang="pl">naprawiono: Zabezpieczenia launchera były zbyt restryktywne</p>
+      </description>
+    </release>
     <release version="0.2.2" date="2026-04-05">
       <description>
         <p>Added animations to the status page.</p>

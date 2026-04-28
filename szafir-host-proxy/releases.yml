@@ -1,4 +1,9 @@
 releases:
+  - version: 0.2.3
+    date: 2026-04-07
+    description:
+      en: "fixed: Landlock launcher sandbox was too restrictive"
+      pl: "naprawiono: Zabezpieczenia launchera były zbyt restryktywne"
   - version: 0.2.2
     date: 2026-04-05
     description:

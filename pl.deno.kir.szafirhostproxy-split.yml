@@ -58,7 +58,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.2.2
+      - -DAPP_VERSION=0.2.3
     sources:
       - type: dir
         path: szafir-host-proxy
