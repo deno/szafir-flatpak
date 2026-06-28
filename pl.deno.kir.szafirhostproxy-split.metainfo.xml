@@ -10,10 +10,16 @@
     <name>deno</name>
   </developer>
   <releases>
-    <release version="0.2.4" date="2026-04-28">
+    <release version="0.2.5" date="2026-04-28">
       <description>
         <p>Update to new version of SzafirHost (1.2.2)</p>
         <p xml:lang="pl">Zaktualizuj do nowej wersji SzafirHost (1.2.2)</p>
+      </description>
+    </release>
+    <release version="0.2.4" date="2026-04-28">
+      <description>
+        <p>Update to new version of SzafirHost (1.2.1)</p>
+        <p xml:lang="pl">Zaktualizuj do nowej wersji SzafirHost (1.2.1)</p>
       </description>
     </release>
     <release version="0.2.3" date="2026-04-07">
