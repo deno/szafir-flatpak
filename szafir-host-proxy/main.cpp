@@ -27,6 +27,7 @@
 #include "LandlockEnv.h"
 #include "BwrapSandbox.h"
 #include "ComponentDownloader.h"
+#include "UpdateController.h"
 
 #include <KSignalHandler>
 
@@ -284,12 +285,14 @@ int main(int argc, char *argv[])
     auto *componentDownloader = new ComponentDownloader(&app);
     setupController->setComponentDownloader(componentDownloader);
 
+    auto *updateController = new UpdateController(componentDownloader, service, &app);
+
     setupController->computePages();
 
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,
                                        componentDownloader,
-                                       nullptr));
+                                       updateController));
 
     auto showMainWindow = [&mainWindow]() {
         mainWindow->show();
@@ -300,7 +303,7 @@ int main(int argc, char *argv[])
     // ----- Tray icon setup (created only after wizard completes) -----
     KStatusNotifierItem *tray = nullptr;
 
-    auto createTray = [&app, &tray, service, scalingController, &mainWindow, &showMainWindow]() {
+    auto createTray = [&app, &tray, service, scalingController, updateController, &mainWindow, &showMainWindow]() {
         if (tray)
             return;  // Already created
 
@@ -316,6 +319,14 @@ int main(int argc, char *argv[])
         QObject::connect(tray, &KStatusNotifierItem::activateRequested,
             &app, [&showMainWindow](bool, const QPoint &) {
                 showMainWindow();
+            });
+
+        QObject::connect(updateController, &UpdateController::updateAvailable,
+            tray, [tray, &showMainWindow](const QString &version, bool) {
+                tray->showMessage(
+                    i18n("SzafirHost update available"),
+                    i18n("Version %1 is available. Open the status window to install.", version),
+                    QStringLiteral(APP_ID));
             });
 
         // HiDPI scaling submenus
@@ -352,10 +363,11 @@ int main(int argc, char *argv[])
 
         // When wizard completes, transition to normal mode
         QObject::connect(setupController, &SetupController::wizardCompleted, &app,
-            [&app, service, &createTray]() {
+            [&app, service, updateController, &createTray]() {
                 app.setQuitOnLastWindowClosed(false);
                 service->setAcceptingConnections(true);
                 createTray();
+                updateController->startScheduling();
             });
 
         // DBus activation during wizard: just raise the wizard window
@@ -368,6 +380,7 @@ int main(int argc, char *argv[])
         app.setQuitOnLastWindowClosed(false);
         service->setAcceptingConnections(true);
         createTray();
+        updateController->startScheduling();
 
         QObject::connect(dbusService, &KDBusService::activateRequested,
             &app, [&showMainWindow, &parser, &showStatusWindowOpt](const QStringList &args, const QString &) {

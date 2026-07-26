@@ -68,9 +68,11 @@ public:
     int activeHostCount() const { return m_activeClients.size(); }
     QString currentDbusSender() const;
     void stopClient(qint64 pid);
+    void stopAllClients();
 
 Q_SIGNALS:
     void activeHostCountChanged(int count);
+    void allClientsStopped();
 
 private:
     bool m_acceptingConnections = false;

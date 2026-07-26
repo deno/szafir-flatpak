@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
@@ -7,6 +8,72 @@ Kirigami.Page {
     id: page
     title: i18n("Status")
     state: mainWindowController.activeHostCount > 0 ? "browsers" : "placeholder"
+
+    readonly property bool updateActive: typeof updateController !== "undefined"
+        && updateController !== null
+        && (updateController.state === UpdateController.Checking
+            || updateController.state === UpdateController.Downloading
+            || updateController.state === UpdateController.StoppingHosts
+            || updateController.state === UpdateController.Installing)
+
+    footer: Rectangle {
+        implicitHeight: updateActive ? updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2 : 0
+        visible: updateActive
+        color: Kirigami.Theme.backgroundColor
+        clip: true
+
+        Behavior on implicitHeight { NumberAnimation { duration: 150 } }
+
+        Kirigami.Separator {
+            anchors.top: parent.top
+            width: parent.width
+        }
+
+        RowLayout {
+            id: updateFooterLayout
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
+
+            BusyIndicator {
+                Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                running: updateActive
+            }
+
+            Label {
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+                text: {
+                    if (typeof updateController === "undefined" || updateController === null)
+                        return ""
+                    switch (updateController.state) {
+                    case UpdateController.Checking:
+                        return i18n("Checking for updates...")
+                    case UpdateController.Downloading:
+                        if (updateController.progress >= 0)
+                            return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
+                        return i18n("Downloading update...")
+                    case UpdateController.StoppingHosts:
+                        return i18n("Stopping active connections...")
+                    case UpdateController.Installing:
+                        return i18n("Installing update...")
+                    default:
+                        return ""
+                    }
+                }
+            }
+
+            ProgressBar {
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 8
+                visible: updateController?.state === UpdateController.Downloading
+                value: updateController?.progress >= 0 ? updateController.progress : 0
+                indeterminate: updateController?.progress < 0
+            }
+        }
+    }
 
     Component {
         id: aboutPageComponent
@@ -102,6 +169,49 @@ Kirigami.Page {
             }
         }
 
+        MenuSeparator {}
+
+        MenuItem {
+            text: i18n("Check for updates...")
+            icon.name: "view-refresh"
+            visible: typeof updateController !== "undefined" && updateController !== null
+            onTriggered: updateController.checkForUpdates(true)
+        }
+
+        MenuItem {
+            text: i18n("Reinstall SzafirHost runtime")
+            icon.name: "system-reboot"
+            visible: typeof updateController !== "undefined" && updateController !== null
+            onTriggered: reinstallConfirmDialog.open()
+        }
+
+        MenuItem {
+            text: i18n("Install runtime from file...")
+            icon.name: "document-open"
+            visible: typeof updateController !== "undefined" && updateController !== null
+            onTriggered: jarFileDialog.open()
+        }
+
+        Menu {
+            title: i18n("Updates")
+            visible: typeof updateController !== "undefined" && updateController !== null
+
+            MenuItem {
+                text: i18n("Automatic updates")
+                checkable: true
+                checked: updateController?.autoUpdate ?? false
+                onTriggered: updateController.autoUpdate = checked
+            }
+            MenuItem {
+                text: i18n("Allow downgrades")
+                checkable: true
+                checked: updateController?.allowDowngrades ?? true
+                onTriggered: updateController.allowDowngrades = checked
+            }
+        }
+
+        MenuSeparator {}
+
         MenuItem {
             text: i18n("About SzafirHost")
             onTriggered: {
@@ -138,6 +248,153 @@ Kirigami.Page {
             text: i18n("For changes to take effect, reset the connection and reload the website.")
             wrapMode: Text.Wrap
             width: Kirigami.Units.gridUnit * 20
+        }
+    }
+
+    FileDialog {
+        id: jarFileDialog
+        title: i18n("Select SzafirHost installer JAR")
+        nameFilters: [i18n("JAR files (*.jar)"), i18n("All files (*)")]
+        onAccepted: updateController.installFromFile(selectedFile)
+    }
+
+    Dialog {
+        id: reinstallConfirmDialog
+        title: i18n("Reinstall Runtime")
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+
+        contentItem: Label {
+            text: i18n("This will stop all active SzafirHost connections and reinstall the runtime. Continue?")
+            wrapMode: Text.Wrap
+            width: Kirigami.Units.gridUnit * 20
+        }
+        onAccepted: updateController.forceReinstall()
+    }
+
+    Dialog {
+        id: updateOfferDialog
+        title: i18n("Update Available")
+        modal: true
+
+        contentItem: ColumnLayout {
+            spacing: Kirigami.Units.smallSpacing
+            width: Kirigami.Units.gridUnit * 22
+
+            Label {
+                Layout.fillWidth: true
+                text: i18n("SzafirHost %1 is available (installed: %2).",
+                           updateController?.availableVersion ?? "",
+                           updateController?.installedVersion || i18n("unknown"))
+                wrapMode: Text.Wrap
+            }
+            CheckBox {
+                id: autoUpdateCheckBox
+                text: i18n("Automatically install future updates")
+                checked: updateController?.autoUpdate ?? false
+            }
+        }
+
+        footer: DialogButtonBox {
+            Button {
+                text: i18n("Install now")
+                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+            }
+            Button {
+                text: i18n("Later")
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+            }
+        }
+
+        onAccepted: {
+            updateController.autoUpdate = autoUpdateCheckBox.checked
+            updateController.applyUpdate()
+        }
+        onRejected: updateController.dismissOffer()
+    }
+
+    Dialog {
+        id: interruptionDialog
+        title: i18n("Active Connections")
+        modal: true
+
+        contentItem: Label {
+            text: i18n("A browser is currently connected. Updating will interrupt any signing operation in progress. Continue now or wait until idle?")
+            wrapMode: Text.Wrap
+            width: Kirigami.Units.gridUnit * 22
+        }
+
+        footer: DialogButtonBox {
+            Button {
+                text: i18n("Continue now")
+                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+            }
+            Button {
+                text: i18n("Wait")
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+            }
+        }
+
+        onAccepted: updateController.confirmInterruption(true)
+        onRejected: updateController.confirmInterruption(false)
+    }
+
+    Dialog {
+        id: updateResultDialog
+        title: updateResultOk ? i18n("Update Complete") : i18n("Update Failed")
+        modal: true
+        standardButtons: Dialog.Ok
+
+        property bool updateResultOk: true
+        property string resultMessage: ""
+
+        contentItem: ColumnLayout {
+            spacing: Kirigami.Units.smallSpacing
+            width: Kirigami.Units.gridUnit * 22
+
+            Label {
+                Layout.fillWidth: true
+                text: updateResultDialog.resultMessage
+                wrapMode: Text.Wrap
+            }
+            Button {
+                visible: !updateResultDialog.updateResultOk
+                text: i18n("Install from file...")
+                onClicked: {
+                    updateResultDialog.close()
+                    jarFileDialog.open()
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: typeof updateController !== "undefined" ? updateController : null
+
+        function onStateChanged() {
+            if (updateController.state === UpdateController.UpdateAvailable)
+                updateOfferDialog.open()
+            else if (updateController.state === UpdateController.UpToDate) {
+                updateResultDialog.updateResultOk = true
+                updateResultDialog.resultMessage = i18n("You are already running the latest version.")
+                updateResultDialog.open()
+            } else if (updateController.state === UpdateController.Error) {
+                updateResultDialog.updateResultOk = false
+                updateResultDialog.resultMessage = updateController.errorString
+                updateResultDialog.open()
+            }
+        }
+
+        function onInterruptionConfirmationNeeded() {
+            interruptionDialog.open()
+        }
+
+        function onUpdateFinished(success) {
+            updateResultDialog.updateResultOk = success
+            updateResultDialog.resultMessage = success
+                ? i18n("SzafirHost runtime has been updated successfully.")
+                : updateController.errorString
+            updateResultDialog.open()
         }
     }
     // ─────────────────────────────────────────────────────────────────────

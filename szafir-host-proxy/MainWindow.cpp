@@ -5,11 +5,13 @@
 #include "SetupController.h"
 #include "NativeMessagingService.h"
 #include "ComponentDownloader.h"
+#include "UpdateController.h"
 #include "config.h"
 
 #include <QDebug>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QtQml/qqml.h>
 #include <QUrl>
 #include <QWindow>
 #include <KAboutData>
@@ -52,6 +54,7 @@ KAboutData createSzafirHostAboutData(const QString &version)
 MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scalingController,
                        SetupController *setupController,
                        ComponentDownloader *componentDownloader,
+                       UpdateController *updateController,
                        QObject *parent)
     : QObject(parent)
     , m_hostRuntime(new HostRuntimeController(this))
@@ -59,6 +62,7 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
     , m_scalingController(scalingController)
     , m_setupController(setupController)
     , m_componentDownloader(componentDownloader)
+    , m_updateController(updateController)
     , m_activeHostCount(service->activeHostCount())
 {
     connect(m_service, &NativeMessagingService::activeHostCountChanged,
@@ -128,6 +132,10 @@ void MainWindow::ensureWindow()
         m_engine = new QQmlApplicationEngine(this);
         m_engine->rootContext()->setContextObject(new KLocalizedContext(m_engine));
 
+        qmlRegisterUncreatableType<UpdateController>(
+            "SzafirHostProxy", 1, 0, "UpdateController",
+            QStringLiteral("UpdateController is only available as a context property"));
+
         m_engine->rootContext()->setContextProperty(
             QStringLiteral("About"),
             QVariant::fromValue(KAboutData::applicationData()));
@@ -164,6 +172,7 @@ void MainWindow::ensureWindow()
     m_engine->rootContext()->setContextProperty(QStringLiteral("scalingController"), m_scalingController);
     m_engine->rootContext()->setContextProperty(QStringLiteral("setupController"), m_setupController);
     m_engine->rootContext()->setContextProperty(QStringLiteral("componentDownloader"), m_componentDownloader);
+    m_engine->rootContext()->setContextProperty(QStringLiteral("updateController"), m_updateController);
     m_engine->load(QUrl(QStringLiteral("qrc:/qt/qml/SzafirHostProxy/qml/MainWindow.qml")));
 
     if (m_engine->rootObjects().isEmpty()) {

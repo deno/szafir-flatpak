@@ -3,6 +3,7 @@
 #include "Component.h"
 
 #include <QAbstractListModel>
+#include <QUrl>
 
 #include <filesystem>
 #include <span>
@@ -61,12 +62,14 @@ public:
         ComponentState state = Pending;
         bool enabled = true;
         bool present = false;
+        bool trustFirstDownload = false;
+        QString urlHash;
         qint64 bytesReceived = 0;
         std::filesystem::path verifiedPath;
 
         bool downloadable() const
         {
-            return !info.url.isEmpty() && !info.hash.isEmpty();
+            return !info.url.isEmpty() && (!info.hash.isEmpty() || trustFirstDownload);
         }
     };
 
@@ -96,6 +99,10 @@ public:
 
     Q_INVOKABLE void setComponentEnabled(const QString &id, bool enabled);
     Q_INVOKABLE void startDownloads();
+    Q_INVOKABLE bool overrideComponentSource(const QString &id, const QUrl &url,
+                                             const QString &version, const QString &urlHash);
+    Q_INVOKABLE bool adoptLocalFile(const QString &id, const QString &sourcePath,
+                                    const QString &sha256);
 
 Q_SIGNALS:
     void isDownloadingChanged();

@@ -91,6 +91,9 @@ set(SZAFIR_HOST_PROXY_SOURCES
     MainWindow.cpp
     ComponentDownloader.h
     ComponentDownloader.cpp
+    SecureNetwork.h
+    UpdateController.h
+    UpdateController.cpp
 )
 
 add_executable(szafir-host-proxy ${SZAFIR_HOST_PROXY_SOURCES})

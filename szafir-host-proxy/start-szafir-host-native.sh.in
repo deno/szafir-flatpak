@@ -24,16 +24,50 @@ fi
 INSTALL_DIR="${XDG_DATA_HOME}/szafir_host"
 LOCK_FILE="${INSTALL_DIR}/.install.lock"
 JAR_PATH="${INSTALL_DIR}/SzafirHost.jar"
+INSTALLED_FROM="${INSTALL_DIR}/.installed-from"
 
-# Run IzPack installer on first launch; flock prevents parallel installs.
-if [ ! -f "$JAR_PATH" ]; then
+INSTALL_ONLY=0
+if [ "$1" = "--install-only" ]; then
+    INSTALL_ONLY=1
+    shift
+fi
+
+FORCE_INSTALL="${SZAFIR_FORCE_INSTALL:-0}"
+INSTALLER_SHA="${SZAFIR_INSTALLER_SHA256:-}"
+
+needs_install() {
+    if [ ! -f "$JAR_PATH" ]; then
+        return 0
+    fi
+    if [ "$FORCE_INSTALL" = "1" ]; then
+        if [ -n "$INSTALLER_SHA" ] && [ -f "$INSTALLED_FROM" ]; then
+            EXISTING_SHA="$(cat "$INSTALLED_FROM" 2>/dev/null)"
+            if [ "$EXISTING_SHA" = "$INSTALLER_SHA" ]; then
+                debug_log "already installed from this installer (sha=$INSTALLER_SHA), skipping"
+                return 1
+            fi
+        fi
+        return 0
+    fi
+    return 1
+}
+
+run_installer() {
     mkdir -p "$INSTALL_DIR"
     (
         flock -x 200
-        # Re-check after acquiring the lock (another instance may have just finished).
-        if [ ! -f "$JAR_PATH" ]; then
-            AUTO_XML="$(mktemp)"
-            cat > "$AUTO_XML" << EOF
+        if ! needs_install; then
+            debug_log "install not needed after acquiring lock"
+            exit 0
+        fi
+
+        if [ "$FORCE_INSTALL" = "1" ] && [ -f "$JAR_PATH" ]; then
+            debug_log "backing up existing SzafirHost.jar"
+            mv "$JAR_PATH" "${JAR_PATH}.bak"
+        fi
+
+        AUTO_XML="$(mktemp)"
+        cat > "$AUTO_XML" << EOF
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <AutomatedInstallation langpack="pol">
     <com.izforge.izpack.panels.htmllicence.HTMLLicencePanel id="SHLicensePanel"/>
@@ -47,12 +81,35 @@ if [ ! -f "$JAR_PATH" ]; then
     <com.izforge.izpack.panels.finish.FinishPanel id="SHFinishPanel"/>
 </AutomatedInstallation>
 EOF
-            debug_log "running installer ${INSTALLER_JAR} (auto xml ${AUTO_XML})"
-            @RUNTIME_PREFIX@/jre/bin/java -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
-            debug_log "installer exit=$?"
-            rm -f "$AUTO_XML"
+        debug_log "running installer ${INSTALLER_JAR} (auto xml ${AUTO_XML})"
+        @RUNTIME_PREFIX@/jre/bin/java -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
+        INSTALL_EXIT=$?
+        debug_log "installer exit=$INSTALL_EXIT"
+        rm -f "$AUTO_XML"
+
+        if [ $INSTALL_EXIT -ne 0 ]; then
+            if [ -f "${JAR_PATH}.bak" ]; then
+                debug_log "installer failed, restoring backup"
+                mv "${JAR_PATH}.bak" "$JAR_PATH"
+            fi
+            exit $INSTALL_EXIT
+        fi
+
+        rm -f "${JAR_PATH}.bak"
+
+        if [ -n "$INSTALLER_SHA" ]; then
+            echo "$INSTALLER_SHA" > "$INSTALLED_FROM"
         fi
     ) 200>"$LOCK_FILE"
+}
+
+if needs_install; then
+    run_installer
+fi
+
+if [ "$INSTALL_ONLY" = "1" ]; then
+    debug_log "install-only mode, exiting"
+    exit 0
 fi
 
 cd "$INSTALL_DIR" || exit 1

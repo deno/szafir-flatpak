@@ -12,6 +12,7 @@ class NativeMessagingService;
 class QQmlApplicationEngine;
 class QWindow;
 class ComponentDownloader;
+class UpdateController;
 
 class MainWindow : public QObject
 {
@@ -23,6 +24,7 @@ public:
     explicit MainWindow(NativeMessagingService *service, ScalingController *scalingController,
                         SetupController *setupController,
                         ComponentDownloader *componentDownloader,
+                        UpdateController *updateController,
                         QObject *parent = nullptr);
     ~MainWindow() override;
 
@@ -50,6 +52,7 @@ private:
     ScalingController *m_scalingController;
     SetupController *m_setupController;
     ComponentDownloader *m_componentDownloader;
+    UpdateController *m_updateController;
     int m_activeHostCount = 0;
     QQmlApplicationEngine *m_engine = nullptr;
     QPointer<QWindow> m_window;

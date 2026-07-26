@@ -113,7 +113,7 @@ Kirigami.Page {
                 Layout.topMargin: Kirigami.Units.largeSpacing
                 Layout.leftMargin: Kirigami.Units.largeSpacing * 2
                 Layout.rightMargin: Kirigami.Units.largeSpacing * 2
-                text: SzafirHostAbout.displayName + " " + SzafirHostAbout.version
+                text: SzafirHostAbout.displayName + " " + ((typeof updateController !== "undefined" && updateController !== null && updateController.installedVersion) ? updateController.installedVersion : SzafirHostAbout.version)
                 wrapMode: Text.WordWrap
             }
 

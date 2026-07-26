@@ -1,5 +1,6 @@
 #include "ComponentDownloader.h"
 #include "AppSettings.h"
+#include "SecureNetwork.h"
 #include "config.h"
 
 #include <KLocalizedString>
@@ -242,7 +243,13 @@ void ComponentDownloader::loadManifest()
 
         bool verified = false;
         QJsonObject compState = componentsState[entry.info.id].toObject();
-        if (compState.contains(QStringLiteral("sha256")) && compState[QStringLiteral("sha256")].toString() == entry.info.hash) {
+        const bool isDynamicInstall = compState.contains(QStringLiteral("urlHash"));
+        const QString stateHash = compState[QStringLiteral("sha256")].toString();
+        const bool hashMatches = isDynamicInstall
+            ? !stateHash.isEmpty()
+            : (stateHash == entry.info.hash);
+
+        if (compState.contains(QStringLiteral("sha256")) && hashMatches) {
             QString pathStr = compState[QStringLiteral("path")].toString();
             const std::filesystem::path verifiedPath = PathUtils::toFsPath(pathStr);
             // Ensure the file is still present on disk
@@ -251,6 +258,13 @@ void ComponentDownloader::loadManifest()
                 && verifiedPath.parent_path() == verifiedComponentsPath()) {
                 verified = true;
                 entry.verifiedPath = verifiedPath;
+                if (isDynamicInstall) {
+                    entry.urlHash = compState[QStringLiteral("urlHash")].toString();
+                    entry.info.version = compState[QStringLiteral("version")].toString(entry.info.version);
+                    entry.info.url = compState[QStringLiteral("url")].toString(entry.info.url);
+                    entry.info.hash = stateHash;
+                    entry.trustFirstDownload = true;
+                }
             }
         }
 
@@ -358,7 +372,7 @@ bool ComponentDownloader::allRequiredComplete() const
 bool ComponentDownloader::hasDownloadableComponents() const
 {
     for (const ComponentEntry &e : m_components) {
-        if (e.info.url.isEmpty() || e.info.hash.isEmpty())
+        if (!e.downloadable())
             continue;
         if (!e.present && (e.info.required || e.info.suggested))
             return true;
@@ -369,8 +383,7 @@ bool ComponentDownloader::hasDownloadableComponents() const
 bool ComponentDownloader::canStartDownload() const
 {
     for (const ComponentEntry &e : m_components) {
-        if (e.enabled && !e.present
-            && !e.info.url.isEmpty() && !e.info.hash.isEmpty())
+        if (e.enabled && !e.present && e.downloadable())
             return true;
     }
     return false;
@@ -431,7 +444,7 @@ void ComponentDownloader::startDownloads()
     for (int i = 0; i < m_components.size(); ++i) {
         ComponentEntry &e = m_components[i];
         const ComponentState previousState = e.state;
-        if (e.info.url.isEmpty() || e.info.hash.isEmpty())
+        if (!e.downloadable())
             continue; // Not downloadable — skip
         if (e.enabled && e.state != Done) {
             qDebug() << "ComponentDownloader: queuing" << e.info.id << "for download";
@@ -535,10 +548,25 @@ void ComponentDownloader::downloadNext()
     m_hashAccumulator.clear();
     m_hashAccumulator.reserve(entry.info.size);
 
-    QNetworkRequest request(QUrl(entry.info.url));
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
-                         QNetworkRequest::NoLessSafeRedirectPolicy);
+    QNetworkRequest request = SecureNetwork::makeSecureRequest(QUrl(entry.info.url));
     m_currentReply = m_networkManager->get(request);
+    SecureNetwork::attachSslAbort(m_currentReply);
+
+    if (entry.info.size == 0) {
+        connect(m_currentReply, &QNetworkReply::metaDataChanged, this, [this]() {
+            if (m_currentDownloadIndex < 0 || m_currentDownloadIndex >= m_components.size())
+                return;
+            ComponentEntry &e = m_components[m_currentDownloadIndex];
+            if (e.info.size == 0 && m_currentReply) {
+                const QVariant len = m_currentReply->header(QNetworkRequest::ContentLengthHeader);
+                if (len.isValid()) {
+                    e.info.size = len.toLongLong();
+                    emitRowChanged(m_currentDownloadIndex, {ComponentRole});
+                }
+            }
+        });
+    }
+
     connect(m_currentReply, &QNetworkReply::readyRead, this, &ComponentDownloader::onReadyRead);
     connect(m_currentReply, &QNetworkReply::finished, this, &ComponentDownloader::onDownloadFinished);
 }
@@ -608,10 +636,16 @@ void ComponentDownloader::onDownloadFinished()
     const QByteArray hash = QCryptographicHash::hash(m_hashAccumulator, QCryptographicHash::Sha256).toHex();
     m_hashAccumulator.clear();
 
-    if (QString::fromLatin1(hash) != entry.info.hash) {
+    const QString computedHash = QString::fromLatin1(hash);
+
+    if (entry.trustFirstDownload && entry.info.hash.isEmpty()) {
+        entry.info.hash = computedHash;
+        qDebug() << "ComponentDownloader: trust-on-first-download, adopted hash" << computedHash
+                 << "for" << entry.info.id;
+    } else if (computedHash != entry.info.hash) {
         qWarning() << "SHA256 mismatch for" << entry.info.id
                    << "expected:" << entry.info.hash
-                   << "got:" << hash;
+                   << "got:" << computedHash;
         entry.state = Error;
         emitRowChanged(m_currentDownloadIndex, {StateRole});
         emitSummaryStateChanged();
@@ -659,6 +693,12 @@ void ComponentDownloader::onDownloadFinished()
     QJsonObject newState;
     newState[QStringLiteral("sha256")] = entry.info.hash;
     newState[QStringLiteral("path")] = PathUtils::toQString(promotedPath);
+    if (!entry.urlHash.isEmpty())
+        newState[QStringLiteral("urlHash")] = entry.urlHash;
+    if (!entry.info.version.isEmpty())
+        newState[QStringLiteral("version")] = entry.info.version;
+    if (!entry.info.url.isEmpty())
+        newState[QStringLiteral("url")] = entry.info.url;
     componentsState[entry.info.id] = newState;
     
     stateObj[QStringLiteral("components")] = componentsState;
@@ -706,4 +746,89 @@ void ComponentDownloader::writeExternalProvidersXml()
     file.write(buffer);
     file.close();
     qDebug() << "ComponentDownloader: wrote external_providers.xml";
+}
+
+bool ComponentDownloader::overrideComponentSource(const QString &id, const QUrl &url,
+                                                   const QString &version, const QString &urlHash)
+{
+    if (m_downloading) {
+        qWarning() << "ComponentDownloader: overrideComponentSource refused while downloading";
+        return false;
+    }
+
+    for (int i = 0; i < m_components.size(); ++i) {
+        ComponentEntry &e = m_components[i];
+        if (e.info.id != id)
+            continue;
+
+        qDebug() << "ComponentDownloader: overriding source for" << id
+                 << "url:" << url.toString() << "version:" << version << "urlHash:" << urlHash;
+
+        e.info.url = url.toString();
+        e.info.version = version;
+        e.info.hash.clear();
+        e.urlHash = urlHash;
+        e.trustFirstDownload = true;
+        e.present = false;
+        e.state = Pending;
+        e.bytesReceived = 0;
+        e.info.size = 0;
+
+        emitRowChanged(i, {ComponentRole, StateRole, PresentRole, BytesReceivedRole, DownloadableRole});
+        emitSummaryStateChanged();
+        return true;
+    }
+
+    qWarning() << "ComponentDownloader: overrideComponentSource - component not found:" << id;
+    return false;
+}
+
+bool ComponentDownloader::adoptLocalFile(const QString &id, const QString &sourcePath,
+                                          const QString &sha256)
+{
+    if (m_downloading) {
+        qWarning() << "ComponentDownloader: adoptLocalFile refused while downloading";
+        return false;
+    }
+
+    for (int i = 0; i < m_components.size(); ++i) {
+        ComponentEntry &e = m_components[i];
+        if (e.info.id != id)
+            continue;
+
+        const std::filesystem::path src = PathUtils::toFsPath(sourcePath);
+        std::filesystem::path promotedPath;
+        if (!installComponent(src, e.info.filename, false, &promotedPath)) {
+            qWarning() << "ComponentDownloader: adoptLocalFile - failed to copy" << sourcePath;
+            return false;
+        }
+
+        e.info.hash = sha256;
+        e.info.url.clear();
+        e.info.version.clear();
+        e.urlHash.clear();
+        e.trustFirstDownload = false;
+        e.present = true;
+        e.state = Done;
+        e.verifiedPath = promotedPath;
+
+        QJsonObject stateObj = loadComponentsState();
+        QJsonObject componentsState = stateObj[QStringLiteral("components")].toObject();
+        QJsonObject newState;
+        newState[QStringLiteral("sha256")] = sha256;
+        newState[QStringLiteral("path")] = PathUtils::toQString(promotedPath);
+        componentsState[id] = newState;
+        stateObj[QStringLiteral("components")] = componentsState;
+        saveComponentsState(stateObj);
+
+        emitRowChanged(i, {ComponentRole, StateRole, PresentRole, DownloadableRole});
+        emitSummaryStateChanged();
+        writeExternalProvidersXml();
+
+        qDebug() << "ComponentDownloader: adopted local file for" << id << "at" << PathUtils::toQString(promotedPath);
+        return true;
+    }
+
+    qWarning() << "ComponentDownloader: adoptLocalFile - component not found:" << id;
+    return false;
 }

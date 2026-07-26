@@ -12,6 +12,7 @@
 #include <QLoggingCategory>
 #include <QProcess>
 #include <QProcessEnvironment>
+#include <QTimer>
 
 #include <KConfig>
 #include <KConfigGroup>
@@ -214,6 +215,8 @@ void NativeMessagingService::spawnHost(const QStringList &args,
                     endRemoveRows();
                 }
                 Q_EMIT activeHostCountChanged(m_activeClients.size());
+                if (m_activeClients.isEmpty())
+                    Q_EMIT allClientsStopped();
             }
             process->deleteLater();
         });
@@ -268,6 +271,28 @@ void NativeMessagingService::stopClient(qint64 pid)
         }
     }
     qWarning() << "stopClient: no bundled process with PID" << pid;
+}
+
+void NativeMessagingService::stopAllClients()
+{
+    if (m_activeClients.isEmpty()) {
+        Q_EMIT allClientsStopped();
+        return;
+    }
+
+    qDebug() << "NativeMessagingService: stopping all" << m_activeClients.size() << "client(s)";
+
+    for (QProcess *process : m_activeClients.keys())
+        process->terminate();
+
+    QTimer::singleShot(5000, this, [this]() {
+        for (QProcess *process : m_activeClients.keys()) {
+            if (process->state() != QProcess::NotRunning) {
+                qWarning() << "Force-killing SzafirHost process" << process->processId();
+                process->kill();
+            }
+        }
+    });
 }
 
 // ---- NativeMessagingAdaptor ------------------------------------------------
