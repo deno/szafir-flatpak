@@ -50,6 +50,20 @@ std::string runtimeDir()
     return "/run/user/" + std::to_string(getuid());
 }
 
+// Resolves the current executable's real path. We cannot pass the literal
+// "/proc/self/exe" to bwrap: inside the sandbox /proc is remounted and
+// "self" is bwrap, so it would re-exec bwrap instead of the app.
+std::string selfExePath()
+{
+    char buf[4096];
+    const ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (len > 0) {
+        buf[len] = '\0';
+        return buf;
+    }
+    return "/proc/self/exe";
+}
+
 // Appends a bind mount if the source path exists (for bwrap versions without -try).
 void bindTry(std::vector<std::string> &args, const char *flag,
              const std::string &src, const std::string &dest)
@@ -148,7 +162,7 @@ std::vector<std::string> buildArgs(const std::string &bwrap, int argc, char *arg
 
     // Target: re-exec the same binary with original arguments
     a.push_back("--");
-    a.push_back("/proc/self/exe");
+    a.push_back(selfExePath());
     for (int i = 1; i < argc; ++i)
         a.push_back(argv[i]);
 
