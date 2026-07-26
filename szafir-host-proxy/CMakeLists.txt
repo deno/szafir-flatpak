@@ -14,6 +14,8 @@ option(SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY "Configure only source packaging (s
 set(CHROME_EXTENSION_URL "https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc" CACHE STRING "URL to Chrome extension")
 set(FIREFOX_EXTENSION_URL "https://www.elektronicznypodpis.pl/download/webmodule/firefox/szafir_sdk_web-current.xpi" CACHE STRING "URL to Firefox extension")
 set(RUNTIME_PREFIX "/app" CACHE STRING "Runtime prefix for installed assets (Flatpak: /app, Nix: \$out)")
+option(SZAFIR_BWRAP "Re-exec under bubblewrap in non-Flatpak builds" OFF)
+set(SZAFIR_BWRAP_PATH "" CACHE STRING "Absolute path to bwrap (empty = search PATH)")
 
 # Derive D-Bus service/interface ID from APP_ID by dropping the final
 # hyphenated suffix, e.g. "...-fh" -> "...".
@@ -22,6 +24,12 @@ string(REGEX REPLACE "-[^-]+$" "" DBUS_APP_ID "${APP_ID}")
 string(REPLACE "." "/" DBUS_OBJECT_PATH_SEGMENT "${DBUS_APP_ID}")
 # Internal wrapper template version. Bump when the wrapper format changes
 set(WRAPPER_TEMPLATE_VERSION 1)
+
+if(SZAFIR_BWRAP)
+    set(SZAFIR_BWRAP_ENABLED 1)
+else()
+    set(SZAFIR_BWRAP_ENABLED 0)
+endif()
 
 configure_file(config.h.in config.h)
 configure_file(flatpak-host-wrapper.in flatpak-host-wrapper @ONLY)
@@ -67,6 +75,8 @@ set(SZAFIR_HOST_PROXY_SOURCES
     LandlockEnv.h
     LandlockSandbox.h
     LandlockSandbox.cpp
+    BwrapSandbox.h
+    BwrapSandbox.cpp
     ScalingController.h
     ScalingController.cpp
     SetupController.h

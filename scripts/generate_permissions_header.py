@@ -79,6 +79,7 @@ _ACCESS_TO_FLAG: dict[str, str] = {
     "read_exec_write":   "Landlock::kReadExecWrite",
     "overrides_dir":     "Landlock::kOverridesDirOps",
     "override_file":     "Landlock::kOverrideFileAccess",
+    "override_file_trunc": "Landlock::kOverrideFileAccessTrunc",
 }
 
 # Maps YAML template tokens → C parameter names in forEachLauncherDynamicRule.
@@ -109,8 +110,9 @@ def _render_launcher_static_entry(rule: dict[str, Any], runtime_prefix: str = "/
     if path.startswith("/app/") or path == "/app":
         path = runtime_prefix + path[4:]
     flag = _ACCESS_TO_FLAG[rule["landlock_access"]]
+    bwrap_flag = _ACCESS_TO_FLAG.get(rule.get("bwrap_landlock_access", ""), "0")
     escaped = path.replace("\\", "\\\\").replace('"', '\\"')
-    return '    {"' + escaped + '", ' + flag + '}'
+    return '    {"' + escaped + '", ' + flag + ', ' + bwrap_flag + '}'
 
 
 def _render_buf_snprintf(buf_name: str, template: str) -> str:
@@ -186,6 +188,7 @@ def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") ->
             rule = {
                 "path": path,
                 "flag": _ACCESS_TO_FLAG[access_token],
+                "bwrap_flag": _ACCESS_TO_FLAG.get(path_entry.get("bwrap_landlock_access", ""), "0"),
                 "group": group_name,
             }
             if path.startswith("/"):
@@ -204,6 +207,7 @@ def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") ->
             static_rules.append({
                 "path": store_dir,
                 "flag": _ACCESS_TO_FLAG["read_exec"],
+                "bwrap_flag": "0",
                 "group": "system_sandbox",
             })
 
@@ -219,7 +223,7 @@ def _build_system_static_entries(rules: list[dict]) -> str:
             lines.append(f"    // {rule['group']}")
             current_group = rule["group"]
         escaped = rule["path"].replace("\\", "\\\\").replace('"', '\\"')
-        lines.append(f'    {{"{escaped}", {rule["flag"]}}},')
+        lines.append(f'    {{"{escaped}", {rule["flag"]}, {rule["bwrap_flag"]}}},')
     # Strip trailing comma from last data line
     for i in range(len(lines) - 1, -1, -1):
         if lines[i].endswith(","):
@@ -228,7 +232,7 @@ def _build_system_static_entries(rules: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def _build_system_dynamic_body(rules: list[dict]) -> str:
+def _build_system_dynamic_body(rules: list[dict], bwrap_dynamic_rules: list[dict]) -> str:
     """Render the function body for forEachSystemDynamicRule."""
     parts: list[str] = []
     buf_idx = 0
@@ -241,10 +245,14 @@ def _build_system_dynamic_body(rules: list[dict]) -> str:
 
         suffix = rule["path"][1:]  # strip leading ~
         flag = rule["flag"]
+        bwrap_flag = rule["bwrap_flag"]
 
         if not suffix:
             # Bare ~ → pass home directly
-            parts.append(f"    fn(home, {flag});")
+            if bwrap_flag != "0":
+                parts.append(f"    fn(home, bwrap ? {bwrap_flag} : {flag});")
+            else:
+                parts.append(f"    fn(home, {flag});")
         else:
             fmt = suffix
             args = ["home"]
@@ -255,9 +263,26 @@ def _build_system_dynamic_body(rules: list[dict]) -> str:
             buf = f"_buf{buf_idx}"
             parts.append(f"    char {buf}[4096];")
             parts.append(f'    snprintf({buf}, sizeof({buf}), "%s{fmt}", {", ".join(args)});')
-            parts.append(f"    fn({buf}, {flag});")
+            if bwrap_flag != "0":
+                parts.append(f"    fn({buf}, bwrap ? {bwrap_flag} : {flag});")
+            else:
+                parts.append(f"    fn({buf}, {flag});")
             buf_idx += 1
         parts.append("")  # blank line between rules
+
+    # Bwrap-only dynamic rules (e.g. XDG_RUNTIME_DIR, /run/pcscd)
+    if bwrap_dynamic_rules:
+        parts.append("    // bwrap_sandbox (only applied inside bwrap namespace)")
+        parts.append("    if (bwrap) {")
+        for rule in bwrap_dynamic_rules:
+            template = rule["template"]
+            flag = _ACCESS_TO_FLAG[rule["landlock_access"]]
+            if template == "{xdg_runtime_dir}":
+                parts.append(f"        fn(xdgRuntimeDir, {flag});")
+            else:
+                escaped = template.replace("\\", "\\\\").replace('"', '\\"')
+                parts.append(f'        fn("{escaped}", {flag});')
+        parts.append("    }")
 
     # Remove trailing blank lines
     while parts and parts[-1] == "":
@@ -325,7 +350,14 @@ def generate(input_path: Path, output_path: Path, runtime_prefix: str = "/app") 
     system_static, system_dynamic = _collect_system_rules(data, runtime_prefix)
     num_system_static = len(system_static)
     system_static_entries = _build_system_static_entries(system_static)
-    system_dynamic_body = _build_system_dynamic_body(system_dynamic)
+
+    bwrap_group = data["permission_groups"].get("bwrap_sandbox", {})
+    bwrap_dynamic_rules = bwrap_group.get("bwrap_dynamic_paths", [])
+    for e in bwrap_dynamic_rules:
+        if e["landlock_access"] not in _ACCESS_TO_FLAG:
+            raise ValueError(f"Unknown landlock_access '{e['landlock_access']}' in bwrap_sandbox.bwrap_dynamic_paths")
+
+    system_dynamic_body = _build_system_dynamic_body(system_dynamic, bwrap_dynamic_rules)
     system_groups_str = ", ".join(_SYSTEM_RULE_GROUPS)
 
     # ── Overrides directory suffix ───────────────────────────────────────────
@@ -407,6 +439,7 @@ inline constexpr std::array<ConfigDirEntry, {num_unique}> kUniqueConfigDirs = {{
 struct LauncherStaticRule {{
     const char *path;
     __u64       access;
+    __u64       bwrapAccess;  ///< used when inside bwrap namespace; 0 = same as access
 }};
 
 /// Static-path Landlock rules for the SzafirHost child process.
@@ -432,6 +465,7 @@ inline void forEachLauncherDynamicRule(
 struct SystemStaticRule {{
     const char *path;
     __u64       access;
+    __u64       bwrapAccess;  ///< used when inside bwrap namespace; 0 = same as access
 }};
 
 /// Static-path Landlock rules for the proxy process (Phase 1 & 2 base rules).
@@ -440,9 +474,12 @@ inline constexpr std::array<SystemStaticRule, {num_system_static}> kSystemStatic
 }}}};
 
 /// Calls fn(path, access) for each home-relative system Landlock rule.
-/// home and appId must remain valid for the duration of the call.
+/// home, appId, and xdgRuntimeDir must remain valid for the duration of the call.
+/// When bwrap is true, tightened access rights are selected where applicable and
+/// bwrap-only rules (XDG_RUNTIME_DIR, /run/pcscd) are emitted.
 template<typename Fn>
-inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
+inline void forEachSystemDynamicRule(const char *home, const char *appId, bool bwrap,
+                                     const char *xdgRuntimeDir, Fn fn)
 {{
 {system_dynamic_body}
 }}

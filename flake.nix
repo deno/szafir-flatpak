@@ -31,6 +31,7 @@
           pkgs.kdePackages.ki18n
           pkgs.kdePackages.kirigami
           pkgs.kdePackages.kstatusnotifieritem
+          pkgs.bubblewrap
         ];
 
         cmakeDir = "../szafir-host-proxy";
@@ -39,6 +40,8 @@
           "-DAPP_VERSION=${version}"
           "-DENABLE_FLATPAK_HOST_ICONS_LOOKUP=OFF"
           "-DRUNTIME_PREFIX=${placeholder "out"}"
+          "-DSZAFIR_BWRAP=ON"
+          "-DSZAFIR_BWRAP_PATH=${pkgs.bubblewrap}/bin/bwrap"
         ];
 
         preConfigure = ''

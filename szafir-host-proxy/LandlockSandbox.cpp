@@ -60,6 +60,19 @@ std::string xdgConfigHome()
     return homePath() + "/.config";
 }
 
+bool inBwrap()
+{
+    const char *v = getenv("SZAFIR_BWRAPPED");
+    return v && v[0] == '1' && v[1] == '\0';
+}
+
+std::string xdgRuntimeDir()
+{
+    const char *env = getenv("XDG_RUNTIME_DIR");
+    if (env && env[0] != '\0') return std::string(env);
+    return "/run/user/" + std::to_string(getuid());
+}
+
 // Signal-safe rule helper for use in forked child (no Qt/C++ allocations).
 bool addRuleRaw(int rulesetFd, const char *path, __u64 access, __u64 handled)
 {
@@ -183,14 +196,18 @@ auto browserVarAppPaths()
 std::vector<PathRule> systemRules()
 {
     const std::string home = homePath();
+    const bool bwrap = inBwrap();
 
     std::vector<PathRule> rules;
     rules.reserve(Permissions::kSystemStaticRules.size() + 8);
 
-    for (const auto &r : Permissions::kSystemStaticRules)
-        rules.push_back({r.path, r.access});
+    for (const auto &r : Permissions::kSystemStaticRules) {
+        const __u64 access = (bwrap && r.bwrapAccess) ? r.bwrapAccess : r.access;
+        rules.push_back({r.path, access});
+    }
 
-    Permissions::forEachSystemDynamicRule(home.c_str(), APP_ID,
+    const std::string rd = xdgRuntimeDir();
+    Permissions::forEachSystemDynamicRule(home.c_str(), APP_ID, bwrap, rd.c_str(),
         [&rules](const char *path, __u64 access) {
             rules.push_back({std::string(path), access});
         });
@@ -354,8 +371,13 @@ void applyLauncherRestrictions(const char *home, const char *xdgDataHome, const 
         }
     };
 
-    for (const Permissions::LauncherStaticRule &rule : Permissions::kLauncherStaticRules)
-        applyRule(rule.path, rule.access);
+    const char *bwrapEnv = getenv("SZAFIR_BWRAPPED");
+    const bool bwrap = bwrapEnv && bwrapEnv[0] == '1' && bwrapEnv[1] == '\0';
+
+    for (const Permissions::LauncherStaticRule &rule : Permissions::kLauncherStaticRules) {
+        const __u64 access = (bwrap && rule.bwrapAccess) ? rule.bwrapAccess : rule.access;
+        applyRule(rule.path, access);
+    }
 
     Permissions::forEachLauncherDynamicRule(home, xdgDataHome, xauthority, applyRule);
 

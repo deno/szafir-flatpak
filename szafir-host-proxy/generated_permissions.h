@@ -78,20 +78,21 @@ inline constexpr std::array<ConfigDirEntry, 6> kUniqueConfigDirs = {{
 struct LauncherStaticRule {
     const char *path;
     __u64       access;
+    __u64       bwrapAccess;  ///< used when inside bwrap namespace; 0 = same as access
 };
 
 /// Static-path Landlock rules for the SzafirHost child process.
 inline constexpr std::array<LauncherStaticRule, 10> kLauncherStaticRules = {{
-    {"/app/jre", Landlock::kReadExec},
-    {"/app/lib", Landlock::kReadExec},
-    {"/app/bin/start-szafir-host-native.sh", Landlock::kReadExecFile},
-    {"/usr", Landlock::kReadExec},
-    {"/etc", Landlock::kReadOnly},
-    {"/run/pcscd", Landlock::kReadWriteCreate},
-    {"/tmp", Landlock::kReadWriteCreate},
-    {"/dev", Landlock::kReadWriteCreate},
-    {"/proc", Landlock::kReadWrite},
-    {"/sys", Landlock::kReadOnly}
+    {"/app/jre", Landlock::kReadExec, 0},
+    {"/app/lib", Landlock::kReadExec, 0},
+    {"/app/bin/start-szafir-host-native.sh", Landlock::kReadExecFile, 0},
+    {"/usr", Landlock::kReadExec, 0},
+    {"/etc", Landlock::kReadOnly, 0},
+    {"/run/pcscd", Landlock::kReadWriteCreate, 0},
+    {"/tmp", Landlock::kReadWriteCreate, Landlock::kReadWrite},
+    {"/dev", Landlock::kReadWriteCreate, 0},
+    {"/proc", Landlock::kReadWrite, Landlock::kReadOnly},
+    {"/sys", Landlock::kReadOnly, 0}
 }};
 
 /// Calls fn(path, access) for each runtime-computed launcher Landlock rule.
@@ -140,28 +141,32 @@ inline void forEachLauncherDynamicRule(
 struct SystemStaticRule {
     const char *path;
     __u64       access;
+    __u64       bwrapAccess;  ///< used when inside bwrap namespace; 0 = same as access
 };
 
 /// Static-path Landlock rules for the proxy process (Phase 1 & 2 base rules).
 inline constexpr std::array<SystemStaticRule, 10> kSystemStaticRules = {{
     // system_sandbox
-    {"/app", Landlock::kReadExecWrite},
-    {"/usr", Landlock::kReadExec},
-    {"/etc", Landlock::kReadOnly},
-    {"/run", Landlock::kReadWriteCreate},
-    {"/tmp", Landlock::kReadWriteCreate},
-    {"/proc", Landlock::kReadWrite},
-    {"/dev", Landlock::kReadWriteCreate},
-    {"/sys", Landlock::kReadOnly},
+    {"/app", Landlock::kReadExecWrite, 0},
+    {"/usr", Landlock::kReadExec, 0},
+    {"/etc", Landlock::kReadOnly, 0},
+    {"/run", Landlock::kReadWriteCreate, 0},
+    {"/tmp", Landlock::kReadWriteCreate, Landlock::kReadWrite},
+    {"/proc", Landlock::kReadWrite, Landlock::kReadOnly},
+    {"/dev", Landlock::kReadWriteCreate, 0},
+    {"/sys", Landlock::kReadOnly, 0},
     // flatpak_metadata
-    {"/var/lib/flatpak/exports/share/icons", Landlock::kReadOnly},
-    {"/var/lib/flatpak/app", Landlock::kReadOnly}
+    {"/var/lib/flatpak/exports/share/icons", Landlock::kReadOnly, 0},
+    {"/var/lib/flatpak/app", Landlock::kReadOnly, 0}
 }};
 
 /// Calls fn(path, access) for each home-relative system Landlock rule.
-/// home and appId must remain valid for the duration of the call.
+/// home, appId, and xdgRuntimeDir must remain valid for the duration of the call.
+/// When bwrap is true, tightened access rights are selected where applicable and
+/// bwrap-only rules (XDG_RUNTIME_DIR, /run/pcscd) are emitted.
 template<typename Fn>
-inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
+inline void forEachSystemDynamicRule(const char *home, const char *appId, bool bwrap,
+                                     const char *xdgRuntimeDir, Fn fn)
 {
     // flatpak_metadata
     char _buf0[4096];
@@ -178,16 +183,22 @@ inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
     fn(_buf2, Landlock::kReadWriteCreate);
 
     // external_providers
-    fn(home, Landlock::kOverridesDirOps);
+    fn(home, bwrap ? Landlock::kReadDirOnly : Landlock::kOverridesDirOps);
 
     char _buf3[4096];
     snprintf(_buf3, sizeof(_buf3), "%s/external_providers.xml", home);
-    fn(_buf3, Landlock::kOverrideFileAccess);
+    fn(_buf3, Landlock::kOverrideFileAccessTrunc);
 
     // java_runtime
     char _buf4[4096];
     snprintf(_buf4, sizeof(_buf4), "%s/.java", home);
     fn(_buf4, Landlock::kReadWriteCreate);
+
+    // bwrap_sandbox (only applied inside bwrap namespace)
+    if (bwrap) {
+        fn(xdgRuntimeDir, Landlock::kReadWriteCreate);
+        fn("/run/pcscd", Landlock::kReadWriteCreate);
+    }
 }
 
 /// Suffix appended to $HOME to form the Flatpak overrides directory path.

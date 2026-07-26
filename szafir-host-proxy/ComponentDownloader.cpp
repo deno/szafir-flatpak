@@ -698,15 +698,12 @@ void ComponentDownloader::writeExternalProvidersXml()
     }
 
     const std::filesystem::path xmlPath = externalProvidersXmlPath();
-    QSaveFile file(PathUtils::toQString(xmlPath));
-    if (!file.open(QIODevice::WriteOnly)) {
+    QFile file(PathUtils::toQString(xmlPath));
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         qWarning() << "ComponentDownloader: failed to open external_providers.xml for writing:" << file.errorString();
         return;
     }
     file.write(buffer);
-    if (!file.commit()) {
-        qWarning() << "ComponentDownloader: failed to commit external_providers.xml:" << file.errorString();
-        return;
-    }
+    file.close();
     qDebug() << "ComponentDownloader: wrote external_providers.xml";
 }

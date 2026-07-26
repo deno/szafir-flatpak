@@ -22,6 +22,9 @@ inline bool readOnOffEnv(const char *name, bool defaultValue = true)
 
 inline bool isModuleEnabled(const char *moduleEnvName)
 {
+    // Inside the bwrap namespace, Landlock is mandatory — ignore kill switches.
+    if (qgetenv("SZAFIR_BWRAPPED") == "1")
+        return true;
     if (!readOnOffEnv("LANDLOCK", true))
         return false;
     return readOnOffEnv(moduleEnvName, true);

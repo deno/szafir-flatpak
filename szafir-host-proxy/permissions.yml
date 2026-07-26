@@ -26,6 +26,7 @@
 # overrides_dir      READ_DIR | READ_FILE | WRITE_FILE | REMOVE_FILE | MAKE_REG | [TRUNCATE]
 #                    (for KConfig/QSaveFile atomic writes — no sub-directory creation needed)
 # override_file      READ_FILE | WRITE_FILE
+# override_file_trunc override_file | [TRUNCATE]  (for in-place O_TRUNC rewrites)
 # read_dir_only      READ_DIR
 #
 # Flatpak --filesystem permission mapping:
@@ -284,10 +285,11 @@ permission_groups:
       - path: "~"
         type: dir
         landlock_access: overrides_dir
+        bwrap_landlock_access: read_dir_only
         flatpak_note: "covered by sandbox $HOME bind-mount — no --filesystem entry needed"
       - path: ~/external_providers.xml
         type: file
-        landlock_access: override_file
+        landlock_access: override_file_trunc
         flatpak_note: "covered by sandbox $HOME bind-mount — no --filesystem entry needed"
     landlock_phases: [phase1, phase2]
 
@@ -325,10 +327,12 @@ permission_groups:
       - path: /tmp
         type: dir
         landlock_access: read_write_create
+        bwrap_landlock_access: read_write
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
       - path: /proc
         type: dir
         landlock_access: read_write
+        bwrap_landlock_access: read_only
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
       - path: /dev
         type: dir
@@ -338,6 +342,24 @@ permission_groups:
         type: dir
         landlock_access: read_only
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
+    landlock_phases: [phase1, phase2]
+
+  bwrap_sandbox:
+    description: >-
+      Runtime socket paths that require explicit Landlock rules only in bwrap
+      mode. Outside bwrap, the broad /run rule covers these; inside bwrap,
+      /run is not mounted and only specific subdirectories are bind-mounted,
+      so each needs its own rule.
+      [fe]XDG_RUNTIME_DIR carries the D-Bus session bus and Wayland socket.
+      /run/pcscd carries the smartcard daemon socket. Both are bind-mounted
+      read-write by the bwrap namespace.[/fe]
+    bwrap_dynamic_paths:
+      - template: "{xdg_runtime_dir}"
+        landlock_access: read_write_create
+        note: "D-Bus session bus, Wayland socket"
+      - template: "/run/pcscd"
+        landlock_access: read_write_create
+        note: "smartcard daemon socket"
     landlock_phases: [phase1, phase2]
 
   launcher_sandbox:
@@ -378,12 +400,14 @@ permission_groups:
       - path: /tmp
         type: dir
         landlock_access: read_write_create
+        bwrap_landlock_access: read_write
       - path: /dev
         type: dir
         landlock_access: read_write_create
       - path: /proc
         type: dir
         landlock_access: read_write
+        bwrap_landlock_access: read_only
       - path: /sys
         type: dir
         landlock_access: read_only

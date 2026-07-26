@@ -25,11 +25,13 @@
 #include "SetupController.h"
 #include "LandlockSandbox.h"
 #include "LandlockEnv.h"
+#include "BwrapSandbox.h"
 #include "ComponentDownloader.h"
 
 #include <KSignalHandler>
 
 #include <csignal>
+#include <cstdio>
 #include <filesystem>
 
 namespace {
@@ -98,6 +100,11 @@ std::function<void(const QString &)> addHiDpiMenu(
 
 int main(int argc, char *argv[])
 {
+    if (!BwrapSandbox::maybeReExec(argc, argv)) {
+        fprintf(stderr, "szafir-host-proxy: bwrap sandbox setup failed; refusing to run\n");
+        return 1;
+    }
+
 #ifdef ENABLE_FLATPAK_HOST_ICONS_LOOKUP
     const std::filesystem::path userFlatpakExportDir =
         PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
