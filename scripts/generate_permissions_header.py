@@ -4,6 +4,7 @@
 Usage:
     generate_permissions_header.py          Generate the header (default paths)
     generate_permissions_header.py <input> <output>   Explicit paths
+    generate_permissions_header.py --runtime-prefix /nix/store/... <input> <output>
 
 The output file is a C++ header with constexpr arrays and an inline template for:
   Permissions::kBrowsers                  — all supported browsers with metadata
@@ -107,8 +108,10 @@ _CONDITION_TO_MACRO: dict[str, str] = {
 }
 
 
-def _render_launcher_static_entry(rule: dict[str, Any]) -> str:
+def _render_launcher_static_entry(rule: dict[str, Any], runtime_prefix: str = "/app") -> str:
     path = rule["path"]
+    if path.startswith("/app/") or path == "/app":
+        path = runtime_prefix + path[4:]
     flag = _ACCESS_TO_FLAG[rule["landlock_access"]]
     escaped = path.replace("\\", "\\\\").replace('"', '\\"')
     return '    {"' + escaped + '", ' + flag + '}'
@@ -167,7 +170,7 @@ def _render_dynamic_rule(entry: dict[str, Any], buf_idx: int) -> str:
 # ── System rule helpers ──────────────────────────────────────────────────────
 
 
-def _collect_system_rules(data: dict[str, Any]) -> tuple[list[dict], list[dict]]:
+def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") -> tuple[list[dict], list[dict]]:
     """Partition system-rule paths into static (absolute) and dynamic (home-relative)."""
     groups = data["permission_groups"]
     static_rules: list[dict[str, Any]] = []
@@ -183,6 +186,8 @@ def _collect_system_rules(data: dict[str, Any]) -> tuple[list[dict], list[dict]]
             if access_token not in _ACCESS_TO_FLAG:
                 raise ValueError(
                     f"Unknown landlock_access '{access_token}' in {group_name}.paths")
+            if path.startswith("/app/") or path == "/app":
+                path = runtime_prefix + path[4:]
             rule = {
                 "path": path,
                 "flag": _ACCESS_TO_FLAG[access_token],
@@ -195,6 +200,19 @@ def _collect_system_rules(data: dict[str, Any]) -> tuple[list[dict], list[dict]]
                 dynamic_rules.append(rule)
             else:
                 raise ValueError(f"Unsupported path format '{path}' in {group_name}")
+
+    if runtime_prefix != "/app":
+        # Outside Flatpak: grant read_exec on the store directory containing the
+        # runtime prefix (e.g. /nix/store) so the process can load shared libraries.
+        parts = runtime_prefix.split("/")
+        store_dir = "/".join(parts[:3]) if len(parts) >= 3 else runtime_prefix
+        if not any(r["path"] == store_dir for r in static_rules):
+            static_rules.append({
+                "path": store_dir,
+                "flag": _ACCESS_TO_FLAG["read_exec"],
+                "condition": None,
+                "group": "system_sandbox",
+            })
 
     return static_rules, dynamic_rules
 
@@ -269,7 +287,7 @@ def _build_system_dynamic_body(rules: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def generate(input_path: Path, output_path: Path) -> None:
+def generate(input_path: Path, output_path: Path, runtime_prefix: str = "/app") -> None:
     data = yaml.safe_load(input_path.read_text(encoding="utf-8"))
 
     browsers: list[dict[str, Any]] = data["browsers"]
@@ -313,7 +331,7 @@ def generate(input_path: Path, output_path: Path) -> None:
         if e["landlock_access"] not in _ACCESS_TO_FLAG:
             raise ValueError(f"Unknown landlock_access '{e['landlock_access']}' in launcher_sandbox.dynamic_paths")
 
-    static_entries = ",\n".join(_render_launcher_static_entry(r) for r in static_rules)
+    static_entries = ",\n".join(_render_launcher_static_entry(r, runtime_prefix) for r in static_rules)
 
     buf_idx = 0
     dynamic_parts: list[str] = []
@@ -326,7 +344,7 @@ def generate(input_path: Path, output_path: Path) -> None:
     dynamic_body = "\n\n".join(dynamic_parts)
 
     # ── System rules ─────────────────────────────────────────────────────────
-    system_static, system_dynamic = _collect_system_rules(data)
+    system_static, system_dynamic = _collect_system_rules(data, runtime_prefix)
     num_system_static = len(system_static)
     system_static_entries = _build_system_static_entries(system_static)
     system_dynamic_body = _build_system_dynamic_body(system_dynamic)
@@ -465,6 +483,16 @@ inline constexpr std::string_view kOverridesDirSuffix = "{overrides_suffix}"sv;
 
 def main() -> None:
     args = sys.argv[1:]
+    runtime_prefix = "/app"
+
+    if "--runtime-prefix" in args:
+        idx = args.index("--runtime-prefix")
+        if idx + 1 >= len(args):
+            print("--runtime-prefix requires a value", file=sys.stderr)
+            sys.exit(1)
+        runtime_prefix = args[idx + 1]
+        args = args[:idx] + args[idx + 2:]
+
     if len(args) == 0:
         input_path, output_path = DEFAULT_INPUT, DEFAULT_OUTPUT
     elif len(args) == 2:
@@ -473,7 +501,7 @@ def main() -> None:
         print(__doc__, file=sys.stderr)
         sys.exit(1)
 
-    generate(input_path, output_path)
+    generate(input_path, output_path, runtime_prefix)
 
 
 if __name__ == "__main__":

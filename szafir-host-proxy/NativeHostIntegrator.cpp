@@ -31,8 +31,8 @@ using namespace std::literals::string_view_literals;
 constexpr std::string_view kManifestName = "pl.com.kir.szafirhost"sv;
 
 constexpr std::string_view kDbusService = DBUS_APP_ID;
-constexpr std::string_view kInstalledWrapperPath = "/app/share/szafir-host-proxy/flatpak-host-wrapper"sv;
-constexpr std::string_view kInstalledWrapperDDir = "/app/share/szafir-host-proxy/flatpak-host-wrapper.d"sv;
+const std::string kInstalledWrapperPath = std::string(RUNTIME_PREFIX) + "/share/szafir-host-proxy/flatpak-host-wrapper";
+const std::string kInstalledWrapperDDir = std::string(RUNTIME_PREFIX) + "/share/szafir-host-proxy/flatpak-host-wrapper.d";
 
 enum class BrowserBase {
     Firefox,
@@ -193,7 +193,7 @@ bool installDropInTemplates(const fs::path &wrapperPath, bool dryRun)
     if (fs::exists(dDir))
         return true;
 
-    fs::path templateDir{std::string(kInstalledWrapperDDir)};
+    fs::path templateDir{kInstalledWrapperDDir};
     if (!fs::exists(templateDir))
         return true;
 
@@ -420,7 +420,7 @@ bool NativeHostIntegrator::installAll(bool force)
 {
     bool allOk = true;
     const auto browserList = browsers();
-    const fs::path installedTemplatePath{std::string(kInstalledWrapperPath)};
+    const fs::path installedTemplatePath{kInstalledWrapperPath};
     const int requiredVersion = installedWrapperVersion(installedTemplatePath);
 
     for (const BrowserInfo &browser : browserList) {
@@ -505,7 +505,7 @@ bool NativeHostIntegrator::ensureWrapperTemplateLoaded()
     if (!m_wrapperTemplate.isEmpty())
         return true;
 
-    const fs::path installedPath{std::string(kInstalledWrapperPath)};
+    const fs::path installedPath{kInstalledWrapperPath};
     qDebug() << "file-op:" << "read" << PathUtils::toQString(installedPath);
     QFile f(installedPath);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {

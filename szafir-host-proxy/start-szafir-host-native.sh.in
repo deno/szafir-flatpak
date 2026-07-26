@@ -48,7 +48,7 @@ if [ ! -f "$JAR_PATH" ]; then
 </AutomatedInstallation>
 EOF
             debug_log "running installer ${INSTALLER_JAR} (auto xml ${AUTO_XML})"
-            /app/jre/bin/java -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
+            @RUNTIME_PREFIX@/jre/bin/java -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
             debug_log "installer exit=$?"
             rm -f "$AUTO_XML"
         fi
@@ -58,7 +58,7 @@ fi
 cd "$INSTALL_DIR" || exit 1
 
 debug_log "launching SzafirHost.jar (path=$JAR_PATH) args=$* cwd=$(pwd)"
-exec /app/jre/bin/java \
+exec @RUNTIME_PREFIX@/jre/bin/java \
     -Djava.io.tmpdir="$HOME/.java/tmp" \
     -Dsun.java2d.uiScale.enabled=true \
     -jar SzafirHost.jar "$@"

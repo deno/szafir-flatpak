@@ -14,6 +14,7 @@ option(ENABLE_FLATPAK_HOST_ICONS_LOOKUP "Add host icons to path" ON)
 option(SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY "Configure only source packaging (skip build deps/targets)" OFF)
 set(CHROME_EXTENSION_URL "https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc" CACHE STRING "URL to Chrome extension")
 set(FIREFOX_EXTENSION_URL "https://www.elektronicznypodpis.pl/download/webmodule/firefox/szafir_sdk_web-current.xpi" CACHE STRING "URL to Firefox extension")
+set(RUNTIME_PREFIX "/app" CACHE STRING "Runtime prefix for installed assets (Flatpak: /app, Nix: \$out)")
 
 # Derive D-Bus service/interface ID from APP_ID by dropping the final
 # hyphenated suffix, e.g. "...-fh" -> "...".
@@ -28,6 +29,7 @@ configure_file(flatpak-host-wrapper.in flatpak-host-wrapper @ONLY)
 configure_file(szafir-host-proxy.service.in ${DBUS_APP_ID}.service @ONLY)
 configure_file(szafir-host-proxy.desktop.in ${APP_ID}.desktop @ONLY)
 configure_file(szafirhost-integration.xml.in szafirhost-integration.xml @ONLY)
+configure_file(start-szafir-host-native.sh.in start-szafir-host-native.sh @ONLY)
 
 set(SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES
     LICENSE
@@ -151,6 +153,7 @@ endif()
 
 
 install(TARGETS szafir-host-proxy DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/start-szafir-host-native.sh DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/flatpak-host-wrapper DESTINATION share/szafir-host-proxy)
 install(FILES flatpak-host-wrapper.d/50-icon-example.sh DESTINATION share/szafir-host-proxy/flatpak-host-wrapper.d)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DBUS_APP_ID}.service DESTINATION share/dbus-1/services)

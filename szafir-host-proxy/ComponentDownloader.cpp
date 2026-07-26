@@ -2,6 +2,7 @@
 
 #include "ComponentDownloader.h"
 #include "AppSettings.h"
+#include "config.h"
 
 #include <KLocalizedString>
 #include <QCryptographicHash>
@@ -266,7 +267,7 @@ void ComponentDownloader::loadManifest()
                 foundPath = verifiedPath;
             } else {
                 // Legacy/bundled fallback: /app/extra and old XDG data extra dir.
-                const std::filesystem::path bundled = std::filesystem::path("/app/extra") / entry.info.filename.toStdString();
+                const std::filesystem::path bundled = std::filesystem::path(RUNTIME_PREFIX) / "extra" / entry.info.filename.toStdString();
                 if (std::filesystem::exists(bundled, ec)) {
                     foundPath = bundled;
                 } else {

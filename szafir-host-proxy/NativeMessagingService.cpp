@@ -4,6 +4,7 @@
 
 #ifdef BUNDLED_HOST
 #include "AppSettings.h"
+#include "config.h"
 #include "LandlockEnv.h"
 #include "LandlockSandbox.h"
 
@@ -209,7 +210,7 @@ void NativeMessagingService::spawnHost(const QStringList &args,
     }
 
     auto *process = new QProcess(this);
-    process->setProgram(QStringLiteral("/app/bin/start-szafir-host-native.sh"));
+    process->setProgram(QString::fromStdString(std::string(RUNTIME_PREFIX) + "/bin/start-szafir-host-native.sh"));
     process->setArguments(args);
     process->setProcessChannelMode(QProcess::SeparateChannels);
 
