@@ -13,9 +13,6 @@ using namespace std::literals::string_view_literals;
 // Flatpak app IDs.
 inline constexpr std::string_view kSzafirAppId    = "pl.kir.szafir"sv;
 
-// QSettings key for the GDK_SCALE value in Flatpak override-style keyfiles.
-inline const QString kGdkScaleKey = QStringLiteral("Environment/GDK_SCALE");
-
 // Returns the path to a Flatpak override keyfile for appId.
 // Uses $HOME/.local/share (XDG default), which is bind-mounted at that path inside the sandbox.
 inline std::filesystem::path hostOverridePath(const QString &appId)
@@ -52,9 +49,8 @@ inline std::filesystem::path licenseAcceptedMarkerPath()
     return configHome / "szafir-host-proxy" / "license-accepted";
 }
 
-// Returns the fallback directory for components downloaded at runtime when
-// the app is not built with extra-data (noextra variant).  Lives inside
-// XDG_DATA_HOME so it persists across Flatpak updates.
+// Returns the fallback directory for components downloaded at runtime.
+// Lives inside XDG_DATA_HOME so it persists across Flatpak updates.
 inline std::filesystem::path downloadedExtraPath()
 {
     const QString dataHomeEnv = qEnvironmentVariable("XDG_DATA_HOME");

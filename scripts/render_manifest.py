@@ -147,34 +147,6 @@ RELEASES: list[dict[str, Any]] = _load_releases()
 APP_VERSION: str = RELEASES[0]["version"]
 
 
-def _load_download_components() -> dict[str, dict[str, Any]]:
-    data = json.loads(
-        (ROOT / "szafir-host-proxy" / "components.json").read_text(encoding="utf-8")
-    )
-    components: dict[str, dict[str, Any]] = {}
-    for component in data.get("components", []):
-        component_id = component.get("id")
-        if isinstance(component_id, str) and component_id:
-            components[component_id] = component
-    return components
-
-
-def _component_field(components: dict[str, dict[str, Any]], component_id: str, field: str) -> Any:
-    if component_id not in components:
-        raise RuntimeError(
-            f"missing component '{component_id}' in szafir-host-proxy/components.json"
-        )
-    component = components[component_id]
-    if field not in component:
-        raise RuntimeError(
-            f"missing field '{field}' for component '{component_id}' in szafir-host-proxy/components.json"
-        )
-    return component[field]
-
-
-DOWNLOAD_COMPONENTS = _load_download_components()
-
-
 def _load_system_components() -> list[dict[str, Any]]:
     data = json.loads(
         (ROOT / "szafir-host-proxy" / "system_components.json").read_text(encoding="utf-8")
@@ -192,27 +164,6 @@ def _get_system_component(component_id: str) -> dict[str, Any]:
 SYSTEM_COMPONENTS: list[dict[str, Any]] = _load_system_components()
 
 
-def _extra_data_entry(component: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "filename": component["filename"],
-        "url": component["url"],
-        "sha256": component["sha256"],
-        "size": component["size"],
-    }
-
-
-def _library_extra_data_entries() -> list[dict[str, Any]]:
-    return [
-        _extra_data_entry(component)
-        for component in DOWNLOAD_COMPONENTS.values()
-        if component.get("type") == "library"
-    ]
-
-
-def _installer_extra_data_entry() -> dict[str, Any]:
-    return _extra_data_entry(DOWNLOAD_COMPONENTS["szafirhost-installer"])
-
-
 VARIANTS: dict[str, dict[str, Any]] = {
     # Flatpak manifests
     "proxy.manifest": {
@@ -226,10 +177,6 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "finish_args": _build_finish_args(PERMISSIONS),
             "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS),
             "system_components": [_get_system_component("pcsc-lite")],
-            "include_installer_extra": False,
-            "include_library_extra": False,
-            "installer_extra_data": _installer_extra_data_entry(),
-            "library_extra_data": _library_extra_data_entries(),
         },
     },
     "szafir.manifest": {

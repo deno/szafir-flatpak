@@ -264,15 +264,10 @@ void ComponentDownloader::loadManifest()
             if (std::filesystem::exists(verifiedPath, ec)) {
                 foundPath = verifiedPath;
             } else {
-                // Legacy/bundled fallback: /app/extra and old XDG data extra dir.
-                const std::filesystem::path bundled = std::filesystem::path(RUNTIME_PREFIX) / "extra" / entry.info.filename.toStdString();
-                if (std::filesystem::exists(bundled, ec)) {
-                    foundPath = bundled;
-                } else {
-                    const std::filesystem::path downloaded = downloadedExtraPath() / entry.info.filename.toStdString();
-                    if (std::filesystem::exists(downloaded, ec)) {
-                        foundPath = downloaded;
-                    }
+                // Migration fallback: old download directory.
+                const std::filesystem::path downloaded = downloadedExtraPath() / entry.info.filename.toStdString();
+                if (std::filesystem::exists(downloaded, ec)) {
+                    foundPath = downloaded;
                 }
             }
 

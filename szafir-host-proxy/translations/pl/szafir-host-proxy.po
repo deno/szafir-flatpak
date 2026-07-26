@@ -106,7 +106,6 @@ msgid "License Agreement"
 msgstr "Licencja"
 
 #: szafir-host-proxy/qml/LicensePage.qml:63
-#: szafir-host-proxy/qml/MissingHostPage.qml:72
 #: szafir-host-proxy/qml/StatusPage.qml:116
 msgid "Quit"
 msgstr "Zakończ"
@@ -114,43 +113,6 @@ msgstr "Zakończ"
 #: szafir-host-proxy/qml/LicensePage.qml:69
 msgid "Accept"
 msgstr "Akceptuj"
-
-#: szafir-host-proxy/qml/MissingHostPage.qml:8
-msgid "Missing Runtime"
-msgstr "Brak środowiska"
-
-# Dialog title (non-bundled variant only)
-#: szafir-host-proxy/qml/MissingHostPage.qml:21
-msgid "SzafirHost Runtime Not Found"
-msgstr "Nie znaleziono środowiska uruchomieniowego SzafirHost"
-
-# Dialog body (non-bundled variant only)
-#: szafir-host-proxy/qml/MissingHostPage.qml:22
-msgid ""
-"The SzafirHost runtime (pl.kir.szafirhost) is not installed. It is required "
-"for Szafir browser integration to work."
-msgstr ""
-"Program SzafirHost (pl.kir.szafirhost) nie jest zainstalowany.\n"
-"Aby korzystać z integracji aplikacji Szafir z przeglądarką, należy go "
-"zainstalować."
-
-# Dialog label above install command (non-bundled variant only)
-#: szafir-host-proxy/qml/MissingHostPage.qml:29
-msgid "Install it by running the following command:"
-msgstr "Zainstaluj wykonując następujące polecenie:"
-
-#: szafir-host-proxy/qml/MissingHostPage.qml:78
-msgid "Checking..."
-msgstr "Sprawdzanie..."
-
-#: szafir-host-proxy/qml/MissingHostPage.qml:78
-msgid "Next"
-msgstr "Dalej"
-
-#: szafir-host-proxy/qml/MissingHostPage.qml:87
-msgid ""
-"SzafirHost runtime is still not installed. Please install it and try again."
-msgstr "Środowisko wykonawcze SzafirHost nadal nie jest zainstalowane. Zainstaluj je i spróbuj ponownie."
 
 #: szafir-host-proxy/qml/StatusPage.qml:8
 msgid "Status"
@@ -183,7 +145,7 @@ msgstr "Skalowanie 2x"
 msgid "1x scaling"
 msgstr "Skalowanie 1x"
 
-# Tray context menu: GDK_SCALE submenu for SzafirHost app (non-bundled variant only)
+# Tray context menu: GDK_SCALE submenu for SzafirHost
 #: szafir-host-proxy/qml/StatusPage.qml:58 szafir-host-proxy/main.cpp:334
 msgid "SzafirHost scaling"
 msgstr "Skalowanie SzafirHost"
@@ -281,12 +243,10 @@ msgstr "Pobierz"
 msgid "SzafirHost Proxy — Setup"
 msgstr "SzafirHost Proxy — Konfiguracja"
 
-# Tray context menu: GDK_SCALE submenu for SzafirHost app (non-bundled variant only)
 #: szafir-host-proxy/qml/MainWindow.qml:15
 msgid "SzafirHost Proxy"
 msgstr "SzafirHost Proxy"
 
-# Tray context menu: GDK_SCALE submenu for SzafirHost app (non-bundled variant only)
 #: szafir-host-proxy/MainWindow.cpp:26
 msgid "KIR SzafirHost"
 msgstr "KIR SzafirHost"
@@ -426,7 +386,3 @@ msgid "Failed to fully install native host integration; continuing startup."
 msgstr "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie będzie kontynuowane."
 "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
 "będzie kontynuowane."
-
-# Tray tooltip: SzafirHost not installed (non-bundled variant only)
-#~ msgid "SzafirHost (pl.kir.szafirhost) is not installed"
-#~ msgstr "SzafirHost (pl.kir.szafirhost) nie jest zainstalowany"

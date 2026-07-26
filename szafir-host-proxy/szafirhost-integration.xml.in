@@ -10,7 +10,7 @@
 
   Used by flatpak-host-wrapper for browser native messaging.
   The proxy forwards stdin/stdout/stderr (as Unix fds) to a fresh
-  SzafirHost process (either bundled or delegated to a separate Flatpak).
+  bundled SzafirHost process.
 -->
 <node>
   <interface name="@DBUS_APP_ID@.NativeMessaging">

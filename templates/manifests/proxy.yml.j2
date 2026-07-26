@@ -53,22 +53,6 @@ modules:
     sources:
       - type: file
         path: szafir-host-proxy/start-szafir-host-native.sh
-{% if include_installer_extra %}
-      - type: extra-data
-        filename: {{ installer_extra_data.filename }}
-        url: {{ installer_extra_data.url }}
-        sha256: {{ installer_extra_data.sha256 }}
-        size: {{ installer_extra_data.size }}
-{% endif %}
-{% if include_library_extra %}
-{% for library in library_extra_data %}
-      - type: extra-data
-        filename: {{ library.filename }}
-        url: {{ library.url }}
-        sha256: {{ library.sha256 }}
-        size: {{ library.size }}
-{% endfor %}
-{% endif %}
 
   - name: szafir-host-proxy
     buildsystem: cmake-ninja
