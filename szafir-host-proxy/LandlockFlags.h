@@ -127,4 +127,15 @@ inline constexpr __u64 kOverrideFileAccess =
     LANDLOCK_ACCESS_FS_READ_FILE  |
     LANDLOCK_ACCESS_FS_WRITE_FILE;
 
+// For an override file rewritten in place (O_TRUNC) instead of via
+// KConfig/QSaveFile's temp-file+rename. Adds TRUNCATE so the write does not
+// need MAKE_REG on the parent directory, letting the directory be restricted
+// to READ_DIR.
+inline constexpr __u64 kOverrideFileAccessTrunc =
+    kOverrideFileAccess           |
+#ifdef LANDLOCK_ACCESS_FS_TRUNCATE
+    LANDLOCK_ACCESS_FS_TRUNCATE   |
+#endif
+    0;
+
 } // namespace Landlock

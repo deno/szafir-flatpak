@@ -388,6 +388,34 @@ fs::path flatpakManifestPath(const BrowserInfo &browser)
         / fs::path("pl.com.kir.szafirhost.json");
 }
 
+// Ensures the pl.kir.szafir override file exists. Landlock Phase 2 restricts
+// the overrides directory to READ_DIR (no MAKE_REG), so the file must already
+// exist for ScalingController to rewrite it in place (O_TRUNC) at runtime.
+// Creating it here, during install (Phase 1), guarantees that.
+bool ensureSzafirOverrideExists(bool dryRun)
+{
+    const fs::path path = hostOverridePath(QString::fromLatin1(kSzafirAppId));
+    if (fs::exists(path))
+        return true;
+
+    if (!ensureParentDir(path, dryRun)) {
+        qWarning() << "Failed to create override parent for" << PathUtils::toQString(path);
+        return false;
+    }
+
+    qDebug() << "file-op:" << "create" << PathUtils::toQString(path);
+    if (dryRun)
+        return true;
+
+    QFile f(PathUtils::toQString(path));
+    if (!f.open(QIODevice::WriteOnly)) {
+        qWarning() << "Failed to create override file" << PathUtils::toQString(path);
+        return false;
+    }
+    f.close();
+    return true;
+}
+
 } // namespace
 
 NativeHostIntegrator::NativeHostIntegrator(bool dryRun)
@@ -461,6 +489,10 @@ bool NativeHostIntegrator::installAll(bool force)
 
         allOk = setBrowserTalkPermission(browser.flatpakId, true, m_dryRun) && allOk;
     }
+
+    // Ensure the szafir override file exists while directory create access is
+    // still available (Phase 1); ScalingController rewrites it in place later.
+    allOk = ensureSzafirOverrideExists(m_dryRun) && allOk;
 
     return allOk;
 }

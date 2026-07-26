@@ -198,18 +198,22 @@ std::vector<PathRule> systemRules()
     return rules;
 }
 
-// Overrides directory + specific override file rules
-void addOverrideRules(std::vector<PathRule> &rules, const std::vector<std::string> &overrideFiles)
+// Overrides directory + specific override file rules.
+// dirAccess defaults to kOverridesDirOps (KConfig/QSaveFile atomic writes need
+// MAKE_REG/REMOVE_FILE on the directory); fileAccess defaults to
+// kOverrideFileAccess. Phase 2 overrides both to drop directory write access.
+void addOverrideRules(std::vector<PathRule> &rules, const std::vector<std::string> &overrideFiles,
+                      __u64 dirAccess = kOverridesDirOps, __u64 fileAccess = kOverrideFileAccess)
 {
     const std::string overridesDir =
         homePath() + std::string(Permissions::kOverridesDirSuffix);
 
-    // Directory-level: allow KConfig temp file operations + inotify
-    rules.push_back({overridesDir, kOverridesDirOps});
+    // Directory-level access (e.g. KConfig temp file operations + inotify).
+    rules.push_back({overridesDir, dirAccess});
 
-    // Per-file read+write access for listed files
+    // Per-file access for listed files.
     for (const std::string &file : overrideFiles) {
-        rules.push_back({overridesDir + "/" + file, kOverrideFileAccess});
+        rules.push_back({overridesDir + "/" + file, fileAccess});
     }
 }
 
@@ -253,13 +257,17 @@ bool limitOverrides()
         rules.push_back({path, kReadWriteCreate});
     }
 
-    // Override files: browsers + szafir
-    std::vector<std::string> overrideFiles;
+    // Override files: browsers use plain read+write (KConfig atomic writes),
+    // while pl.kir.szafir additionally gets TRUNCATE so it can be rewritten in
+    // place (O_TRUNC) after Phase 2 drops directory write access. Landlock
+    // domains stack by intersection, so TRUNCATE must be granted here in Phase 1
+    // for Phase 2's in-place write to remain effective.
+    std::vector<std::string> browserOverrideFiles;
     for (const Permissions::BrowserEntry &b : Permissions::kBrowsers) {
-        overrideFiles.emplace_back(b.flatpakId);
+        browserOverrideFiles.emplace_back(b.flatpakId);
     }
-    overrideFiles.emplace_back("pl.kir.szafir");
-    addOverrideRules(rules, overrideFiles);
+    addOverrideRules(rules, browserOverrideFiles);
+    addOverrideRules(rules, {"pl.kir.szafir"}, kOverridesDirOps, kOverrideFileAccessTrunc);
 
     if (!applyRuleset(abi, rules)) {
         qWarning() << "Landlock: Phase 1 restriction failed";
@@ -285,10 +293,14 @@ bool dropBrowserAccess()
     // Browser config dirs are NOT included — they get dropped by intersection.
     // Browser .var/app dirs are NOT included — dropped too.
 
-    // Only szafir override files remain
+    // Only the szafir override file remains, and only with in-place write
+    // access (O_TRUNC). The directory is restricted to READ_DIR (enough for
+    // QFileSystemWatcher's inotify); stacked with Phase 1's kOverridesDirOps,
+    // the effective directory access is READ_DIR only — no MAKE_REG/REMOVE_FILE,
+    // so no new override files can be created or existing ones deleted here.
     std::vector<std::string> overrideFiles;
     overrideFiles.emplace_back("pl.kir.szafir");
-    addOverrideRules(rules, overrideFiles);
+    addOverrideRules(rules, overrideFiles, kReadDirOnly, kOverrideFileAccessTrunc);
 
     if (!applyRuleset(abi, rules)) {
         qWarning() << "Landlock: Phase 2 restriction failed";
