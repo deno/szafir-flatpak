@@ -103,6 +103,18 @@ inline constexpr __u64 kReadWriteCreate =
 #endif
     0;
 
+// kReadWriteCreate plus LANDLOCK_ACCESS_FS_IOCTL_DEV (ABI v5+). Required on /dev
+// for the proxy GUI: Mesa/libdrm issues DRM_IOCTL_VERSION and other ioctls on
+// /dev/dri/* to detect and use the GPU driver, and Landlock denies device ioctls
+// unless IOCTL_DEV is granted. On kernels older than ABI v5 the bit is absent and
+// ioctls are unrestricted.
+inline constexpr __u64 kReadWriteCreateDev =
+    kReadWriteCreate              |
+#ifdef LANDLOCK_ACCESS_FS_IOCTL_DEV
+    LANDLOCK_ACCESS_FS_IOCTL_DEV  |
+#endif
+    0;
+
 // Union of read+exec and read+write — used for /app which needs execute access
 // (JRE, bundled binaries) and full write access (JRE extraction, extra-data).
 inline constexpr __u64 kReadExecWrite =

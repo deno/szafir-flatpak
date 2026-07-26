@@ -75,6 +75,7 @@ _ACCESS_TO_FLAG: dict[str, str] = {
     "read_exec_file":    "Landlock::kReadExecFile",
     "read_write":        "Landlock::kReadWrite",
     "read_write_create": "Landlock::kReadWriteCreate",
+    "read_write_create_dev": "Landlock::kReadWriteCreateDev",
     "read_dir_only":     "Landlock::kReadDirOnly",
     "read_exec_write":   "Landlock::kReadExecWrite",
     "overrides_dir":     "Landlock::kOverridesDirOps",

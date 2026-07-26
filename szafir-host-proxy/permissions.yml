@@ -336,7 +336,7 @@ permission_groups:
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
       - path: /dev
         type: dir
-        landlock_access: read_write_create
+        landlock_access: read_write_create_dev
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
       - path: /sys
         type: dir

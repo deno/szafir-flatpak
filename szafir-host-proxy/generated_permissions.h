@@ -156,7 +156,7 @@ inline constexpr std::array<SystemStaticRule, 10> kSystemStaticRules = {{
     {"/run", Landlock::kReadWriteCreate, 0},
     {"/tmp", Landlock::kReadWriteCreate, Landlock::kReadWrite},
     {"/proc", Landlock::kReadWrite, Landlock::kReadOnly},
-    {"/dev", Landlock::kReadWriteCreate, 0},
+    {"/dev", Landlock::kReadWriteCreateDev, 0},
     {"/sys", Landlock::kReadOnly, 0},
     // flatpak_metadata
     {"/var/lib/flatpak/exports/share/icons", Landlock::kReadOnly, 0},
