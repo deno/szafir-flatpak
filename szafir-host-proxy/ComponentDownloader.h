@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef BUNDLED_HOST
-
 #include "Component.h"
 
 #include <QAbstractListModel>
@@ -125,5 +123,3 @@ private:
     QFile *m_outputFile = nullptr;
     QByteArray m_hashAccumulator;
 };
-
-#endif // BUNDLED_HOST

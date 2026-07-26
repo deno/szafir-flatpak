@@ -37,7 +37,6 @@
 
         cmakeFlags = [
           "-DAPP_VERSION=${version}"
-          "-DBUNDLED_HOST=ON"
           "-DENABLE_FLATPAK_HOST_ICONS_LOOKUP=OFF"
           "-DRUNTIME_PREFIX=${placeholder "out"}"
         ];

@@ -7,13 +7,13 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk25
 
 finish-args:
-  # Display server connections and IPC: Wayland socket, X11 fallback socket (split variant
-  # only), GPU device access (DRI), and POSIX shared memory (--share=ipc).
+  # Display server connections and IPC: Wayland socket, GPU device access (DRI), and POSIX
+  # shared memory (--share=ipc).
   - --socket=wayland
   - --share=ipc
   - --device=dri
-  # D-Bus name ownership and talk permissions for the proxy's well-known D-Bus service name,
-  # Flatpak host process spawning (split only), and system tray integration.
+  # D-Bus name ownership and talk permissions for the proxy's well-known D-Bus service name
+  # and system tray integration.
   - --own-name=pl.deno.kir.szafirhostproxy
   - --talk-name=org.kde.StatusNotifierWatcher
   # Browser configuration directories for native messaging host installation. Access required
@@ -51,10 +51,9 @@ finish-args:
   - --filesystem=~/.var/app/com.google.ChromeDev:create
   - --filesystem=~/.var/app/org.chromium.Chromium:create
   - --filesystem=~/.var/app/io.github.ungoogled_software.ungoogled_chromium:create
-  # Additional permissions required in the bundled/in-process variant where szafir-host-proxy
-  # directly runs the SzafirHost JVM process: X11 socket for the JVM Swing UI, PC/SC smartcard
-  # daemon for direct smartcard access, and network access for component downloads and JVM
-  # communication.
+  # Additional permissions required for directly running the SzafirHost JVM process: X11
+  # socket for the JVM Swing UI, PC/SC smartcard daemon for direct smartcard access, and
+  # network access for component downloads and JVM communication.
   - --socket=x11
   - --socket=pcsc
   - --share=network
@@ -104,11 +103,9 @@ modules:
       - type: file
         path: szafir-host-proxy/start-szafir-host-native.sh
 
-
   - name: szafir-host-proxy
     buildsystem: cmake-ninja
     config-opts:
-      - -DBUNDLED_HOST=ON
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
       - -DAPP_VERSION=0.2.5
     sources:
@@ -127,12 +124,12 @@ modules:
     buildsystem: simple
     build-commands:
       - install -D -m 644 proxy_icon.svg /app/share/icons/hicolor/scalable/apps/pl.deno.kir.szafirhostproxy.svg
-      - install -D -m 644 pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml /app/share/metainfo/pl.deno.kir.szafirhostproxy.metainfo.xml
+      - install -D -m 644 pl.deno.kir.szafirhostproxy.metainfo.xml /app/share/metainfo/pl.deno.kir.szafirhostproxy.metainfo.xml
       - install -D -m 644 pl.deno.kir.szafirhostproxy.desktop /app/share/applications/pl.deno.kir.szafirhostproxy.desktop
     sources:
       - type: file
         path: szafir-host-proxy/proxy_icon.svg
       - type: file
-        path: szafir-host-proxy/pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml
+        path: szafir-host-proxy/pl.deno.kir.szafirhostproxy.metainfo.xml
       - type: file
         path: pl.deno.kir.szafirhostproxy.desktop

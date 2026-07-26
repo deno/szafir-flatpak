@@ -12,10 +12,6 @@
 #include <QMenu>
 #include <QStandardPaths>
 
-#ifndef BUNDLED_HOST
-#include <QProcess>
-#endif
-
 #include <KAboutData>
 #include <KDBusService>
 #include <KLocalizedString>
@@ -29,10 +25,7 @@
 #include "SetupController.h"
 #include "LandlockSandbox.h"
 #include "LandlockEnv.h"
-
-#ifdef BUNDLED_HOST
 #include "ComponentDownloader.h"
-#endif
 
 #include <KSignalHandler>
 
@@ -40,28 +33,6 @@
 #include <filesystem>
 
 namespace {
-
-#ifndef BUNDLED_HOST
-
-QString getProxyOrigin()
-{
-    QProcess process;
-    process.start(
-        QStringLiteral("flatpak-spawn"),
-        {QStringLiteral("--host"), QStringLiteral("flatpak"), QStringLiteral("info"),
-         QStringLiteral("--show-origin"), QStringLiteral(APP_ID)});
-    if (!process.waitForFinished(5000)) {
-        qWarning() << "Timed out while querying proxy origin";
-        process.kill();
-        process.waitForFinished();
-        return {};
-    }
-    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0)
-        return {};
-    return QString::fromUtf8(process.readAllStandardOutput()).trimmed();
-}
-
-#endif // BUNDLED_HOST
 
 void updateTray(KStatusNotifierItem *tray, int activeHostCount)
 {
@@ -295,12 +266,7 @@ int main(int argc, char *argv[])
 
     // Scaling override paths
     const std::filesystem::path szafirOverride = hostOverridePath(QString::fromLatin1(kSzafirAppId));
-    const std::filesystem::path hostOverride =
-#ifndef BUNDLED_HOST
-        hostOverridePath(QString::fromLatin1(kSzafirHostAppId));
-#else
-        bundledHostOverridePath();
-#endif
+    const std::filesystem::path hostOverride = bundledHostOverridePath();
     auto *scalingController = new ScalingController(szafirOverride, hostOverride, &app);
 
     // Setup controller determines wizard flow
@@ -308,26 +274,15 @@ int main(int argc, char *argv[])
     if (forceWizard)
         setupController->setForceWizard(true);
 
-#ifdef BUNDLED_HOST
     auto *componentDownloader = new ComponentDownloader(&app);
     setupController->setComponentDownloader(componentDownloader);
-#endif
 
     setupController->computePages();
 
-#ifndef BUNDLED_HOST
-    const QString proxyOrigin = getProxyOrigin();
-#endif
-
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,
-#ifdef BUNDLED_HOST
                                        componentDownloader,
-#endif
                                        nullptr));
-#ifndef BUNDLED_HOST
-    mainWindow->setMissingHostOrigin(proxyOrigin);
-#endif
 
     auto showMainWindow = [&mainWindow]() {
         mainWindow->show();

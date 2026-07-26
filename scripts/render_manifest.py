@@ -43,25 +43,17 @@ def _comment_lines(description: str, width: int = 90) -> list[str]:
     return textwrap.wrap(normalized, width=width)
 
 
-def _build_finish_arg_groups(permissions: dict[str, Any], bundled_host: bool) -> list[dict[str, Any]]:
+def _build_finish_arg_groups(permissions: dict[str, Any]) -> list[dict[str, Any]]:
     """Build ordered finish-args grouped by permission group with comment text."""
-    condition = "bundled" if bundled_host else "split"
     groups = permissions["permission_groups"]
     browsers: list[dict[str, Any]] = permissions["browsers"]
 
-    def matches(cond: str | None) -> bool:
-        return cond is None or cond == condition
-
     def flatpak_args(group_name: str) -> list[str]:
         g = groups[group_name]
-        if not matches(g.get("condition")):
-            return []
-        return [e["arg"] for e in g.get("flatpak_args", []) if matches(e.get("condition"))]
+        return [e["arg"] for e in g.get("flatpak_args", [])]
 
     def filesystem_args(group_name: str) -> list[str]:
         g = groups[group_name]
-        if not matches(g.get("condition")):
-            return []
         result = []
         for p in g.get("paths", []):
             if "flatpak_note" in p:
@@ -130,9 +122,9 @@ def _build_finish_arg_groups(permissions: dict[str, Any], bundled_host: bool) ->
     return finish_groups
 
 
-def _build_finish_args(permissions: dict[str, Any], bundled_host: bool) -> list[str]:
-    """Build the ordered finish-args list for a proxy manifest variant."""
-    return [arg for group in _build_finish_arg_groups(permissions, bundled_host) for arg in group["args"]]
+def _build_finish_args(permissions: dict[str, Any]) -> list[str]:
+    """Build the ordered finish-args list for the proxy manifest."""
+    return [arg for group in _build_finish_arg_groups(permissions) for arg in group["args"]]
 
 
 PERMISSIONS: dict[str, Any] = _load_permissions()
@@ -223,118 +215,21 @@ def _installer_extra_data_entry() -> dict[str, Any]:
 
 VARIANTS: dict[str, dict[str, Any]] = {
     # Flatpak manifests
-    "proxy-split.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-split.yml",
+    "proxy.manifest": {
+        "output": "pl.deno.kir.szafirhostproxy.yml",
         "template_root": "manifests",
         "template": "proxy.yml.j2",
         "context": {
             "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-split.metainfo.xml",
+            "metainfo_file": "pl.deno.kir.szafirhostproxy.metainfo.xml",
             "app_version": APP_VERSION,
-            "bundled_host": False,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=False),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=False),
-            "system_components": [],
-            "include_installer_extra": False,
-            "include_library_extra": False,
-        },
-    },
-    "proxy-inprocess--extra-all.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess--extra-all.yml",
-        "template_root": "manifests",
-        "template": "proxy.yml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-            "app_version": APP_VERSION,
-            "bundled_host": True,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
-            "system_components": [_get_system_component("pcsc-lite")],
-            "include_installer_extra": True,
-            "include_library_extra": True,
-            "installer_extra_data": _installer_extra_data_entry(),
-            "library_extra_data": _library_extra_data_entries(),
-        },
-    },
-    "proxy-inprocess--extra-empty_missing.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess--extra-empty_missing.yml",
-        "template_root": "manifests",
-        "template": "proxy.yml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-            "app_version": APP_VERSION,
-            "bundled_host": True,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
-            "system_components": [],
-            "include_installer_extra": False,
-            "include_library_extra": False,
-            "installer_extra_data": _installer_extra_data_entry(),
-            "library_extra_data": _library_extra_data_entries(),
-        },
-    },
-    "proxy-inprocess--extra-empty.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess--extra-empty.yml",
-        "template_root": "manifests",
-        "template": "proxy.yml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-            "app_version": APP_VERSION,
-            "bundled_host": True,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
+            "finish_args": _build_finish_args(PERMISSIONS),
+            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS),
             "system_components": [_get_system_component("pcsc-lite")],
             "include_installer_extra": False,
             "include_library_extra": False,
             "installer_extra_data": _installer_extra_data_entry(),
             "library_extra_data": _library_extra_data_entries(),
-        },
-    },
-    "proxy-inprocess--extra-runtime.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess--extra-runtime.yml",
-        "template_root": "manifests",
-        "template": "proxy.yml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-            "app_version": APP_VERSION,
-            "bundled_host": True,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
-            "system_components": [_get_system_component("pcsc-lite")],
-            "include_installer_extra": True,
-            "include_library_extra": False,
-            "installer_extra_data": _installer_extra_data_entry(),
-            "library_extra_data": _library_extra_data_entries(),
-        },
-    },
-    "proxy-inprocess--extra-runtime_missing.manifest": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess--extra-runtime_missing.yml",
-        "template_root": "manifests",
-        "template": "proxy.yml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "metainfo_file": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-            "app_version": APP_VERSION,
-            "bundled_host": True,
-            "finish_args": _build_finish_args(PERMISSIONS, bundled_host=True),
-            "finish_arg_groups": _build_finish_arg_groups(PERMISSIONS, bundled_host=True),
-            "system_components": [],
-            "include_installer_extra": True,
-            "include_library_extra": False,
-            "installer_extra_data": _installer_extra_data_entry(),
-            "library_extra_data": _library_extra_data_entries(),
-        },
-    },
-    "szafirhost.manifest": {
-        "output": "pl.kir.szafirhost.yml",
-        "template_root": "manifests",
-        "template": "szafirhost.yml.j2",
-        "context": {
-            "system_components": [_get_system_component("pcsc-lite")],
         },
     },
     "szafir.manifest": {
@@ -346,8 +241,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
         },
     },
     # Metainfo XML files
-    "proxy-split.meta": {
-        "output": "pl.deno.kir.szafirhostproxy-split.metainfo.xml",
+    "proxy.meta": {
+        "output": "pl.deno.kir.szafirhostproxy.metainfo.xml",
         "template_root": "metainfo",
         "template": "proxy.metainfo.xml.j2",
         "context": {
@@ -357,8 +252,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
     },
-    "proxy-split.meta.local": {
-        "output": "szafir-host-proxy/pl.deno.kir.szafirhostproxy-split.metainfo.xml",
+    "proxy.meta.local": {
+        "output": "szafir-host-proxy/pl.deno.kir.szafirhostproxy.metainfo.xml",
         "template_root": "metainfo",
         "template": "proxy.metainfo.xml.j2",
         "context": {
@@ -367,34 +262,6 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
         },
-    },
-    "proxy-inprocess.meta": {
-        "output": "pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-        "template_root": "metainfo",
-        "template": "proxy.metainfo.xml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "releases": RELEASES,
-            "summary_en": "Browser bridge for Szafir website signing",
-            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
-        },
-    },
-    "proxy-inprocess.meta.local": {
-        "output": "szafir-host-proxy/pl.deno.kir.szafirhostproxy-inprocess.metainfo.xml",
-        "template_root": "metainfo",
-        "template": "proxy.metainfo.xml.j2",
-        "context": {
-            "app_id": "pl.deno.kir.szafirhostproxy",
-            "releases": RELEASES,
-            "summary_en": "Browser bridge for Szafir website signing",
-            "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
-        },
-    },
-    "szafirhost.meta": {
-        "output": "pl.kir.szafirhost.metainfo.xml",
-        "template_root": "metainfo",
-        "template": "szafirhost.metainfo.xml.j2",
-        "context": {},
     },
 }
 

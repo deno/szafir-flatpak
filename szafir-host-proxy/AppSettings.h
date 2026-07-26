@@ -12,10 +12,8 @@ using namespace std::literals::string_view_literals;
 
 // Flatpak app IDs.
 inline constexpr std::string_view kSzafirAppId    = "pl.kir.szafir"sv;
-inline constexpr std::string_view kSzafirHostAppId = "pl.kir.szafirhost"sv;
 
 // QSettings key for the GDK_SCALE value in Flatpak override-style keyfiles.
-// Used in both bundled and non-bundled modes to store HiDPI scaling preferences.
 inline const QString kGdkScaleKey = QStringLiteral("Environment/GDK_SCALE");
 
 // Returns the path to a Flatpak override keyfile for appId.
@@ -27,8 +25,6 @@ inline std::filesystem::path hostOverridePath(const QString &appId)
 
     return hostDataHome / "flatpak" / "overrides" / PathUtils::toFsPath(appId);
 }
-
-#ifdef BUNDLED_HOST
 
 // Returns the path to a local override file for the bundled SzafirHost.
 // Mirrors the Flatpak per-app override keyfile layout but lives inside
@@ -112,5 +108,3 @@ inline std::filesystem::path externalProvidersXmlPath()
 {
     return PathUtils::toFsPath(qEnvironmentVariable("HOME")) / "external_providers.xml";
 }
-
-#endif // BUNDLED_HOST

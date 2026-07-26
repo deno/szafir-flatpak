@@ -9,7 +9,6 @@ set(CMAKE_AUTOMOC ON)
 
 # ----- Build-time configuration ---------------------------------------------
 set(APP_ID "pl.deno.kir.szafirhostproxy" CACHE STRING "Flatpak application ID")
-option(BUNDLED_HOST "Bundle SzafirHost inside the Flatpak instead of delegating to a separate one" OFF)
 option(ENABLE_FLATPAK_HOST_ICONS_LOOKUP "Add host icons to path" ON)
 option(SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY "Configure only source packaging (skip build deps/targets)" OFF)
 set(CHROME_EXTENSION_URL "https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc" CACHE STRING "URL to Chrome extension")
@@ -35,11 +34,8 @@ set(SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES
     LICENSE
     szafir_license_en.md
     szafir_license_pl.md
+    components.json
 )
-
-if(BUNDLED_HOST)
-    list(APPEND SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES components.json)
-endif()
 
 foreach(required_file IN LISTS SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${required_file}")
@@ -83,13 +79,9 @@ set(SZAFIR_HOST_PROXY_SOURCES
     HostRuntimeController.cpp
     MainWindow.h
     MainWindow.cpp
+    ComponentDownloader.h
+    ComponentDownloader.cpp
 )
-if(BUNDLED_HOST)
-    list(APPEND SZAFIR_HOST_PROXY_SOURCES
-        ComponentDownloader.h
-        ComponentDownloader.cpp
-    )
-endif()
 
 add_executable(szafir-host-proxy ${SZAFIR_HOST_PROXY_SOURCES})
 
@@ -101,7 +93,6 @@ qt_add_qml_module(szafir-host-proxy
         qml/WelcomePage.qml
         qml/DownloadPage.qml
         qml/LicensePage.qml
-        qml/MissingHostPage.qml
         qml/StatusPage.qml
         qml/SzafirHostAboutPage.qml
         qml/AnimatedStateButton.qml
@@ -113,19 +104,16 @@ qt_add_resources(szafir-host-proxy "szafir-host-proxy-static-assets"
     szafir_license_en.md
     szafir_license_pl.md
 )
-if(BUNDLED_HOST)
-    qt_add_resources(szafir-host-proxy "download-manifest"
-        PREFIX "/szafir-host-proxy"
-        FILES
-        components.json
-        system_components.json
-    )
-endif()
+qt_add_resources(szafir-host-proxy "download-manifest"
+    PREFIX "/szafir-host-proxy"
+    FILES
+    components.json
+    system_components.json
+)
 
 target_include_directories(szafir-host-proxy PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_compile_definitions(szafir-host-proxy PRIVATE
-    $<$<BOOL:${BUNDLED_HOST}>:BUNDLED_HOST>
     $<$<BOOL:${ENABLE_FLATPAK_HOST_ICONS_LOOKUP}>:ENABLE_FLATPAK_HOST_ICONS_LOOKUP>
     DBUS_APP_ID="${DBUS_APP_ID}"
 )
@@ -134,6 +122,7 @@ target_link_libraries(szafir-host-proxy
     PRIVATE
     Qt6::Core
     Qt6::DBus
+    Qt6::Network
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
@@ -146,9 +135,6 @@ target_link_libraries(szafir-host-proxy
     KF6::Kirigami
     KF6::StatusNotifierItem
 )
-if(BUNDLED_HOST)
-    target_link_libraries(szafir-host-proxy PRIVATE Qt6::Network)
-endif()
 
 
 

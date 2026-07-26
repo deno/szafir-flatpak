@@ -1,5 +1,3 @@
-#ifdef BUNDLED_HOST
-
 #include "ComponentDownloader.h"
 #include "AppSettings.h"
 #include "config.h"
@@ -717,5 +715,3 @@ void ComponentDownloader::writeExternalProvidersXml()
     }
     qDebug() << "ComponentDownloader: wrote external_providers.xml";
 }
-
-#endif // BUNDLED_HOST

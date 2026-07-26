@@ -4,10 +4,8 @@
 #include "ScalingController.h"
 #include "SetupController.h"
 #include "NativeMessagingService.h"
-#include "config.h"
-#ifdef BUNDLED_HOST
 #include "ComponentDownloader.h"
-#endif
+#include "config.h"
 
 #include <QDebug>
 #include <QQmlApplicationEngine>
@@ -53,18 +51,14 @@ KAboutData createSzafirHostAboutData(const QString &version)
 
 MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scalingController,
                        SetupController *setupController,
-#ifdef BUNDLED_HOST
                        ComponentDownloader *componentDownloader,
-#endif
                        QObject *parent)
     : QObject(parent)
     , m_hostRuntime(new HostRuntimeController(this))
     , m_service(service)
     , m_scalingController(scalingController)
     , m_setupController(setupController)
-#ifdef BUNDLED_HOST
     , m_componentDownloader(componentDownloader)
-#endif
     , m_activeHostCount(service->activeHostCount())
 {
     connect(m_service, &NativeMessagingService::activeHostCountChanged,
@@ -140,7 +134,6 @@ void MainWindow::ensureWindow()
         m_engine->rootContext()->setContextProperty(
             QStringLiteral("SzafirHostAbout"),
             QVariant::fromValue(createSzafirHostAboutData(
-#ifdef BUNDLED_HOST
                 [this]() -> QString {
                     for (const auto &e : m_componentDownloader->components()) {
                         if (e.info.id == QLatin1String("szafirhost-installer"))
@@ -148,16 +141,11 @@ void MainWindow::ensureWindow()
                     }
                     return {};
                 }()
-#else
-                QString{}
-#endif
             )));
 
         m_engine->rootContext()->setContextProperty(
             QStringLiteral("componentInfo"), new AboutPageComponentInfo(
-#ifdef BUNDLED_HOST
                 m_componentDownloader,
-#endif
                 m_engine));
 
         m_engine->rootContext()->setContextProperty(
@@ -175,12 +163,7 @@ void MainWindow::ensureWindow()
     m_engine->rootContext()->setContextProperty(QStringLiteral("mainWindowController"), this);
     m_engine->rootContext()->setContextProperty(QStringLiteral("scalingController"), m_scalingController);
     m_engine->rootContext()->setContextProperty(QStringLiteral("setupController"), m_setupController);
-#ifdef BUNDLED_HOST
     m_engine->rootContext()->setContextProperty(QStringLiteral("componentDownloader"), m_componentDownloader);
-#endif
-#ifndef BUNDLED_HOST
-    m_engine->rootContext()->setContextProperty(QStringLiteral("missingHostOrigin"), m_missingHostOrigin);
-#endif
     m_engine->load(QUrl(QStringLiteral("qrc:/qt/qml/SzafirHostProxy/qml/MainWindow.qml")));
 
     if (m_engine->rootObjects().isEmpty()) {

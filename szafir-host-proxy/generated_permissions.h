@@ -184,13 +184,10 @@ inline void forEachSystemDynamicRule(const char *home, const char *appId, Fn fn)
     snprintf(_buf3, sizeof(_buf3), "%s/external_providers.xml", home);
     fn(_buf3, Landlock::kOverrideFileAccess);
 
-#ifdef BUNDLED_HOST
     // java_runtime
     char _buf4[4096];
     snprintf(_buf4, sizeof(_buf4), "%s/.java", home);
     fn(_buf4, Landlock::kReadWriteCreate);
-
-#endif
 }
 
 /// Suffix appended to $HOME to form the Flatpak overrides directory path.

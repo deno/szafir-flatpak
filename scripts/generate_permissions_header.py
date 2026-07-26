@@ -103,10 +103,6 @@ _SYSTEM_TEMPLATE_PARAMS: dict[str, str] = {
     "{app_id}": "appId",
 }
 
-_CONDITION_TO_MACRO: dict[str, str] = {
-    "bundled": "BUNDLED_HOST",
-}
-
 
 def _render_launcher_static_entry(rule: dict[str, Any], runtime_prefix: str = "/app") -> str:
     path = rule["path"]
@@ -178,7 +174,6 @@ def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") ->
 
     for group_name in _SYSTEM_RULE_GROUPS:
         group = groups[group_name]
-        condition = group.get("condition")
 
         for path_entry in group.get("paths", []):
             path = path_entry["path"]
@@ -191,7 +186,6 @@ def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") ->
             rule = {
                 "path": path,
                 "flag": _ACCESS_TO_FLAG[access_token],
-                "condition": condition,
                 "group": group_name,
             }
             if path.startswith("/"):
@@ -210,7 +204,6 @@ def _collect_system_rules(data: dict[str, Any], runtime_prefix: str = "/app") ->
             static_rules.append({
                 "path": store_dir,
                 "flag": _ACCESS_TO_FLAG["read_exec"],
-                "condition": None,
                 "group": "system_sandbox",
             })
 
@@ -239,21 +232,9 @@ def _build_system_dynamic_body(rules: list[dict]) -> str:
     """Render the function body for forEachSystemDynamicRule."""
     parts: list[str] = []
     buf_idx = 0
-    current_condition = None
     current_group = None
 
     for rule in rules:
-        condition = rule.get("condition")
-        # Open/close #ifdef blocks on condition transitions
-        if condition != current_condition:
-            if current_condition is not None:
-                parts.append("#endif")
-                parts.append("")
-            if condition is not None:
-                macro = _CONDITION_TO_MACRO[condition]
-                parts.append(f"#ifdef {macro}")
-            current_condition = condition
-
         if rule["group"] != current_group:
             parts.append(f"    // {rule['group']}")
             current_group = rule["group"]
@@ -277,9 +258,6 @@ def _build_system_dynamic_body(rules: list[dict]) -> str:
             parts.append(f"    fn({buf}, {flag});")
             buf_idx += 1
         parts.append("")  # blank line between rules
-
-    if current_condition is not None:
-        parts.append("#endif")
 
     # Remove trailing blank lines
     while parts and parts[-1] == "":

@@ -3,9 +3,7 @@
 #include <QObject>
 #include <QVariantList>
 
-#ifdef BUNDLED_HOST
 class ComponentDownloader;
-#endif
 
 class SetupController : public QObject
 {
@@ -19,7 +17,6 @@ public:
     enum Page {
         Welcome,
         Download,
-        MissingHost,
         License,
         Status
     };
@@ -35,19 +32,13 @@ public:
     // Call before computePages() to force wizard even when all checks pass.
     void setForceWizard(bool force) { m_forceWizard = force; }
 
-#ifdef BUNDLED_HOST
     // Must be called before computePages() so isRuntimePresent() uses verified state.
     void setComponentDownloader(ComponentDownloader *downloader) { m_downloader = downloader; }
-#endif
 
     void computePages();
 
     Q_INVOKABLE void advance();
     Q_INVOKABLE void acceptLicense();
-
-#ifndef BUNDLED_HOST
-    Q_INVOKABLE bool checkHostAndAdvance();
-#endif
 
 Q_SIGNALS:
     void currentPageChanged();
@@ -62,7 +53,5 @@ private:
     int m_pageIndex = 0;
     Page m_currentPage = Welcome;
     bool m_forceWizard = false;
-#ifdef BUNDLED_HOST
     ComponentDownloader *m_downloader = nullptr;
-#endif
 };

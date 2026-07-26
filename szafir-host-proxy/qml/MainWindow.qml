@@ -32,9 +32,8 @@ Kirigami.ApplicationWindow {
         switch (pageEnum) {
         case 0: return Qt.resolvedUrl("WelcomePage.qml")
         case 1: return Qt.resolvedUrl("DownloadPage.qml")
-        case 2: return Qt.resolvedUrl("MissingHostPage.qml")
-        case 3: return Qt.resolvedUrl("LicensePage.qml")
-        case 4: return Qt.resolvedUrl("StatusPage.qml")
+        case 2: return Qt.resolvedUrl("LicensePage.qml")
+        case 3: return Qt.resolvedUrl("StatusPage.qml")
         default: return Qt.resolvedUrl("StatusPage.qml")
         }
     }

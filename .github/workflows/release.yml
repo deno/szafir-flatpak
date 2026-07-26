@@ -70,10 +70,10 @@ jobs:
             org.freedesktop.Sdk/x86_64/25.08 \
             org.freedesktop.Sdk.Extension.openjdk25/x86_64/25.08
 
-      - name: Build proxy (extra-empty)
+      - name: Build proxy
         run: |
           flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir-proxy \
-            pl.deno.kir.szafirhostproxy-inprocess--extra-empty.yml
+            pl.deno.kir.szafirhostproxy.yml
 
       - name: Build standalone Szafir (repo only)
         run: |
@@ -83,7 +83,7 @@ jobs:
       - name: Create bundle
         run: |
           flatpak build-bundle repo \
-            pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak \
+            pl.deno.kir.szafirhostproxy.flatpak \
             pl.deno.kir.szafirhostproxy
 
       - name: Archive repo
@@ -92,8 +92,8 @@ jobs:
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bundle-pl.deno.kir.szafirhostproxy-extra-empty
-          path: pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak
+          name: bundle-pl.deno.kir.szafirhostproxy
+          path: pl.deno.kir.szafirhostproxy.flatpak
 
       - name: Upload proxy source artifact
         uses: actions/upload-artifact@v4
@@ -118,7 +118,7 @@ jobs:
       - name: Download bundle
         uses: actions/download-artifact@v4
         with:
-          name: bundle-pl.deno.kir.szafirhostproxy-extra-empty
+          name: bundle-pl.deno.kir.szafirhostproxy
 
       - name: Download proxy source
         uses: actions/download-artifact@v4
@@ -129,7 +129,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            pl.deno.kir.szafirhostproxy-inprocess--extra-empty.flatpak
+            pl.deno.kir.szafirhostproxy.flatpak
             szafir-host-proxy-*-source.tar.gz
             szafir-host-proxy-*-source.tar.gz.sha256
 

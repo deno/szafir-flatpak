@@ -11,9 +11,7 @@
 #include <QStringList>
 #include <QVariantMap>
 
-#ifdef BUNDLED_HOST
 class QProcess;
-#endif
 
 struct ClientInfo
 {
@@ -60,9 +58,7 @@ public:
     void setAcceptingConnections(bool accepting);
 
     // Called by the adaptor; spawns SzafirHost with fdIn/fdOut/fdErr
-    // forwarded as stdin/stdout/stderr.
-    // When BUNDLED_HOST is defined, runs the host as a local QProcess.
-    // Otherwise, delegates to a separate Flatpak via the Development API.
+    // forwarded as stdin/stdout/stderr via a local QProcess.
     void spawnHost(const QStringList &args,
                    const QDBusUnixFileDescriptor &fdIn,
                    const QDBusUnixFileDescriptor &fdOut,
@@ -76,19 +72,10 @@ public:
 Q_SIGNALS:
     void activeHostCountChanged(int count);
 
-#ifndef BUNDLED_HOST
-private Q_SLOTS:
-    void onSpawnExited(quint32 pid, quint32 exitStatus);
-#endif
-
 private:
     bool m_acceptingConnections = false;
 
-#ifdef BUNDLED_HOST
     QMap<QProcess *, ClientInfo> m_activeClients;
-#else
-    QMap<quint32, ClientInfo> m_activeClients;
-#endif
     QList<ClientInfo> m_clientList; // ordered list mirroring m_activeClients for the model
 
     int clientListIndexByPid(qint64 pid) const;

@@ -107,8 +107,6 @@ browsers:
 #   derived_from_browsers: true  : paths are derived from the browsers list
 #   flatpak_args      : Flatpak finish-args not expressible as --filesystem
 #                       (sockets, D-Bus names, --share, --persist, --env)
-#   condition         : "bundled" | "split" | absent (= always applicable)
-#                       When set at group level, entire group is conditional.
 #   landlock_access   : Landlock permission token for derived-browser groups
 #   flatpak_permission: ro | rw | create  (for derived-browser groups)
 #   landlock_phases   : Landlock phases that include this group (documentation)
@@ -123,7 +121,6 @@ browsers:
 #
 # Per flatpak_args entry:
 #   arg               : Flatpak finish-arg string (e.g. "--socket=wayland")
-#   condition         : "bundled" | "split" | absent (= always)
 # ────────────────────────────────────────────────────────────────────────────
 
 permission_groups:
@@ -133,12 +130,9 @@ permission_groups:
 
   display_ipc:
     description: >-
-      Display server connections and IPC: Wayland socket, X11 fallback socket
-      (split variant only), GPU device access (DRI), and POSIX shared memory
-      (--share=ipc).
-      [fe]Bundled uses direct X11 via bundled_extras.[/fe]
+      Display server connections and IPC: Wayland socket, GPU device access
+      (DRI), and POSIX shared memory (--share=ipc).
     flatpak_args:
-      - {arg: "--socket=fallback-x11", condition: split}
       - {arg: "--socket=wayland"}
       - {arg: "--share=ipc"}
       - {arg: "--device=dri"}
@@ -146,12 +140,10 @@ permission_groups:
   dbus_names:
     description: >-
       D-Bus name ownership and talk permissions for the proxy's well-known
-      D-Bus service name, Flatpak host process spawning (split only), and system
-      tray integration.
+      D-Bus service name and system tray integration.
       [fe]Flatpak D-Bus names — no filesystem path; Landlock does not apply.[/fe]
     flatpak_args:
       - {arg: "--own-name=pl.deno.kir.szafirhostproxy"}
-      - {arg: "--talk-name=org.freedesktop.Flatpak", condition: split}
       - {arg: "--talk-name=org.kde.StatusNotifierWatcher"}
 
   # Browser filesystem permissions
@@ -234,16 +226,15 @@ permission_groups:
         flatpak_permission: ro
     landlock_phases: [phase1, phase2]
 
-  # ── Bundled-host-only permissions ───────────────────────────────────────────
+  # ── SzafirHost runtime permissions ─────────────────────────────────────────
 
   bundled_extras:
     description: >-
-      Additional permissions required in the bundled/in-process variant where
-      szafir-host-proxy directly runs the SzafirHost JVM process: X11 socket for
-      the JVM Swing UI, PC/SC smartcard daemon for direct smartcard access, and
-      network access for component downloads and JVM communication.
+      Additional permissions required for directly running the SzafirHost JVM
+      process: X11 socket for the JVM Swing UI, PC/SC smartcard daemon for
+      direct smartcard access, and network access for component downloads and
+      JVM communication.
       [fe]Flatpak sockets/share — no filesystem path; Landlock does not apply.[/fe]
-    condition: bundled
     flatpak_args:
       - {arg: "--socket=x11"}
       - {arg: "--socket=pcsc"}
@@ -255,7 +246,6 @@ permission_groups:
       required environment variables for the bundled OpenJDK runtime.
       [fe]Landlock grants read_write_create on ~/.java in both phases so the JVM
       can read/write its cache throughout the sandbox lifecycle.[/fe]
-    condition: bundled
     paths:
       - path: ~/.java
         type: dir

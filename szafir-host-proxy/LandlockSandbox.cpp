@@ -253,15 +253,12 @@ bool limitOverrides()
         rules.push_back({path, kReadWriteCreate});
     }
 
-    // Override files: browsers + szafir + szafirhost (if unbundled)
+    // Override files: browsers + szafir
     std::vector<std::string> overrideFiles;
     for (const Permissions::BrowserEntry &b : Permissions::kBrowsers) {
         overrideFiles.emplace_back(b.flatpakId);
     }
     overrideFiles.emplace_back("pl.kir.szafir");
-#ifndef BUNDLED_HOST
-    overrideFiles.emplace_back("pl.kir.szafirhost");
-#endif
     addOverrideRules(rules, overrideFiles);
 
     if (!applyRuleset(abi, rules)) {
@@ -291,9 +288,6 @@ bool dropBrowserAccess()
     // Only szafir override files remain
     std::vector<std::string> overrideFiles;
     overrideFiles.emplace_back("pl.kir.szafir");
-#ifndef BUNDLED_HOST
-    overrideFiles.emplace_back("pl.kir.szafirhost");
-#endif
     addOverrideRules(rules, overrideFiles);
 
     if (!applyRuleset(abi, rules)) {

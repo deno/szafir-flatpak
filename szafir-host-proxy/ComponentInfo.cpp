@@ -2,7 +2,6 @@
 
 #include <KLocalizedString>
 
-#ifdef BUNDLED_HOST
 #include "ComponentDownloader.h"
 #include <QDebug>
 #include <QFile>
@@ -10,22 +9,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLocale>
-#endif
 
 
 // ── AboutPageComponentInfo ────────────────────────────────────────────────────
 
-AboutPageComponentInfo::AboutPageComponentInfo(
-#ifdef BUNDLED_HOST
-    ComponentDownloader *downloader,
-#endif
-    QObject *parent)
+AboutPageComponentInfo::AboutPageComponentInfo(ComponentDownloader *downloader, QObject *parent)
     : QObject(parent)
-#ifdef BUNDLED_HOST
     , m_downloader(downloader)
-#endif
 {
-#ifdef BUNDLED_HOST
     QFile f(QStringLiteral(":/szafir-host-proxy/system_components.json"));
     if (!f.open(QIODevice::ReadOnly)) {
         qWarning() << "ComponentInfo: failed to open system_components.json resource";
@@ -57,14 +48,11 @@ AboutPageComponentInfo::AboutPageComponentInfo(
             .hash      = sha256,
         });
     }
-#endif
 }
 
 QList<Component> AboutPageComponentInfo::buildComponentList() const
 {
     QList<Component> result = m_systemComponents;
-#ifdef BUNDLED_HOST
     result.append(m_downloader->presentDisplayEntries());
-#endif
     return result;
 }

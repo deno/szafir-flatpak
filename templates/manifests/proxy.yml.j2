@@ -3,10 +3,8 @@ runtime: org.kde.Platform
 runtime-version: '6.10'
 sdk: org.kde.Sdk
 command: szafir-host-proxy
-{% if bundled_host %}
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk25
-{% endif %}
 
 finish-args:
 {% for group in finish_arg_groups %}
@@ -17,7 +15,6 @@ finish-args:
   - {{ arg }}
 {% endfor %}
 {% endfor %}
-{% if bundled_host %}
 
 cleanup:
   - /include
@@ -30,10 +27,8 @@ cleanup:
   - /share/doc
   - /share/man
   - /sbin
-{% endif %}
 
 modules:
-{% if bundled_host %}
 {% include 'fragments/openjdk_module.yml.j2' %}
 {% for comp in system_components %}
 
@@ -75,14 +70,9 @@ modules:
 {% endfor %}
 {% endif %}
 
-{% endif %}
-
   - name: szafir-host-proxy
     buildsystem: cmake-ninja
     config-opts:
-{% if bundled_host %}
-      - -DBUNDLED_HOST=ON
-{% endif %}
       - -DAPP_ID={{ app_id }}
       - -DAPP_VERSION={{ app_version }}
     sources:
@@ -94,10 +84,8 @@ modules:
         path: szafir-host-proxy/szafir_license_en.md
       - type: file
         path: szafir-host-proxy/szafir_license_pl.md
-{% if bundled_host %}
       - type: file
         path: szafir-host-proxy/components.json
-{% endif %}
 
   - name: szafir-icons
     buildsystem: simple
