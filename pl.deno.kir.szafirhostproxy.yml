@@ -108,7 +108,6 @@ modules:
     config-opts:
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
       - -DAPP_VERSION=0.2.5
-      - -DSZAFIR_BWRAP=OFF
     sources:
       - type: dir
         path: szafir-host-proxy

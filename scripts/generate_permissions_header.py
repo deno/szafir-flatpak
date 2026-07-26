@@ -323,8 +323,18 @@ def generate(input_path: Path, output_path: Path, runtime_prefix: str = "/app") 
 
     # Launcher section
     launcher_group = data["permission_groups"]["launcher_sandbox"]
-    static_rules: list[dict[str, Any]] = launcher_group["paths"]
+    static_rules: list[dict[str, Any]] = list(launcher_group["paths"])
     dynamic_rules: list[dict[str, Any]] = launcher_group["dynamic_paths"]
+
+    if runtime_prefix != "/app":
+        # Outside Flatpak the child also needs read_exec on the store directory that
+        # holds the runtime prefix: Nix rewrites the start script's shebang to a store
+        # bash path, and the JRE loads libraries from other store paths.
+        parts = runtime_prefix.split("/")
+        store_dir = "/".join(parts[:3]) if len(parts) >= 3 else runtime_prefix
+        if not any(r["path"] == store_dir for r in static_rules):
+            static_rules.append({"path": store_dir, "landlock_access": "read_exec"})
+
     num_static = len(static_rules)
 
     for r in static_rules:

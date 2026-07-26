@@ -2,11 +2,8 @@
 #include "config.h"
 
 #include <cerrno>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <string>
-#include <vector>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -50,20 +47,6 @@ std::string runtimeDir()
     return "/run/user/" + std::to_string(getuid());
 }
 
-// Resolves the current executable's real path. We cannot pass the literal
-// "/proc/self/exe" to bwrap: inside the sandbox /proc is remounted and
-// "self" is bwrap, so it would re-exec bwrap instead of the app.
-std::string selfExePath()
-{
-    char buf[4096];
-    const ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-    if (len > 0) {
-        buf[len] = '\0';
-        return buf;
-    }
-    return "/proc/self/exe";
-}
-
 // Appends a bind mount if the source path exists (for bwrap versions without -try).
 void bindTry(std::vector<std::string> &args, const char *flag,
              const std::string &src, const std::string &dest)
@@ -75,10 +58,46 @@ void bindTry(std::vector<std::string> &args, const char *flag,
     args.push_back(dest);
 }
 
-std::vector<std::string> buildArgs(const std::string &bwrap, int argc, char *argv[])
+} // anonymous namespace
+
+namespace BwrapSandbox {
+
+bool childWrappingEnabled()
+{
+#if !SZAFIR_BWRAP_ENABLED
+    return false;
+#else
+    const char *noBwrap = getenv("SZAFIR_NO_BWRAP");
+    if (noBwrap && strcmp(noBwrap, "1") == 0)
+        return false;
+    return !locateBwrap().empty();
+#endif
+}
+
+std::string bwrapPath()
+{
+    return locateBwrap();
+}
+
+std::string selfExePath()
+{
+    // Resolve the real executable path. We cannot pass the literal "/proc/self/exe"
+    // to bwrap: inside the sandbox /proc is remounted and "self" would be bwrap, so
+    // it would exec bwrap instead of the shim.
+    char buf[4096];
+    const ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (len > 0) {
+        buf[len] = '\0';
+        return buf;
+    }
+    return "/proc/self/exe";
+}
+
+std::vector<std::string> childSandboxArgs(const std::string &launcherExe,
+                                          const std::string &cmd,
+                                          const std::vector<std::string> &cmdArgs)
 {
     std::vector<std::string> a;
-    a.push_back(bwrap);
 
     // Namespaces
     a.push_back("--unshare-pid");
@@ -118,10 +137,18 @@ std::vector<std::string> buildArgs(const std::string &bwrap, int argc, char *arg
     a.push_back("/sys");
     a.push_back("/sys");
 
-    // Minimal /dev (null, zero, urandom, random, tty, ptmx)
+    // /bin (and the dynamic-linker dirs /lib, /lib64) so the start script's
+    // #!/bin/sh shebang and the JRE's interpreter resolve on glibc distros where
+    // these are symlinks into /usr. bwrap resolves the symlink source.
+    bindTry(a, "--ro-bind", "/bin", "/bin");
+    bindTry(a, "--ro-bind", "/lib", "/lib");
+    bindTry(a, "--ro-bind", "/lib64", "/lib64");
+
+    // Minimal /dev (null, zero, urandom, random, tty, ptmx).
+    // /dev/dri is deliberately NOT bound: the Java runtime software-renders and
+    // does not need GPU acceleration.
     a.push_back("--dev");
     a.push_back("/dev");
-    bindTry(a, "--dev-bind", "/dev/dri", "/dev/dri");
 
     // Private procfs (PID namespace: only own PIDs visible)
     a.push_back("--proc");
@@ -133,10 +160,10 @@ std::vector<std::string> buildArgs(const std::string &bwrap, int argc, char *arg
     a.push_back("--tmpfs");
     a.push_back("/tmp");
 
-    // X11 socket (source resolved against host before pivot)
+    // X11 socket (display)
     bindTry(a, "--bind", "/tmp/.X11-unix", "/tmp/.X11-unix");
 
-    // Runtime directory: D-Bus session bus, Wayland socket
+    // Runtime directory: Wayland socket, D-Bus session bus
     const std::string rd = runtimeDir();
     if (pathExists(rd.c_str())) {
         a.push_back("--bind");
@@ -155,64 +182,21 @@ std::vector<std::string> buildArgs(const std::string &bwrap, int argc, char *arg
         a.push_back(home);
     }
 
-    // Mark as wrapped so the re-execed process skips re-exec
+    // Mark as wrapped so HostLauncher forces Landlock on inside the namespace
     a.push_back("--setenv");
     a.push_back("SZAFIR_BWRAPPED");
     a.push_back("1");
 
-    // Target: re-exec the same binary with original arguments
+    // Target: the launch shim applies Landlock, then execs the host command
     a.push_back("--");
-    a.push_back(selfExePath());
-    for (int i = 1; i < argc; ++i)
-        a.push_back(argv[i]);
+    a.push_back(launcherExe);
+    a.push_back("--launch-host");
+    a.push_back("--");
+    a.push_back(cmd);
+    for (const std::string &arg : cmdArgs)
+        a.push_back(arg);
 
     return a;
-}
-
-} // anonymous namespace
-
-namespace BwrapSandbox {
-
-bool inBwrap()
-{
-    const char *v = getenv("SZAFIR_BWRAPPED");
-    return v && strcmp(v, "1") == 0;
-}
-
-bool maybeReExec(int argc, char *argv[])
-{
-#if !SZAFIR_BWRAP_ENABLED
-    return true;
-#else
-    if (inBwrap())
-        return true;
-
-    const char *noBwrap = getenv("SZAFIR_NO_BWRAP");
-    if (noBwrap && strcmp(noBwrap, "1") == 0) {
-        fprintf(stderr, "szafir-host-proxy: SZAFIR_NO_BWRAP=1 — running without bwrap sandbox\n");
-        return true;
-    }
-
-    const std::string bwrap = locateBwrap();
-    if (bwrap.empty()) {
-        fprintf(stderr, "szafir-host-proxy: bwrap not found; cannot sandbox\n");
-        return false;
-    }
-
-    std::vector<std::string> args = buildArgs(bwrap, argc, argv);
-
-    std::vector<char *> execArgs;
-    execArgs.reserve(args.size() + 1);
-    for (auto &s : args)
-        execArgs.push_back(s.data());
-    execArgs.push_back(nullptr);
-
-    execvp(execArgs[0], execArgs.data());
-
-    fprintf(stderr, "szafir-host-proxy: execvp(%s) failed: %s\n",
-            execArgs[0], strerror(errno));
-    return false;
-#endif
 }
 
 } // namespace BwrapSandbox

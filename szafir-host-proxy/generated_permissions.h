@@ -82,11 +82,14 @@ struct LauncherStaticRule {
 };
 
 /// Static-path Landlock rules for the SzafirHost child process.
-inline constexpr std::array<LauncherStaticRule, 10> kLauncherStaticRules = {{
+inline constexpr std::array<LauncherStaticRule, 13> kLauncherStaticRules = {{
     {"/app/jre", Landlock::kReadExec, 0},
     {"/app/lib", Landlock::kReadExec, 0},
     {"/app/bin/start-szafir-host-native.sh", Landlock::kReadExecFile, 0},
+    {"/bin/sh", Landlock::kReadExecFile, 0},
     {"/usr", Landlock::kReadExec, 0},
+    {"/lib", Landlock::kReadExec, 0},
+    {"/lib64", Landlock::kReadExec, 0},
     {"/etc", Landlock::kReadOnly, 0},
     {"/run/pcscd", Landlock::kReadWriteCreate, 0},
     {"/tmp", Landlock::kReadWriteCreate, Landlock::kReadWrite},

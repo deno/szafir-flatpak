@@ -6,6 +6,7 @@
 #include "config.h"
 #include "LandlockEnv.h"
 #include "LandlockSandbox.h"
+#include "BwrapSandbox.h"
 
 #include <QDebug>
 #include <QDir>
@@ -13,6 +14,8 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QTimer>
+
+#include <vector>
 
 #include <KConfig>
 #include <KConfigGroup>
@@ -162,15 +165,16 @@ void NativeMessagingService::spawnHost(const QStringList &args,
     }
 
     auto *process = new QProcess(this);
-    process->setProgram(QString::fromStdString(std::string(RUNTIME_PREFIX) + "/bin/start-szafir-host-native.sh"));
-    process->setArguments(args);
     process->setProcessChannelMode(QProcess::SeparateChannels);
 
     const int inFd = fdIn.fileDescriptor();
     const int outFd = fdOut.fileDescriptor();
     const int errFd = fdErr.fileDescriptor();
 
-    // Pre-capture paths in the parent before fork
+    const std::string startScript = std::string(RUNTIME_PREFIX) + "/bin/start-szafir-host-native.sh";
+
+    // Pre-capture paths in the parent before fork (used by the non-bwrap branch and
+    // to ensure the install dir exists below).
     const QByteArray homeEnv = qgetenv("HOME");
     const QByteArray xdgDataHomeEnv = qgetenv("XDG_DATA_HOME");
     const QByteArray xauthorityEnv = qgetenv("XAUTHORITY");
@@ -180,19 +184,52 @@ void NativeMessagingService::spawnHost(const QStringList &args,
         : xdgDataHomeEnv.toStdString();
     const std::string launcherXauthority = xauthorityEnv.toStdString(); // empty = use ~/.Xauthority fallback
 
-    const bool launcherLandlockEnabled = LandlockEnv::isModuleEnabled("LANDLOCK_LAUNCHER");
-    if (!launcherLandlockEnabled)
-        qInfo() << "Landlock launcher restrictions disabled by environment.";
+    if (BwrapSandbox::childWrappingEnabled()) {
+        // Wrap the runtime in its own bwrap namespace. Landlock is applied *inside*
+        // the namespace by the --launch-host shim (it must come after bwrap's mount
+        // setup), so the fork handler only wires the browser FDs onto stdio — bwrap
+        // passes 0/1/2 through to the sandboxed command.
+        std::vector<std::string> scriptArgs;
+        scriptArgs.reserve(args.size());
+        for (const QString &arg : args)
+            scriptArgs.push_back(arg.toStdString());
 
-    process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome, launcherXauthority, launcherLandlockEnabled]() {
-        if (launcherLandlockEnabled) {
-            LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str(), launcherXauthority.c_str());
-        }
+        const std::vector<std::string> bwrapArgs = BwrapSandbox::childSandboxArgs(
+            BwrapSandbox::selfExePath(), startScript, scriptArgs);
 
-        dup2OrExit(inFd, STDIN_FILENO, "stdin");
-        dup2OrExit(outFd, STDOUT_FILENO, "stdout");
-        dup2OrExit(errFd, STDERR_FILENO, "stderr");
-    });
+        QStringList qArgs;
+        qArgs.reserve(static_cast<int>(bwrapArgs.size()));
+        for (const std::string &a : bwrapArgs)
+            qArgs.append(QString::fromStdString(a));
+
+        process->setProgram(QString::fromStdString(BwrapSandbox::bwrapPath()));
+        process->setArguments(qArgs);
+
+        process->setChildProcessModifier([inFd, outFd, errFd]() {
+            dup2OrExit(inFd, STDIN_FILENO, "stdin");
+            dup2OrExit(outFd, STDOUT_FILENO, "stdout");
+            dup2OrExit(errFd, STDERR_FILENO, "stderr");
+        });
+    } else {
+        // Flatpak (or bwrap unavailable): exec the start script directly and apply the
+        // Landlock launcher restrictions in the fork handler.
+        process->setProgram(QString::fromStdString(startScript));
+        process->setArguments(args);
+
+        const bool launcherLandlockEnabled = LandlockEnv::isModuleEnabled("LANDLOCK_LAUNCHER");
+        if (!launcherLandlockEnabled)
+            qInfo() << "Landlock launcher restrictions disabled by environment.";
+
+        process->setChildProcessModifier([inFd, outFd, errFd, launcherHome, launcherXdgDataHome, launcherXauthority, launcherLandlockEnabled]() {
+            if (launcherLandlockEnabled) {
+                LandlockSandbox::applyLauncherRestrictions(launcherHome.c_str(), launcherXdgDataHome.c_str(), launcherXauthority.c_str());
+            }
+
+            dup2OrExit(inFd, STDIN_FILENO, "stdin");
+            dup2OrExit(outFd, STDOUT_FILENO, "stdout");
+            dup2OrExit(errFd, STDERR_FILENO, "stderr");
+        });
+    }
 
     connect(process, &QProcess::finished, this,
         [this, process](int exitCode, QProcess::ExitStatus exitStatus) {

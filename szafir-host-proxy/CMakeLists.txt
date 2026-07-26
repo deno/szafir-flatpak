@@ -77,6 +77,10 @@ set(SZAFIR_HOST_PROXY_SOURCES
     LandlockSandbox.cpp
     BwrapSandbox.h
     BwrapSandbox.cpp
+    HostLauncher.h
+    HostLauncher.cpp
+    SelfTest.h
+    SelfTest.cpp
     ScalingController.h
     ScalingController.cpp
     SetupController.h

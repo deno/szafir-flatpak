@@ -25,7 +25,8 @@
 #include "SetupController.h"
 #include "LandlockSandbox.h"
 #include "LandlockEnv.h"
-#include "BwrapSandbox.h"
+#include "HostLauncher.h"
+#include "SelfTest.h"
 #include "ComponentDownloader.h"
 #include "UpdateController.h"
 
@@ -33,6 +34,7 @@
 
 #include <csignal>
 #include <cstdio>
+#include <cstring>
 #include <filesystem>
 
 namespace {
@@ -101,10 +103,14 @@ std::function<void(const QString &)> addHiDpiMenu(
 
 int main(int argc, char *argv[])
 {
-    if (!BwrapSandbox::maybeReExec(argc, argv)) {
-        fprintf(stderr, "szafir-host-proxy: bwrap sandbox setup failed; refusing to run\n");
-        return 1;
-    }
+    // Launcher shim: invoked by bwrap *inside* the child namespace to apply Landlock
+    // and then exec the SzafirHost start script. Handled before any Qt setup.
+    if (argc >= 2 && strcmp(argv[1], "--launch-host") == 0)
+        return HostLauncher::run(argc, argv);
+
+    // Hidden self-test: verify FDs survive dup2 -> bwrap -> --launch-host -> exec.
+    if (argc >= 2 && strcmp(argv[1], "--selftest-fd") == 0)
+        return SelfTest::fdPassthrough(argc, argv);
 
 #ifdef ENABLE_FLATPAK_HOST_ICONS_LOOKUP
     const std::filesystem::path userFlatpakExportDir =

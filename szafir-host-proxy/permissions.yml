@@ -387,9 +387,21 @@ permission_groups:
         type: file
         landlock_access: read_exec_file
         note: "startup script"
+      - path: /bin/sh
+        type: file
+        landlock_access: read_exec_file
+        note: "POSIX shell for the startup script shebang (#!/bin/sh)"
       - path: /usr
         type: dir
         landlock_access: read_exec
+      - path: /lib
+        type: dir
+        landlock_access: read_exec
+        note: "dynamic linker/libs; bwrap binds this separately so it is not beneath /usr"
+      - path: /lib64
+        type: dir
+        landlock_access: read_exec
+        note: "ELF interpreter /lib64/ld-*.so; bwrap binds it separately from /usr"
       - path: /etc
         type: dir
         landlock_access: read_only
