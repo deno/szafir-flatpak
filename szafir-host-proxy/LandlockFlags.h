@@ -81,6 +81,12 @@ inline constexpr __u64 kReadOnlyFile =
 inline constexpr __u64 kReadDirOnly =
     LANDLOCK_ACCESS_FS_READ_DIR;
 
+// Minimal access for parent XDG directories (~/.cache, ~/.local/share, ~/.config):
+// enough to create the app's own subdirectory within them.
+inline constexpr __u64 kMakeSubdir =
+    LANDLOCK_ACCESS_FS_READ_DIR   |
+    LANDLOCK_ACCESS_FS_MAKE_DIR;
+
 inline constexpr __u64 kReadWrite =
     LANDLOCK_ACCESS_FS_READ_FILE  |
     LANDLOCK_ACCESS_FS_READ_DIR   |

@@ -138,7 +138,7 @@ inline void forEachLauncherDynamicRule(
 }
 
 // ── System rules ────────────────────────────────────────────────────────────
-// Source: permissions.yml — system_sandbox, flatpak_metadata, app_xdg_data, external_providers, java_runtime
+// Source: permissions.yml — system_sandbox, flatpak_metadata, app_xdg_data, native_xdg_dirs, external_providers, java_runtime
 
 /// One static (absolute, compile-time-constant path) system Landlock rule.
 struct SystemStaticRule {
@@ -185,17 +185,46 @@ inline void forEachSystemDynamicRule(const char *home, const char *appId, bool b
     snprintf(_buf2, sizeof(_buf2), "%s/.var/app/%s", home, appId);
     fn(_buf2, Landlock::kReadWriteCreate);
 
+    // native_xdg_dirs
+    char _buf3[4096];
+    snprintf(_buf3, sizeof(_buf3), "%s/.cache", home);
+    fn(_buf3, Landlock::kMakeSubdir);
+
+    char _buf4[4096];
+    snprintf(_buf4, sizeof(_buf4), "%s/.local/share", home);
+    fn(_buf4, Landlock::kMakeSubdir);
+
+    char _buf5[4096];
+    snprintf(_buf5, sizeof(_buf5), "%s/.config", home);
+    fn(_buf5, Landlock::kMakeSubdir);
+
+    char _buf6[4096];
+    snprintf(_buf6, sizeof(_buf6), "%s/.local/share/szafir-host-proxy", home);
+    fn(_buf6, Landlock::kReadWriteCreate);
+
+    char _buf7[4096];
+    snprintf(_buf7, sizeof(_buf7), "%s/.cache/szafir-host-proxy", home);
+    fn(_buf7, Landlock::kReadWriteCreate);
+
+    char _buf8[4096];
+    snprintf(_buf8, sizeof(_buf8), "%s/.config/szafir-host-proxy", home);
+    fn(_buf8, Landlock::kReadWriteCreate);
+
+    char _buf9[4096];
+    snprintf(_buf9, sizeof(_buf9), "%s/.config/flatpak-overrides", home);
+    fn(_buf9, Landlock::kReadWriteCreate);
+
     // external_providers
     fn(home, bwrap ? Landlock::kReadDirOnly : Landlock::kOverridesDirOps);
 
-    char _buf3[4096];
-    snprintf(_buf3, sizeof(_buf3), "%s/external_providers.xml", home);
-    fn(_buf3, Landlock::kOverrideFileAccessTrunc);
+    char _buf10[4096];
+    snprintf(_buf10, sizeof(_buf10), "%s/external_providers.xml", home);
+    fn(_buf10, Landlock::kOverrideFileAccessTrunc);
 
     // java_runtime
-    char _buf4[4096];
-    snprintf(_buf4, sizeof(_buf4), "%s/.java", home);
-    fn(_buf4, Landlock::kReadWriteCreate);
+    char _buf11[4096];
+    snprintf(_buf11, sizeof(_buf11), "%s/.java", home);
+    fn(_buf11, Landlock::kReadWriteCreate);
 
     // bwrap_sandbox (only applied inside bwrap namespace)
     if (bwrap) {

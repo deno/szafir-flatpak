@@ -77,6 +77,7 @@ _ACCESS_TO_FLAG: dict[str, str] = {
     "read_write_create": "Landlock::kReadWriteCreate",
     "read_write_create_dev": "Landlock::kReadWriteCreateDev",
     "read_dir_only":     "Landlock::kReadDirOnly",
+    "make_subdir":       "Landlock::kMakeSubdir",
     "read_exec_write":   "Landlock::kReadExecWrite",
     "overrides_dir":     "Landlock::kOverridesDirOps",
     "override_file":     "Landlock::kOverrideFileAccess",
@@ -96,6 +97,7 @@ _SYSTEM_RULE_GROUPS: list[str] = [
     "system_sandbox",
     "flatpak_metadata",
     "app_xdg_data",
+    "native_xdg_dirs",
     "external_providers",
     "java_runtime",
 ]

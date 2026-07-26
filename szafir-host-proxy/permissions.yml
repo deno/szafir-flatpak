@@ -273,6 +273,45 @@ permission_groups:
         flatpak_note: "implicit Flatpak sandbox — no --filesystem entry needed"
     landlock_phases: [phase1, phase2]
 
+  native_xdg_dirs:
+    description: >-
+      The proxy's own XDG subdirectories used in non-Flatpak (native/Nix) builds
+      where XDG_DATA_HOME, XDG_CACHE_HOME, and XDG_CONFIG_HOME point to the real
+      ~/.local/share, ~/.cache, and ~/.config. In Flatpak these paths do not exist
+      (XDG is redirected to ~/.var/app/<APP_ID>) so the rules are inert.
+      [fe]No Flatpak --filesystem entry needed; these are only relevant outside
+      the Flatpak sandbox.[/fe]
+    paths:
+      - path: ~/.cache
+        type: dir
+        landlock_access: make_subdir
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.local/share
+        type: dir
+        landlock_access: make_subdir
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.config
+        type: dir
+        landlock_access: make_subdir
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.local/share/szafir-host-proxy
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.cache/szafir-host-proxy
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.config/szafir-host-proxy
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.config/flatpak-overrides
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "not applicable inside Flatpak"
+    landlock_phases: [phase1, phase2]
+
   external_providers:
     description: >-
       The external_providers.xml file written to $HOME by the component
