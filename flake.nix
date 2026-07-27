@@ -43,6 +43,7 @@
           "-DRUNTIME_PREFIX=${placeholder "out"}"
           "-DSZAFIR_BWRAP=ON"
           "-DSZAFIR_BWRAP_PATH=${pkgs.bubblewrap}/bin/bwrap"
+          "-DSZAFIR_DEV=ON"
         ];
 
         preConfigure = ''

@@ -116,6 +116,31 @@ int main(int argc, char *argv[])
     if (argc >= 2 && strcmp(argv[1], "--selftest-tls") == 0)
         return SelfTest::tlsProbe(argc, argv);
 
+#ifdef SZAFIR_DEV_BUILD
+    // Dev-only: wipe the proxy's own XDG state so the app starts as if
+    // freshly installed. Host override files are preserved.
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--fresh-env") == 0) {
+            const auto xdgOr = [](const char *var, const char *fallback) {
+                const QByteArray v = qgetenv(var);
+                return v.isEmpty() ? std::filesystem::path(qgetenv("HOME").toStdString()) / fallback
+                                   : std::filesystem::path(v.toStdString());
+            };
+            const std::filesystem::path dirs[] = {
+                xdgOr("XDG_CONFIG_HOME", ".config") / "szafir-host-proxy",
+                xdgOr("XDG_DATA_HOME",   ".local/share") / "szafir-host-proxy",
+                xdgOr("XDG_CACHE_HOME",  ".cache") / "szafir-host-proxy",
+            };
+            for (const auto &d : dirs) {
+                std::error_code ec;
+                if (std::filesystem::remove_all(d, ec) > 0)
+                    qInfo().noquote() << "fresh-env: cleared" << QString::fromStdString(d.string());
+            }
+            break;
+        }
+    }
+#endif
+
 #ifdef ENABLE_FLATPAK_HOST_ICONS_LOOKUP
     const std::filesystem::path userFlatpakExportDir =
         PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
@@ -203,6 +228,11 @@ int main(int argc, char *argv[])
     const QCommandLineOption updateAndExitOpt(
         QStringLiteral("update-and-exit"),
         i18n("Download enabled components headlessly, then exit."));
+#ifdef SZAFIR_DEV_BUILD
+    const QCommandLineOption freshEnvOpt(
+        QStringLiteral("fresh-env"),
+        i18n("Run with a throwaway XDG environment (dev builds only)."));
+#endif
 
     parser.addOption(debugOpt);
     parser.addOption(installOpt);
@@ -211,6 +241,9 @@ int main(int argc, char *argv[])
     parser.addOption(showStatusWindowOpt);
     parser.addOption(wizardOpt);
     parser.addOption(updateAndExitOpt);
+#ifdef SZAFIR_DEV_BUILD
+    parser.addOption(freshEnvOpt);
+#endif
 
     parser.process(app);
     aboutData.processCommandLine(&parser);

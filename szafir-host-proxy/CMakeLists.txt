@@ -16,6 +16,7 @@ set(FIREFOX_EXTENSION_URL "https://www.elektronicznypodpis.pl/download/webmodule
 set(RUNTIME_PREFIX "/app" CACHE STRING "Runtime prefix for installed assets (Flatpak: /app, Nix: \$out)")
 option(SZAFIR_BWRAP "Re-exec under bubblewrap in non-Flatpak builds" OFF)
 set(SZAFIR_BWRAP_PATH "" CACHE STRING "Absolute path to bwrap (empty = search PATH)")
+option(SZAFIR_DEV "Enable dev-only CLI options (--fresh-env)" OFF)
 
 # Derive D-Bus service/interface ID from APP_ID by dropping the final
 # hyphenated suffix, e.g. "...-fh" -> "...".
@@ -132,6 +133,7 @@ target_include_directories(szafir-host-proxy PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 
 target_compile_definitions(szafir-host-proxy PRIVATE
     $<$<BOOL:${ENABLE_FLATPAK_HOST_ICONS_LOOKUP}>:ENABLE_FLATPAK_HOST_ICONS_LOOKUP>
+    $<$<BOOL:${SZAFIR_DEV}>:SZAFIR_DEV_BUILD>
     DBUS_APP_ID="${DBUS_APP_ID}"
 )
 
