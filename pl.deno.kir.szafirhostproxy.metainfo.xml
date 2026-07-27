@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.3.0" date="2026-07-27">
+      <description>
+        <p>Unified component discovery on the web; dropped the bundled manifest. Shows download sizes, reworked update flow into the Download view.</p>
+        <p xml:lang="pl">Ujednolicono wykrywanie komponentów w sieci; usunięto dołączony manifest. Pokazywanie rozmiarów pobierania, przebudowany przepływ aktualizacji w widoku Pobierania.</p>
+      </description>
+    </release>
     <release version="0.2.5" date="2026-04-28">
       <description>
         <p>Update to new version of SzafirHost (1.2.2)</p>

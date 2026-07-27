@@ -1,4 +1,9 @@
 releases:
+  - version: 0.3.0
+    date: 2026-07-27
+    description:
+      en: Unified component discovery on the web; dropped the bundled manifest. Shows download sizes, reworked update flow into the Download view.
+      pl: Ujednolicono wykrywanie komponentów w sieci; usunięto dołączony manifest. Pokazywanie rozmiarów pobierania, przebudowany przepływ aktualizacji w widoku Pobierania.
   - version: 0.2.5
     date: 2026-04-28
     description:

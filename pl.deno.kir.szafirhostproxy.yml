@@ -95,19 +95,11 @@ modules:
         url: https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz
         sha256: cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7
 
-  - name: szafirhost
-    buildsystem: simple
-    build-commands:
-      - install -D -m 755 start-szafir-host-native.sh /app/bin/start-szafir-host-native.sh
-    sources:
-      - type: file
-        path: szafir-host-proxy/start-szafir-host-native.sh
-
   - name: szafir-host-proxy
     buildsystem: cmake-ninja
     config-opts:
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.2.5
+      - -DAPP_VERSION=0.3.0
     sources:
       - type: dir
         path: szafir-host-proxy

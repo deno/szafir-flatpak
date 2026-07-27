@@ -46,14 +46,6 @@ modules:
         sha256: {{ comp.source_sha256 }}
 {% endfor %}
 
-  - name: szafirhost
-    buildsystem: simple
-    build-commands:
-      - install -D -m 755 start-szafir-host-native.sh /app/bin/start-szafir-host-native.sh
-    sources:
-      - type: file
-        path: szafir-host-proxy/start-szafir-host-native.sh
-
   - name: szafir-host-proxy
     buildsystem: cmake-ninja
     config-opts:
