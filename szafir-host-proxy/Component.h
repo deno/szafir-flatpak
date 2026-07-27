@@ -5,8 +5,8 @@
 
 // ── Component ─────────────────────────────────────────────────────────────────
 // Fields shared by both system components (system_components.json) and
-// downloaded components (components.json).  Used as the sole type for the
-// About-page component list.
+// downloaded components (discovered at runtime, persisted in
+// components-state.json).  Used as the sole type for the About-page list.
 
 struct Component {
     Q_GADGET

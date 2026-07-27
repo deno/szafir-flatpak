@@ -117,8 +117,6 @@ modules:
         path: szafir-host-proxy/szafir_license_en.md
       - type: file
         path: szafir-host-proxy/szafir_license_pl.md
-      - type: file
-        path: szafir-host-proxy/components.json
 
   - name: szafir-icons
     buildsystem: simple

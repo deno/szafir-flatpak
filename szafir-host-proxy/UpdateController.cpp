@@ -1,5 +1,6 @@
 #include "UpdateController.h"
 #include "AppSettings.h"
+#include "ComponentDiscovery.h"
 #include "ComponentDownloader.h"
 #include "NativeMessagingService.h"
 #include "SecureNetwork.h"
@@ -30,8 +31,6 @@
 
 namespace {
 
-constexpr const char *kDiscoveryUrl = "https://www.elektronicznypodpis.pl/aplikacje-i-sterowniki";
-constexpr int kMaxPageBytes = 4 * 1024 * 1024;
 constexpr int kInstallerTimeoutMs = 5 * 60 * 1000;
 
 std::filesystem::path updateSettingsPath()
@@ -43,95 +42,6 @@ std::filesystem::path updateSettingsPath()
     return configHome / "szafir-host-proxy" / "update-settings.json";
 }
 
-DiscoveryResult parseDiscoveryPage(const QByteArray &html)
-{
-    DiscoveryResult result;
-    const QString page = QString::fromUtf8(html);
-
-    // --- Runtime (szafirhost-install.jar) ---
-    static const QRegularExpression runtimeLinkRe(
-        QStringLiteral(R"re(href\s*=\s*"(https?://[^"]*/([0-9a-fA-F]{32})/szafirhost-install\.jar)")re"));
-
-    struct Candidate {
-        QUrl url;
-        QString hash;
-        int pos;
-    };
-    QList<Candidate> candidates;
-
-    {
-        QRegularExpressionMatchIterator it = runtimeLinkRe.globalMatch(page);
-        while (it.hasNext()) {
-            QRegularExpressionMatch m = it.next();
-            QUrl url(m.captured(1));
-            if (url.scheme() != QLatin1String("https"))
-                continue;
-            if (url.host() != QLatin1String("www.elektronicznypodpis.pl"))
-                continue;
-            candidates.append({url, m.captured(2), static_cast<int>(m.capturedStart())});
-        }
-    }
-
-    if (!candidates.isEmpty()) {
-        const Candidate *best = &candidates.first();
-        for (const Candidate &c : candidates) {
-            int ctxStart = qMax(0, c.pos - 400);
-            int ctxEnd = qMin(html.size(), c.pos + 400);
-            QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart)).toLower();
-            if (ctx.contains(QLatin1String("macos")) || ctx.contains(QLatin1String("linux"))) {
-                best = &c;
-                break;
-            }
-        }
-
-        result.runtime.url = best->url;
-        result.runtime.urlHash = best->hash;
-        result.runtime.valid = true;
-
-        int ctxStart = qMax(0, best->pos - 400);
-        int ctxEnd = qMin(html.size(), best->pos + 400);
-        QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart));
-
-        static const QRegularExpression versionRe(
-            QStringLiteral(R"(wersja\s+([0-9]+(?:\.[0-9]+)+))"), QRegularExpression::CaseInsensitiveOption);
-        QRegularExpressionMatch vm = versionRe.match(ctx);
-        if (vm.hasMatch())
-            result.runtime.version = vm.captured(1);
-    }
-
-    // --- Library (libCCGraphiteP*.so) ---
-    static const QRegularExpression libLinkRe(
-        QStringLiteral(R"re(href\s*=\s*"(https?://[^"]*/([0-9a-fA-F]{32})/(libCCGraphiteP(?:[0-9]+(?:\.[0-9]+)+)\.so))")re"));
-
-    {
-        QRegularExpressionMatchIterator it = libLinkRe.globalMatch(page);
-        while (it.hasNext()) {
-            QRegularExpressionMatch m = it.next();
-            QUrl url(m.captured(1));
-            if (url.scheme() != QLatin1String("https"))
-                continue;
-            if (url.host() != QLatin1String("www.elektronicznypodpis.pl"))
-                continue;
-
-            result.library.url = url;
-            result.library.urlHash = m.captured(2);
-            result.library.filename = m.captured(3);
-            result.library.valid = true;
-
-            // Extract version from filename: libCCGraphiteP11.2.0.5.6.so → 11.2.0.5.6
-            static const QRegularExpression libVersionRe(
-                QStringLiteral(R"(libCCGraphiteP((?:[0-9]+\.)+[0-9]+)\.so)"));
-            QRegularExpressionMatch vm = libVersionRe.match(m.captured(3));
-            if (vm.hasMatch())
-                result.library.version = vm.captured(1);
-
-            break; // single Linux link expected
-        }
-    }
-
-    return result;
-}
-
 } // namespace
 
 UpdateController::UpdateController(ComponentDownloader *downloader,
@@ -140,7 +50,6 @@ UpdateController::UpdateController(ComponentDownloader *downloader,
     : QObject(parent)
     , m_downloader(downloader)
     , m_service(service)
-    , m_nam(new QNetworkAccessManager(this))
 {
     loadSettings();
     loadRuntimeState();
@@ -276,36 +185,19 @@ void UpdateController::checkForUpdates(bool manual)
     setProgress(-1);
     m_errorString.clear();
 
-    QUrl url{QString::fromLatin1(kDiscoveryUrl)};
-    QNetworkRequest request = SecureNetwork::makeSecureRequest(url);
-    QNetworkReply *reply = m_nam->get(request);
-    SecureNetwork::attachSslAbort(reply);
+    connect(m_downloader, &ComponentDownloader::discoveryFinished, this,
+        [this, manual](const DiscoveryResult &result) {
+            onDiscoveryFinished(result, manual);
+        }, Qt::SingleShotConnection);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, manual]() {
-        onDiscoveryFinished(reply, manual);
-    });
+    m_downloader->discoverComponents();
 }
 
-void UpdateController::onDiscoveryFinished(QNetworkReply *reply, bool manual)
+void UpdateController::onDiscoveryFinished(const DiscoveryResult &discovered, bool manual)
 {
-    reply->deleteLater();
-
-    if (reply->error() != QNetworkReply::NoError) {
-        if (manual) {
-            setError(i18n("Update check failed: %1. You can install from a local file instead.",
-                          reply->errorString()));
-        } else {
-            qWarning() << "UpdateController: automatic check failed:" << reply->errorString();
-            setState(Idle);
-        }
-        return;
-    }
-
-    QByteArray body = reply->read(kMaxPageBytes);
     m_lastCheckTime = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
     saveSettings();
 
-    DiscoveryResult discovered = parseDiscoveryPage(body);
     if (!discovered.runtime.valid && !discovered.library.valid) {
         if (manual) {
             setError(i18n("Could not find SzafirHost download link on the website. "

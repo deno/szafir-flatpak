@@ -299,15 +299,7 @@ int main(int argc, char *argv[])
         }
 
         auto *downloader = new ComponentDownloader(&app);
-
-        // Optional positional URL: exercise the update flow (dynamic source
-        // override, redirects) exactly like UpdateController does.
         const QStringList positional = parser.positionalArguments();
-        if (!positional.isEmpty()) {
-            downloader->overrideComponentSource(QStringLiteral("szafirhost-installer"),
-                                                QUrl(positional.first()),
-                                                QString(), QStringLiteral("cli-test"));
-        }
 
         bool anyFailed = false;
         QObject::connect(downloader, &ComponentDownloader::downloadFailed, &app,
@@ -322,11 +314,25 @@ int main(int argc, char *argv[])
                 app.exit(anyFailed ? 1 : 0);
             });
 
-        if (!downloader->canStartDownload()) {
-            qInfo().noquote() << QStringLiteral("update-and-exit: nothing to download");
-            return 0;
-        }
-        downloader->startDownloads();
+        QObject::connect(downloader, &ComponentDownloader::discoveryFinished, &app,
+            [downloader, &app, &positional](const DiscoveryResult &result) {
+                downloader->applyDiscovery(result);
+
+                if (!positional.isEmpty()) {
+                    downloader->overrideComponentSource(QStringLiteral("szafirhost-installer"),
+                                                        QUrl(positional.first()),
+                                                        QString(), QStringLiteral("cli-test"));
+                }
+
+                if (!downloader->canStartDownload()) {
+                    qInfo().noquote() << QStringLiteral("update-and-exit: nothing to download");
+                    app.exit(0);
+                    return;
+                }
+                downloader->startDownloads();
+            });
+
+        downloader->discoverComponents();
         return app.exec();
     }
 
@@ -374,6 +380,15 @@ int main(int argc, char *argv[])
 
     auto *componentDownloader = new ComponentDownloader(&app);
     setupController->setComponentDownloader(componentDownloader);
+
+    // Trigger discovery so fresh installs get component URLs; restarts with
+    // existing state ignore the results (entries already have urls from state).
+    QObject::connect(componentDownloader, &ComponentDownloader::discoveryFinished,
+        componentDownloader, [componentDownloader](const DiscoveryResult &result) {
+            if (componentDownloader->needsDiscovery())
+                componentDownloader->applyDiscovery(result);
+        });
+    componentDownloader->discoverComponents();
 
     auto *updateController = new UpdateController(componentDownloader, service, &app);
 

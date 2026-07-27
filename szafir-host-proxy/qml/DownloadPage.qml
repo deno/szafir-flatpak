@@ -18,6 +18,14 @@ Kirigami.Page {
         focus: true
         interactive: contentHeight > height
 
+        // Shown while discovery is in progress and no components are loaded yet.
+        Kirigami.PlaceholderMessage {
+            anchors.centerIn: parent
+            visible: componentDownloader.isDiscovering && componentList.count === 0
+            text: i18n("Discovering available components...")
+            helpfulAction: null
+        }
+
         header: ColumnLayout {
             width: componentList.width
             spacing: Kirigami.Units.largeSpacing

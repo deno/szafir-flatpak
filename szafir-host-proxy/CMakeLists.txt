@@ -43,7 +43,6 @@ set(SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES
     LICENSE
     szafir_license_en.md
     szafir_license_pl.md
-    components.json
 )
 
 foreach(required_file IN LISTS SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES)
@@ -71,6 +70,8 @@ set(SZAFIR_HOST_PROXY_SOURCES
     main.cpp
     AppSettings.h
     Component.h
+    ComponentDiscovery.h
+    ComponentDiscovery.cpp
     ComponentInfo.h
     ComponentInfo.cpp
     LandlockEnv.h
@@ -125,7 +126,6 @@ qt_add_resources(szafir-host-proxy "szafir-host-proxy-static-assets"
 qt_add_resources(szafir-host-proxy "download-manifest"
     PREFIX "/szafir-host-proxy"
     FILES
-    components.json
     system_components.json
 )
 

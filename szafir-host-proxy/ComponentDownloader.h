@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Component.h"
+#include "ComponentDiscovery.h"
 
 #include <QAbstractListModel>
 #include <QUrl>
@@ -40,6 +41,7 @@ class ComponentDownloader : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(bool isDownloading READ isDownloading NOTIFY isDownloadingChanged)
+    Q_PROPERTY(bool isDiscovering READ isDiscovering NOTIFY isDiscoveringChanged)
     Q_PROPERTY(bool allRequiredComplete READ allRequiredComplete NOTIFY summaryStateChanged)
     Q_PROPERTY(bool canStartDownload READ canStartDownload NOTIFY summaryStateChanged)
     Q_PROPERTY(bool hasMissingComponents READ hasMissingComponents NOTIFY summaryStateChanged)
@@ -92,10 +94,15 @@ public:
     std::span<const ComponentEntry> components() const;
     QList<Component> presentDisplayEntries() const;
     bool isDownloading() const { return m_downloading; }
+    bool isDiscovering() const { return m_discovering; }
     bool allRequiredComplete() const;
     bool hasDownloadableComponents() const;
     bool canStartDownload() const;
     bool hasMissingComponents() const;
+    bool needsDiscovery() const;
+
+    void discoverComponents();
+    void applyDiscovery(const DiscoveryResult &result);
 
     Q_INVOKABLE void setComponentEnabled(const QString &id, bool enabled);
     Q_INVOKABLE void startDownloads();
@@ -107,12 +114,14 @@ public:
 
 Q_SIGNALS:
     void isDownloadingChanged();
+    void isDiscoveringChanged();
     void summaryStateChanged();
     void allDownloadsComplete();
     void downloadFailed(const QString &id, const QString &errorString);
+    void discoveryFinished(const DiscoveryResult &result);
 
 private:
-    void loadManifest();
+    void loadInstalledState();
     void downloadNext();
     void startRequest(const QUrl &url);
     void onReadyRead();
@@ -128,6 +137,7 @@ private:
     int m_currentDownloadIndex = -1;
     int m_redirectHops = 0;
     bool m_downloading = false;
+    bool m_discovering = false;
     std::filesystem::path m_currentDownloadPath;
 
     QNetworkAccessManager *m_networkManager = nullptr;

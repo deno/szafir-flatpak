@@ -23,6 +23,28 @@
 
 namespace {
 
+struct ComponentDescriptor {
+    const char *id;
+    const char *type;
+    const char *providerName;
+    bool required;
+    bool suggested;
+};
+
+constexpr ComponentDescriptor kRegistry[] = {
+    { "szafirhost-installer", "installer", "",                 true,  false },
+    { "libccgraphite",        "library",   "libCCGraphiteP11", false, true  },
+};
+
+QString localizedComponentName(const QString &id)
+{
+    if (id == QLatin1String("szafirhost-installer"))
+        return i18n("SzafirHost Runtime");
+    if (id == QLatin1String("libccgraphite"))
+        return i18n("libCCGraphite Cryptographic Provider");
+    return id;
+}
+
 QJsonObject loadComponentsState()
 {
     QFile f(PathUtils::toQString(componentStatePath()));
@@ -128,7 +150,7 @@ ComponentDownloader::ComponentDownloader(QObject *parent)
     : QAbstractListModel(parent)
     , m_networkManager(new QNetworkAccessManager(this))
 {
-    loadManifest();
+    loadInstalledState();
 }
 
 int ComponentDownloader::rowCount(const QModelIndex &parent) const
@@ -179,22 +201,9 @@ std::span<const ComponentDownloader::ComponentEntry> ComponentDownloader::compon
     return {m_components.data(), static_cast<std::size_t>(m_components.size())};
 }
 
-void ComponentDownloader::loadManifest()
+void ComponentDownloader::loadInstalledState()
 {
     cleanupDownloadDir();
-
-    QFile f(QStringLiteral(":/szafir-host-proxy/components.json"));
-    if (!f.open(QIODevice::ReadOnly)) {
-        qWarning() << "Failed to open components.json resource";
-        return;
-    }
-
-    QJsonParseError err;
-    const QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "JSON parse error in components.json:" << err.errorString();
-        return;
-    }
 
     QJsonObject stateObj = loadComponentsState();
     QJsonObject componentsState = stateObj[QStringLiteral("components")].toObject();
@@ -202,123 +211,85 @@ void ComponentDownloader::loadManifest()
 
     QList<ComponentEntry> loadedComponents;
 
-    const QJsonArray arr = doc.object()[QStringLiteral("components")].toArray();
-    for (const QJsonValue &v : arr) {
-        const QJsonObject obj = v.toObject();
+    for (const auto &desc : kRegistry) {
         ComponentEntry entry;
-        entry.info.id       = obj[QStringLiteral("id")].toString();
-        entry.info.type     = obj[QStringLiteral("type")].toString();
-        entry.info.providerName = obj[QStringLiteral("provider_name")].toString();
-        entry.info.version  = obj[QStringLiteral("version")].toString();
-        // "name" is either a plain string (English) or an object keyed by language
-        // code. If an object, "en" is required (validated at load-time). The best
-        // available locale match is resolved here and stored as the display name.
-        const QJsonValue nameVal = obj[QStringLiteral("name")];
-        if (nameVal.isObject()) {
-            const QJsonObject namesObj = nameVal.toObject();
-            const QString englishName = namesObj.value(QStringLiteral("en")).toString();
-            if (englishName.isEmpty()) {
-                qWarning() << "components.json: component"
-                           << obj[QStringLiteral("id")].toString()
-                           << "has name object without required \"en\" key — skipping";
-                continue;
-            }
-            const QString lang = QLocale::system().name().section(QLatin1Char('_'), 0, 0);
-            const QString localizedName = namesObj.value(lang).toString();
-            entry.info.name = localizedName.isEmpty() ? englishName : localizedName;
-        } else {
-            entry.info.name = nameVal.toString();
-        }
-        entry.info.filename    = obj[QStringLiteral("filename")].toString();
-        entry.info.url         = obj[QStringLiteral("url")].toString();
-        entry.info.hash        = obj[QStringLiteral("sha256")].toString();
-        entry.info.hashLabel   = entry.info.hash.isEmpty() ? QString{}
-            : (entry.info.type == QLatin1String("installer") ? QString{i18n("SHA256 (installer):")} : QString{i18n("SHA256:")});
-        entry.info.size        = obj[QStringLiteral("size")].toInteger();
-        entry.info.required    = obj[QStringLiteral("required")].toBool();
-        entry.info.suggested   = obj[QStringLiteral("suggested")].toBool();
-        entry.enabled          = entry.info.required || entry.info.suggested; // required/suggested components start enabled
+        entry.info.id           = QString::fromLatin1(desc.id);
+        entry.info.type         = QString::fromLatin1(desc.type);
+        entry.info.providerName = QString::fromLatin1(desc.providerName);
+        entry.info.name         = localizedComponentName(entry.info.id);
+        entry.info.required     = desc.required;
+        entry.info.suggested    = desc.suggested;
+        entry.enabled           = desc.required || desc.suggested;
 
-        const bool downloadable = entry.downloadable();
-
-        bool verified = false;
+        // Restore location data from persisted state.
         QJsonObject compState = componentsState[entry.info.id].toObject();
         const bool isDynamicInstall = compState.contains(QStringLiteral("urlHash"));
         const QString stateHash = compState[QStringLiteral("sha256")].toString();
-        const bool hashMatches = isDynamicInstall
-            ? !stateHash.isEmpty()
-            : (stateHash == entry.info.hash);
 
-        if (compState.contains(QStringLiteral("sha256")) && hashMatches) {
-            QString pathStr = compState[QStringLiteral("path")].toString();
-            const std::filesystem::path verifiedPath = PathUtils::toFsPath(pathStr);
-            // Ensure the file is still present on disk
+        if (compState.contains(QStringLiteral("sha256")) && !stateHash.isEmpty()) {
+            entry.info.url      = compState[QStringLiteral("url")].toString();
+            entry.info.version  = compState[QStringLiteral("version")].toString();
+            entry.info.filename = compState[QStringLiteral("filename")].toString();
+            entry.info.hash     = stateHash;
+            entry.info.hashLabel = entry.info.type == QLatin1String("installer")
+                ? i18n("SHA256 (installer):") : i18n("SHA256:");
+
+            if (isDynamicInstall) {
+                entry.urlHash = compState[QStringLiteral("urlHash")].toString();
+                entry.trustFirstDownload = true;
+            }
+
+            // Verify the file is still on disk.
+            const std::filesystem::path verifiedPath =
+                PathUtils::toFsPath(compState[QStringLiteral("path")].toString());
             std::error_code ec;
             if (std::filesystem::exists(verifiedPath, ec)
                 && verifiedPath.parent_path() == verifiedComponentsPath()) {
-                verified = true;
+                entry.present = true;
+                entry.state = Done;
                 entry.verifiedPath = verifiedPath;
-                if (isDynamicInstall) {
-                    entry.urlHash = compState[QStringLiteral("urlHash")].toString();
-                    entry.info.version = compState[QStringLiteral("version")].toString(entry.info.version);
-                    entry.info.url = compState[QStringLiteral("url")].toString(entry.info.url);
-                    entry.info.hash = stateHash;
-                    entry.info.filename = compState[QStringLiteral("filename")].toString(entry.info.filename);
-                    entry.trustFirstDownload = true;
-                }
+                qDebug() << "ComponentDownloader: component already present & verified:" << entry.info.id;
             }
         }
 
-        if (!verified) {
-            // Not in state or checksum changed or file missing, let's look for it
+        // Fallback: look for the file on disk even without valid state.
+        if (!entry.present && !entry.info.filename.isEmpty()) {
             std::filesystem::path foundPath;
             std::error_code ec;
 
-            // Check dedicated verified location first.
             const std::filesystem::path verifiedPath = finalComponentPath(entry.info.filename);
             if (std::filesystem::exists(verifiedPath, ec)) {
                 foundPath = verifiedPath;
             } else {
-                // Migration fallback: old download directory.
                 const std::filesystem::path downloaded = downloadedExtraPath() / entry.info.filename.toStdString();
-                if (std::filesystem::exists(downloaded, ec)) {
+                if (std::filesystem::exists(downloaded, ec))
                     foundPath = downloaded;
-                }
             }
 
-            if (!foundPath.empty()) {
-                // File found on disk but not in state (or invalid state). Verify its hash.
+            if (!foundPath.empty() && !entry.info.hash.isEmpty()) {
                 qDebug() << "ComponentDownloader: verifying SHA256 for newly found component" << entry.info.id;
-                QString actualHash = computeFileSha256(foundPath);
+                const QString actualHash = computeFileSha256(foundPath);
                 if (actualHash == entry.info.hash) {
                     std::filesystem::path promotedPath;
                     if (installComponent(foundPath, entry.info.filename, false, &promotedPath)) {
-                        verified = true;
+                        entry.present = true;
+                        entry.state = Done;
                         entry.verifiedPath = promotedPath;
-                        // Save to state
                         QJsonObject newState;
                         newState[QStringLiteral("sha256")] = entry.info.hash;
                         newState[QStringLiteral("path")] = PathUtils::toQString(promotedPath);
                         componentsState[entry.info.id] = newState;
                         stateChanged = true;
-                    } else {
-                        qWarning() << "ComponentDownloader: failed to promote verified component" << entry.info.id;
                     }
                 } else {
-                    qWarning() << "ComponentDownloader: checksum mismatch for" << entry.info.id << "at" << PathUtils::toQString(foundPath);
+                    qWarning() << "ComponentDownloader: checksum mismatch for" << entry.info.id
+                               << "at" << PathUtils::toQString(foundPath);
                 }
             }
         }
 
-        entry.present = verified;
-        if (entry.present) {
-            entry.state = Done;
-            qDebug() << "ComponentDownloader: component already present & verified:" << entry.info.id;
-        } else if (!downloadable) {
+        if (!entry.present && !entry.downloadable())
             entry.state = Missing;
-            qWarning() << "ComponentDownloader: component" << entry.info.id
-                       << "is not present and has no download URL — marking as Missing";
-        }
 
         qDebug() << "ComponentDownloader: loaded component" << entry.info.id
                  << "required:" << entry.info.required
@@ -348,7 +319,72 @@ void ComponentDownloader::loadManifest()
     emitSummaryStateChanged();
     writeExternalProvidersXml();
 
-    qDebug() << "ComponentDownloader: loaded" << m_components.size() << "component(s) from manifest";
+    qDebug() << "ComponentDownloader: loaded" << m_components.size() << "component(s) from state";
+}
+
+void ComponentDownloader::discoverComponents()
+{
+    if (m_discovering)
+        return;
+
+    m_discovering = true;
+    Q_EMIT isDiscoveringChanged();
+
+    QNetworkRequest request = SecureNetwork::makeSecureRequest(QUrl{QString::fromLatin1(kDiscoveryUrl)});
+    QNetworkReply *reply = m_networkManager->get(request);
+    SecureNetwork::attachSslAbort(reply);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        m_discovering = false;
+        Q_EMIT isDiscoveringChanged();
+
+        DiscoveryResult result;
+        if (reply->error() == QNetworkReply::NoError) {
+            constexpr int kMaxPageBytes = 4 * 1024 * 1024;
+            result = parseDiscoveryPage(reply->read(kMaxPageBytes));
+        } else {
+            qWarning() << "ComponentDownloader: discovery failed:" << reply->errorString();
+        }
+
+        Q_EMIT discoveryFinished(result);
+    });
+}
+
+void ComponentDownloader::applyDiscovery(const DiscoveryResult &result)
+{
+    auto apply = [this](const DiscoveredComponent &disc, const QString &id) {
+        if (!disc.valid)
+            return;
+        for (auto &e : m_components) {
+            if (e.info.id != id)
+                continue;
+            e.info.url = disc.url.toString();
+            e.info.version = disc.version;
+            e.info.filename = disc.filename;
+            e.urlHash = disc.urlHash;
+            e.info.hash.clear();
+            e.trustFirstDownload = true;
+            e.info.size = 0;
+            if (!e.present)
+                e.state = Pending;
+            break;
+        }
+    };
+
+    apply(result.runtime, QStringLiteral("szafirhost-installer"));
+    apply(result.library, QStringLiteral("libccgraphite"));
+
+    emitSummaryStateChanged();
+}
+
+bool ComponentDownloader::needsDiscovery() const
+{
+    for (const auto &e : m_components) {
+        if (e.info.required && !e.present && e.info.url.isEmpty())
+            return true;
+    }
+    return false;
 }
 
 QList<Component> ComponentDownloader::presentDisplayEntries() const
@@ -529,7 +565,10 @@ void ComponentDownloader::downloadNext()
         return;
     }
 
-    const std::filesystem::path destPath = downloadSubdir / entry.info.filename.toStdString();
+    QString filename = entry.info.filename;
+    if (filename.isEmpty())
+        filename = QUrl(entry.info.url).fileName();
+    const std::filesystem::path destPath = downloadSubdir / filename.toStdString();
     m_currentDownloadPath = destPath;
     m_outputFile = new QFile(PathUtils::toQString(destPath), this);
     if (!m_outputFile->open(QIODevice::WriteOnly | QIODevice::Truncate)) {

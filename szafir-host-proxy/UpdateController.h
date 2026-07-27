@@ -1,27 +1,14 @@
 #pragma once
 
+#include "ComponentDiscovery.h"
+
 #include <QObject>
 #include <QTimer>
 #include <QUrl>
 
 class ComponentDownloader;
 class NativeMessagingService;
-class QNetworkAccessManager;
-class QNetworkReply;
 class QProcess;
-
-struct DiscoveredComponent {
-    QUrl url;
-    QString urlHash;
-    QString version;
-    QString filename;
-    bool valid = false;
-};
-
-struct DiscoveryResult {
-    DiscoveredComponent runtime;
-    DiscoveredComponent library;
-};
 
 class UpdateController : public QObject
 {
@@ -95,7 +82,7 @@ private:
     void loadRuntimeState();
     void saveRuntimeState();
 
-    void onDiscoveryFinished(QNetworkReply *reply, bool manual);
+    void onDiscoveryFinished(const DiscoveryResult &result, bool manual);
     void evaluateDiscovery(const DiscoveryResult &discovered, bool manual);
     void beginInstallSequence();
     void onHostsStopped();
@@ -105,7 +92,6 @@ private:
 
     ComponentDownloader *m_downloader;
     NativeMessagingService *m_service;
-    QNetworkAccessManager *m_nam;
     QTimer *m_checkTimer = nullptr;
 
     State m_state = Idle;
