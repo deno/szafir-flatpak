@@ -58,11 +58,14 @@
         # libglvnd's libEGL dispatches to a Mesa vendor implementation that is
         # dlopened at runtime; point the wrapper at Mesa's EGL vendor config, DRI
         # drivers, and libraries. Needed on non-NixOS hosts (no /run/opengl-driver).
+        # SSL_CERT_FILE: Nix OpenSSL only checks the NixOS bundle path, not
+        # distro layouts like Fedora's /etc/pki — ship the Mozilla CA bundle.
         preFixup = ''
           qtWrapperArgs+=(
             --prefix __EGL_VENDOR_LIBRARY_DIRS : "${pkgs.mesa}/share/glvnd/egl_vendor.d"
             --prefix LIBGL_DRIVERS_PATH : "${pkgs.mesa}/lib/dri"
             --prefix LD_LIBRARY_PATH : "${pkgs.mesa}/lib"
+            --set-default SSL_CERT_FILE "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           )
         '';
       };
