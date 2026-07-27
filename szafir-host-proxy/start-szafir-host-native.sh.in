@@ -32,6 +32,14 @@ if [ "$1" = "--install-only" ]; then
     shift
 fi
 
+# Prefer the bundled JRE; fall back to the system java (e.g. RPM builds).
+if [ -x "@RUNTIME_PREFIX@/jre/bin/java" ]; then
+    JAVA_BIN="@RUNTIME_PREFIX@/jre/bin/java"
+else
+    JAVA_BIN="java"
+fi
+debug_log "JAVA_BIN=$JAVA_BIN"
+
 FORCE_INSTALL="${SZAFIR_FORCE_INSTALL:-0}"
 INSTALLER_SHA="${SZAFIR_INSTALLER_SHA256:-}"
 
@@ -82,7 +90,7 @@ run_installer() {
 </AutomatedInstallation>
 EOF
         debug_log "running installer ${INSTALLER_JAR} (auto xml ${AUTO_XML})"
-        @RUNTIME_PREFIX@/jre/bin/java -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
+        "$JAVA_BIN" -jar "${INSTALLER_JAR}" "$AUTO_XML" >&2
         INSTALL_EXIT=$?
         debug_log "installer exit=$INSTALL_EXIT"
         rm -f "$AUTO_XML"
@@ -115,7 +123,7 @@ fi
 cd "$INSTALL_DIR" || exit 1
 
 debug_log "launching SzafirHost.jar (path=$JAR_PATH) args=$* cwd=$(pwd)"
-exec @RUNTIME_PREFIX@/jre/bin/java \
+exec "$JAVA_BIN" \
     -Djava.io.tmpdir="$HOME/.java/tmp" \
     -Dsun.java2d.uiScale.enabled=true \
     -jar SzafirHost.jar "$@"
