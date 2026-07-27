@@ -64,7 +64,6 @@ Kirigami.Page {
 
             Button {
                 text: i18n("Get Started")
-                highlighted: true
                 icon.name: "go-next"
                 onClicked: setupController.advance()
             }

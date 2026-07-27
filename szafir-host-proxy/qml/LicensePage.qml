@@ -67,7 +67,6 @@ Kirigami.Page {
 
             Button {
                 text: i18n("Accept")
-                highlighted: true
                 icon.name: "dialog-ok"
                 onClicked: setupController.acceptLicense()
             }
