@@ -9,4 +9,10 @@ namespace SelfTest {
 // wrapping is not enabled), 1 on FAIL.
 int fdPassthrough(int argc, char *argv[]);
 
+// Verify HTTPS certificate verification under the production Landlock phases.
+// Applies Phase 1 + Phase 2 (honoring LANDLOCK env kill switches), then issues
+// a HEAD request through SecureNetwork to the given URL (argv[2], defaults to
+// the component download host). Returns 0 when the TLS handshake succeeds.
+int tlsProbe(int argc, char *argv[]);
+
 } // namespace SelfTest

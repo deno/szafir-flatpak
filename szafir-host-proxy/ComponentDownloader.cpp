@@ -548,24 +548,31 @@ void ComponentDownloader::downloadNext()
     m_hashAccumulator.clear();
     m_hashAccumulator.reserve(entry.info.size);
 
-    QNetworkRequest request = SecureNetwork::makeSecureRequest(QUrl(entry.info.url));
+    m_redirectHops = 0;
+    startRequest(QUrl(entry.info.url));
+}
+
+void ComponentDownloader::startRequest(const QUrl &url)
+{
+    QNetworkRequest request = SecureNetwork::makeManualRedirectRequest(url);
     m_currentReply = m_networkManager->get(request);
     SecureNetwork::attachSslAbort(m_currentReply);
 
-    if (entry.info.size == 0) {
-        connect(m_currentReply, &QNetworkReply::metaDataChanged, this, [this]() {
-            if (m_currentDownloadIndex < 0 || m_currentDownloadIndex >= m_components.size())
+    connect(m_currentReply, &QNetworkReply::metaDataChanged, this, [this]() {
+        if (m_currentDownloadIndex < 0 || m_currentDownloadIndex >= m_components.size())
+            return;
+        ComponentEntry &e = m_components[m_currentDownloadIndex];
+        if (e.info.size == 0 && m_currentReply) {
+            const int status = m_currentReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            if (status < 200 || status >= 300)
                 return;
-            ComponentEntry &e = m_components[m_currentDownloadIndex];
-            if (e.info.size == 0 && m_currentReply) {
-                const QVariant len = m_currentReply->header(QNetworkRequest::ContentLengthHeader);
-                if (len.isValid()) {
-                    e.info.size = len.toLongLong();
-                    emitRowChanged(m_currentDownloadIndex, {ComponentRole});
-                }
+            const QVariant len = m_currentReply->header(QNetworkRequest::ContentLengthHeader);
+            if (len.isValid()) {
+                e.info.size = len.toLongLong();
+                emitRowChanged(m_currentDownloadIndex, {ComponentRole});
             }
-        });
-    }
+        }
+    });
 
     connect(m_currentReply, &QNetworkReply::readyRead, this, &ComponentDownloader::onReadyRead);
     connect(m_currentReply, &QNetworkReply::finished, this, &ComponentDownloader::onDownloadFinished);
@@ -575,6 +582,12 @@ void ComponentDownloader::onReadyRead()
 {
     if (!m_outputFile || !m_currentReply
         || m_currentDownloadIndex < 0 || m_currentDownloadIndex >= m_components.size())
+        return;
+
+    // Redirect responses are handled in onDownloadFinished; their bodies are
+    // not part of the download.
+    const int status = m_currentReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (status >= 300 && status < 400)
         return;
 
     const QByteArray data = m_currentReply->readAll();
@@ -598,6 +611,54 @@ void ComponentDownloader::onDownloadFinished()
         return;
 
     ComponentEntry &entry = m_components[m_currentDownloadIndex];
+
+    // Handle redirects manually: re-validate (and possibly rewrite) each hop
+    // before following it, keeping the output file open across hops.
+    if (m_currentReply && m_currentReply->error() == QNetworkReply::NoError) {
+        const QUrl target = m_currentReply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+        if (target.isValid()) {
+            QNetworkReply *redirectReply = m_currentReply;
+            m_currentReply = nullptr;
+            redirectReply->deleteLater();
+
+            const QUrl resolved =
+                SecureNetwork::rewriteRedirectTarget(redirectReply->url().resolved(target));
+
+            QString redirectError;
+            if (++m_redirectHops > kMaxRedirectHops)
+                redirectError = QStringLiteral("Too many redirects");
+            else if (resolved.scheme() != QLatin1String("https")
+                     || !SecureNetwork::isAllowedHost(resolved))
+                redirectError = QStringLiteral("Redirect to untrusted URL: ") + resolved.toString();
+
+            if (redirectError.isEmpty()) {
+                qDebug() << "ComponentDownloader: following redirect for" << entry.info.id
+                         << "to" << resolved.toString();
+                startRequest(resolved);
+                return;
+            }
+
+            qWarning() << "Download failed for" << entry.info.id << ":" << redirectError;
+            if (m_outputFile) {
+                m_outputFile->close();
+                delete m_outputFile;
+                m_outputFile = nullptr;
+            }
+            const std::filesystem::path downloadedPath = m_currentDownloadPath;
+            m_currentDownloadPath.clear();
+            m_hashAccumulator.clear();
+            entry.state = Error;
+            emitRowChanged(m_currentDownloadIndex, {StateRole});
+            emitSummaryStateChanged();
+            Q_EMIT downloadFailed(entry.info.id, redirectError);
+            if (!downloadedPath.empty()) {
+                std::error_code ec;
+                std::filesystem::remove_all(downloadedPath.parent_path(), ec);
+            }
+            downloadNext();
+            return;
+        }
+    }
 
     std::filesystem::path downloadedPath;
     if (m_outputFile) {

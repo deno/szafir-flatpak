@@ -112,6 +112,10 @@ int main(int argc, char *argv[])
     if (argc >= 2 && strcmp(argv[1], "--selftest-fd") == 0)
         return SelfTest::fdPassthrough(argc, argv);
 
+    // Hidden self-test: verify HTTPS certificate verification under Landlock.
+    if (argc >= 2 && strcmp(argv[1], "--selftest-tls") == 0)
+        return SelfTest::tlsProbe(argc, argv);
+
 #ifdef ENABLE_FLATPAK_HOST_ICONS_LOOKUP
     const std::filesystem::path userFlatpakExportDir =
         PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
@@ -196,6 +200,9 @@ int main(int argc, char *argv[])
     const QCommandLineOption wizardOpt(
         QStringLiteral("wizard"),
         i18n("Show the first-run setup wizard even if all checks already pass."));
+    const QCommandLineOption updateAndExitOpt(
+        QStringLiteral("update-and-exit"),
+        i18n("Download enabled components headlessly, then exit."));
 
     parser.addOption(debugOpt);
     parser.addOption(installOpt);
@@ -203,6 +210,7 @@ int main(int argc, char *argv[])
     parser.addOption(dryRunOpt);
     parser.addOption(showStatusWindowOpt);
     parser.addOption(wizardOpt);
+    parser.addOption(updateAndExitOpt);
 
     parser.process(app);
     aboutData.processCommandLine(&parser);
@@ -244,6 +252,49 @@ int main(int argc, char *argv[])
         }
         qInfo().noquote() << (dryRun ? i18n("Dry-run uninstall complete.") : i18n("Native host integration removed."));
         return 0;
+    }
+
+    if (parser.isSet(updateAndExitOpt)) {
+        // Mirror the production sequence: Phase 2 is applied before any download runs.
+        if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_2")) {
+            if (!LandlockSandbox::dropBrowserAccess()) {
+                qCritical() << "Landlock Phase 2 (dropBrowserAccess) failed; aborting.";
+                return 1;
+            }
+        } else {
+            qInfo() << "Landlock Phase 2 disabled by environment.";
+        }
+
+        auto *downloader = new ComponentDownloader(&app);
+
+        // Optional positional URL: exercise the update flow (dynamic source
+        // override, redirects) exactly like UpdateController does.
+        const QStringList positional = parser.positionalArguments();
+        if (!positional.isEmpty()) {
+            downloader->overrideComponentSource(QStringLiteral("szafirhost-installer"),
+                                                QUrl(positional.first()),
+                                                QString(), QStringLiteral("cli-test"));
+        }
+
+        bool anyFailed = false;
+        QObject::connect(downloader, &ComponentDownloader::downloadFailed, &app,
+            [&anyFailed](const QString &id, const QString &errorString) {
+                qWarning().noquote() << "update-and-exit: download failed for" << id << ":" << errorString;
+                anyFailed = true;
+            });
+        QObject::connect(downloader, &ComponentDownloader::allDownloadsComplete, &app,
+            [&app, &anyFailed]() {
+                qInfo().noquote() << (anyFailed ? QStringLiteral("update-and-exit: FAILED")
+                                                : QStringLiteral("update-and-exit: OK"));
+                app.exit(anyFailed ? 1 : 0);
+            });
+
+        if (!downloader->canStartDownload()) {
+            qInfo().noquote() << QStringLiteral("update-and-exit: nothing to download");
+            return 0;
+        }
+        downloader->startDownloads();
+        return app.exec();
     }
 
     QDBusConnection bus = QDBusConnection::sessionBus();

@@ -25,6 +25,21 @@ inline bool isAllowedHost(const QUrl &url)
     return false;
 }
 
+// cdn.elektronicznypodpis.pl is a storage.googleapis.com bucket alias whose
+// TLS endpoint serves only the leaf certificate (missing intermediate), so
+// strict verification fails. Fetch the same object through the canonical GCS
+// endpoint, which presents a complete, verifiable chain.
+inline QUrl rewriteRedirectTarget(const QUrl &url)
+{
+    if (url.host() == QLatin1String("cdn.elektronicznypodpis.pl")) {
+        QUrl rewritten(url);
+        rewritten.setHost(QStringLiteral("storage.googleapis.com"));
+        rewritten.setPath(QStringLiteral("/cdn.elektronicznypodpis.pl") + url.path());
+        return rewritten;
+    }
+    return url;
+}
+
 inline QNetworkRequest makeSecureRequest(const QUrl &url)
 {
     if (url.scheme() != QLatin1String("https")) {
@@ -40,6 +55,17 @@ inline QNetworkRequest makeSecureRequest(const QUrl &url)
     sslCfg.setPeerVerifyMode(QSslSocket::VerifyPeer);
     request.setSslConfiguration(sslCfg);
 
+    return request;
+}
+
+// For downloads whose redirect targets must be re-validated (and possibly
+// rewritten) per hop by the caller.
+inline QNetworkRequest makeManualRedirectRequest(const QUrl &url)
+{
+    QNetworkRequest request = makeSecureRequest(url);
+    if (request.url().isValid())
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                             QNetworkRequest::ManualRedirectPolicy);
     return request;
 }
 

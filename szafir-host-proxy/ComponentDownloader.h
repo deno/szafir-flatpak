@@ -113,6 +113,7 @@ Q_SIGNALS:
 private:
     void loadManifest();
     void downloadNext();
+    void startRequest(const QUrl &url);
     void onReadyRead();
     void onDownloadFinished();
     void writeExternalProvidersXml();
@@ -120,8 +121,11 @@ private:
     void emitRowChanged(int row, const QList<int> &roles);
     void emitSummaryStateChanged();
 
+    static constexpr int kMaxRedirectHops = 5;
+
     QList<ComponentEntry> m_components;
     int m_currentDownloadIndex = -1;
+    int m_redirectHops = 0;
     bool m_downloading = false;
     std::filesystem::path m_currentDownloadPath;
 

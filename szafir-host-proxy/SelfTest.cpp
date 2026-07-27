@@ -1,10 +1,20 @@
 #include "SelfTest.h"
 #include "BwrapSandbox.h"
+#include "LandlockEnv.h"
+#include "LandlockSandbox.h"
+#include "SecureNetwork.h"
 
 #include <QByteArray>
 #include <QCoreApplication>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QProcess>
+#include <QSslConfiguration>
+#include <QSslSocket>
 #include <QStringList>
+#include <QTimer>
+#include <QUrl>
 
 #include <cerrno>
 #include <cstdio>
@@ -152,6 +162,86 @@ int fdPassthrough(int argc, char *argv[])
     if (!stderrOut.isEmpty())
         fprintf(stderr, "selftest-fd: child stderr:\n%s\n", stderrOut.constData());
     return 1;
+}
+
+int tlsProbe(int argc, char *argv[])
+{
+    QCoreApplication app(argc, argv);
+
+    // Mirror main(): Phase 1 before any Qt networking, Phase 2 afterwards.
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_1")) {
+        if (!LandlockSandbox::limitOverrides()) {
+            fprintf(stderr, "selftest-tls: FAIL (Landlock Phase 1 failed)\n");
+            return 1;
+        }
+    } else {
+        printf("selftest-tls: Landlock Phase 1 disabled by environment\n");
+    }
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_2")) {
+        if (!LandlockSandbox::dropBrowserAccess()) {
+            fprintf(stderr, "selftest-tls: FAIL (Landlock Phase 2 failed)\n");
+            return 1;
+        }
+    } else {
+        printf("selftest-tls: Landlock Phase 2 disabled by environment\n");
+    }
+
+    printf("selftest-tls: backend=%s library=%s supportsSsl=%d\n",
+           qPrintable(QSslSocket::activeBackend()),
+           qPrintable(QSslSocket::sslLibraryVersionString()),
+           QSslSocket::supportsSsl());
+    printf("selftest-tls: defaultConfiguration CA certs=%lld systemCaCertificates=%lld\n",
+           static_cast<long long>(QSslConfiguration::defaultConfiguration().caCertificates().size()),
+           static_cast<long long>(QSslConfiguration::systemCaCertificates().size()));
+    const char *sslCertFile = getenv("SSL_CERT_FILE");
+    printf("selftest-tls: SSL_CERT_FILE=%s\n", sslCertFile ? sslCertFile : "(unset)");
+    fflush(stdout);
+
+    const QUrl url(argc > 2 ? QString::fromLocal8Bit(argv[2])
+                            : QStringLiteral("https://www.elektronicznypodpis.pl/"));
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request = SecureNetwork::makeSecureRequest(url);
+    if (!request.url().isValid()) {
+        fprintf(stderr, "selftest-tls: FAIL (URL rejected: %s)\n", qPrintable(url.toString()));
+        return 1;
+    }
+
+    QNetworkReply *reply = manager.head(request);
+    SecureNetwork::attachSslAbort(reply);
+
+    bool sawSslError = false;
+    QObject::connect(reply, &QNetworkReply::sslErrors, reply,
+        [&sawSslError](const QList<QSslError> &errors) {
+            sawSslError = true;
+            for (const QSslError &e : errors)
+                fprintf(stderr, "selftest-tls: sslError: %s\n", qPrintable(e.errorString()));
+        });
+
+    int result = 1;
+    QObject::connect(reply, &QNetworkReply::finished, &app,
+        [&app, &result, &sawSslError, reply]() {
+            const bool tlsOk = !sawSslError && reply->error() != QNetworkReply::SslHandshakeFailedError
+                               && reply->error() != QNetworkReply::OperationCanceledError;
+            if (tlsOk) {
+                printf("selftest-tls: PASS (handshake OK, HTTP status %d, error=%d %s)\n",
+                       reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(),
+                       static_cast<int>(reply->error()), qPrintable(reply->errorString()));
+                result = 0;
+            } else {
+                fprintf(stderr, "selftest-tls: FAIL (error=%d %s)\n",
+                        static_cast<int>(reply->error()), qPrintable(reply->errorString()));
+            }
+            app.quit();
+        });
+
+    QTimer::singleShot(20000, &app, [&app]() {
+        fprintf(stderr, "selftest-tls: FAIL (timeout)\n");
+        app.quit();
+    });
+
+    app.exec();
+    return result;
 }
 
 } // namespace SelfTest
