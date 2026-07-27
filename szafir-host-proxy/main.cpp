@@ -225,10 +225,10 @@ int main(int argc, char *argv[])
     const QCommandLineOption wizardOpt(
         QStringLiteral("wizard"),
         i18n("Show the first-run setup wizard even if all checks already pass."));
+#ifdef SZAFIR_DEV_BUILD
     const QCommandLineOption updateAndExitOpt(
         QStringLiteral("update-and-exit"),
-        i18n("Download enabled components headlessly, then exit."));
-#ifdef SZAFIR_DEV_BUILD
+        i18n("Download enabled components headlessly, then exit (dev builds only)."));
     const QCommandLineOption freshEnvOpt(
         QStringLiteral("fresh-env"),
         i18n("Run with a throwaway XDG environment (dev builds only)."));
@@ -243,8 +243,8 @@ int main(int argc, char *argv[])
     parser.addOption(dryRunOpt);
     parser.addOption(showStatusWindowOpt);
     parser.addOption(wizardOpt);
-    parser.addOption(updateAndExitOpt);
 #ifdef SZAFIR_DEV_BUILD
+    parser.addOption(updateAndExitOpt);
     parser.addOption(freshEnvOpt);
     parser.addOption(testingUpdateOpt);
 #endif
@@ -291,6 +291,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+#ifdef SZAFIR_DEV_BUILD
     if (parser.isSet(updateAndExitOpt)) {
         // Mirror the production sequence: Phase 2 is applied before any download runs.
         if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_2")) {
@@ -339,6 +340,7 @@ int main(int argc, char *argv[])
         downloader->discoverComponents();
         return app.exec();
     }
+#endif
 
     QDBusConnection bus = QDBusConnection::sessionBus();
     if (!bus.isConnected()) {
