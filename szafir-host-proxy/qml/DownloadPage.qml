@@ -102,15 +102,23 @@ Kirigami.Page {
                         text: {
                             if (model.present) return i18n("Already installed")
                             const sizeMb = (model.component.size / 1048576).toFixed(1)
+                            const estMb = (model.component.estimatedSize / 1048576).toFixed(1)
                             switch (model.state) {
-                            case 0: return i18n("%1 MB", sizeMb)               // Pending
+                            case 0:                                              // Pending
+                                if (model.component.size > 0) return i18n("%1 MB", sizeMb)
+                                if (model.component.estimatedSize > 0) return i18n("~%1 MB", estMb)
+                                return ""
                             case 1: {                                           // Downloading
                                 const recvMb = (model.bytesReceived / 1048576).toFixed(1)
-                                return i18n("Downloading... %1 / %2 MB", recvMb, sizeMb)
+                                const totalMb = model.component.size > 0 ? sizeMb : estMb
+                                return i18n("Downloading... %1 / %2 MB", recvMb, totalMb)
                             }
                             case 2: return i18n("Verifying checksum...")        // Verifying
                             case 3: return i18n("Downloaded")                   // Done
-                            case 4: return i18n("%1 MB", sizeMb)               // Skipped → show size again
+                            case 4:                                              // Skipped
+                                if (model.component.size > 0) return i18n("%1 MB", sizeMb)
+                                if (model.component.estimatedSize > 0) return i18n("~%1 MB", estMb)
+                                return ""
                             case 5: return i18n("Error")                        // Error
                             case 6: return i18n("Missing")                      // Missing — not available
                             default: return ""

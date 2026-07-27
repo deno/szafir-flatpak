@@ -20,6 +20,8 @@
 #include <QXmlStreamWriter>
 
 #include <algorithm>
+#include <functional>
+#include <memory>
 
 namespace {
 
@@ -29,11 +31,12 @@ struct ComponentDescriptor {
     const char *providerName;
     bool required;
     bool suggested;
+    qint64 estimatedSize;
 };
 
 constexpr ComponentDescriptor kRegistry[] = {
-    { "szafirhost-installer", "installer", "",                 true,  false },
-    { "libccgraphite",        "library",   "libCCGraphiteP11", false, true  },
+    { "szafirhost-installer", "installer", "",                 true,  false, 37900059 },
+    { "libccgraphite",        "library",   "libCCGraphiteP11", false, true,   6659848 },
 };
 
 QString localizedComponentName(const QString &id)
@@ -219,6 +222,7 @@ void ComponentDownloader::loadInstalledState()
         entry.info.name         = localizedComponentName(entry.info.id);
         entry.info.required     = desc.required;
         entry.info.suggested    = desc.suggested;
+        entry.info.estimatedSize = desc.estimatedSize;
         entry.enabled           = desc.required || desc.suggested;
 
         // Restore location data from persisted state.
@@ -356,7 +360,8 @@ void ComponentDownloader::applyDiscovery(const DiscoveryResult &result)
     auto apply = [this](const DiscoveredComponent &disc, const QString &id) {
         if (!disc.valid)
             return;
-        for (auto &e : m_components) {
+        for (int i = 0; i < m_components.size(); ++i) {
+            auto &e = m_components[i];
             if (e.info.id != id)
                 continue;
             e.info.url = disc.url.toString();
@@ -368,6 +373,7 @@ void ComponentDownloader::applyDiscovery(const DiscoveryResult &result)
             e.info.size = 0;
             if (!e.present)
                 e.state = Pending;
+            emitRowChanged(i, {ComponentRole, StateRole, DownloadableRole});
             break;
         }
     };
@@ -376,6 +382,58 @@ void ComponentDownloader::applyDiscovery(const DiscoveryResult &result)
     apply(result.library, QStringLiteral("libccgraphite"));
 
     emitSummaryStateChanged();
+}
+
+void ComponentDownloader::fetchRemoteSizes()
+{
+    for (int i = 0; i < m_components.size(); ++i) {
+        const ComponentEntry &entry = m_components[i];
+        if (entry.info.url.isEmpty() || entry.info.size > 0 || entry.present)
+            continue;
+
+        const QString id = entry.info.id;
+        QUrl url(entry.info.url);
+
+        using HeadFn = std::function<void(const QUrl &, int)>;
+        auto sendHead = std::make_shared<HeadFn>();
+        *sendHead = [this, id, sendHead](const QUrl &reqUrl, int hops) {
+            QNetworkRequest request = SecureNetwork::makeManualRedirectRequest(reqUrl);
+            QNetworkReply *reply = m_networkManager->head(request);
+            SecureNetwork::attachSslAbort(reply);
+
+            connect(reply, &QNetworkReply::finished, this, [this, reply, id, hops, sendHead]() {
+                reply->deleteLater();
+
+                if (reply->error() != QNetworkReply::NoError)
+                    return;
+
+                const QUrl target = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+                if (target.isValid()) {
+                    if (hops >= kMaxRedirectHops)
+                        return;
+                    const QUrl resolved = SecureNetwork::rewriteRedirectTarget(reply->url().resolved(target));
+                    if (resolved.scheme() != QLatin1String("https") || !SecureNetwork::isAllowedHost(resolved))
+                        return;
+                    (*sendHead)(resolved, hops + 1);
+                    return;
+                }
+
+                const QVariant len = reply->header(QNetworkRequest::ContentLengthHeader);
+                if (!len.isValid())
+                    return;
+
+                for (int j = 0; j < m_components.size(); ++j) {
+                    if (m_components[j].info.id == id) {
+                        m_components[j].info.size = len.toLongLong();
+                        emitRowChanged(j, {ComponentRole});
+                        break;
+                    }
+                }
+            });
+        };
+
+        (*sendHead)(url, 0);
+    }
 }
 
 bool ComponentDownloader::needsDiscovery() const

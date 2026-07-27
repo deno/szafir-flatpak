@@ -385,8 +385,10 @@ int main(int argc, char *argv[])
     // existing state ignore the results (entries already have urls from state).
     QObject::connect(componentDownloader, &ComponentDownloader::discoveryFinished,
         componentDownloader, [componentDownloader](const DiscoveryResult &result) {
-            if (componentDownloader->needsDiscovery())
+            if (componentDownloader->needsDiscovery()) {
                 componentDownloader->applyDiscovery(result);
+                componentDownloader->fetchRemoteSizes();
+            }
         });
     componentDownloader->discoverComponents();
 

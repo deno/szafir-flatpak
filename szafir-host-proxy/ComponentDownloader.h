@@ -22,6 +22,7 @@ struct DownloadableComponent : Component
     Q_PROPERTY(QString filename     MEMBER filename)
     Q_PROPERTY(QString url          MEMBER url)
     Q_PROPERTY(qint64  size         MEMBER size)
+    Q_PROPERTY(qint64  estimatedSize MEMBER estimatedSize)
     Q_PROPERTY(bool    required     MEMBER required)
     Q_PROPERTY(bool    suggested    MEMBER suggested)
 public:
@@ -32,6 +33,7 @@ public:
     QString filename;
     QString url;
     qint64 size = 0;
+    qint64 estimatedSize = 0;
     bool required = false;
     bool suggested = false;
 };
@@ -103,6 +105,7 @@ public:
 
     void discoverComponents();
     void applyDiscovery(const DiscoveryResult &result);
+    void fetchRemoteSizes();
 
     Q_INVOKABLE void setComponentEnabled(const QString &id, bool enabled);
     Q_INVOKABLE void startDownloads();
