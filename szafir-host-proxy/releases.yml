@@ -1,4 +1,13 @@
 releases:
+  - version: 0.3.2
+    date: 2026-07-27
+    description:
+      en: >-
+        Switch pcsc-lite 2.3.3 download URL to Fedora lookaside mirror;
+        upstream removed older releases from their site, breaking CI builds.
+      pl: >-
+        Zmieniono adres pobierania pcsc-lite 2.3.3 na mirror Fedora;
+        upstream usunął starsze wydania ze swojej strony, co psuło budowanie CI.
   - version: 0.3.1
     date: 2026-07-27
     description:

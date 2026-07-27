@@ -92,7 +92,7 @@ modules:
       - install -Dm644 ../COPYING /app/share/licenses/$FLATPAK_ID/pcsc-lite/COPYING
     sources:
       - type: archive
-        url: https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz
+        url: https://src.fedoraproject.org/repo/pkgs/pcsc-lite/pcsc-lite-2.3.3.tar.xz/sha512/96a62364eb0221828a5e3f65d500f8b83acc27cdc0c40fad2b0f807b399c1a465524421175bd7c05fa4ece152f9afe7f8b60c57ee20fa948af7d8899543a2d12/pcsc-lite-2.3.3.tar.xz
         sha256: cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7
 
   # Build-time dep: CMake configure runs generate_permissions_header.py (imports yaml);
@@ -110,7 +110,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.3.1
+      - -DAPP_VERSION=0.3.2
       - -DSZAFIR_DEV=ON
     sources:
       - type: dir

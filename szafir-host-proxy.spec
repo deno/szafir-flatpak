@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.3.1
+Version:        0.3.2
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
