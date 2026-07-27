@@ -83,39 +83,39 @@ if(NOT _permissions_gen_result EQUAL 0)
 endif()
 
 set(SZAFIR_HOST_PROXY_SOURCES
-    main.cpp
-    AppSettings.h
-    Component.h
-    ComponentDiscovery.h
-    ComponentDiscovery.cpp
-    ComponentInfo.h
-    ComponentInfo.cpp
-    LandlockEnv.h
-    LandlockSandbox.h
-    LandlockSandbox.cpp
-    BwrapSandbox.h
-    BwrapSandbox.cpp
-    HostLauncher.h
-    HostLauncher.cpp
-    SelfTest.h
-    SelfTest.cpp
-    ScalingController.h
-    ScalingController.cpp
-    SetupController.h
-    SetupController.cpp
-    NativeHostIntegrator.h
-    NativeHostIntegrator.cpp
-    NativeMessagingService.h
-    NativeMessagingService.cpp
-    HostRuntimeController.h
-    HostRuntimeController.cpp
-    MainWindow.h
-    MainWindow.cpp
-    ComponentDownloader.h
-    ComponentDownloader.cpp
-    SecureNetwork.h
-    UpdateController.h
-    UpdateController.cpp
+    src/main.cpp
+    src/AppSettings.h
+    src/Component.h
+    src/ComponentDiscovery.h
+    src/ComponentDiscovery.cpp
+    src/ComponentInfo.h
+    src/ComponentInfo.cpp
+    src/LandlockEnv.h
+    src/LandlockSandbox.h
+    src/LandlockSandbox.cpp
+    src/BwrapSandbox.h
+    src/BwrapSandbox.cpp
+    src/HostLauncher.h
+    src/HostLauncher.cpp
+    src/SelfTest.h
+    src/SelfTest.cpp
+    src/ScalingController.h
+    src/ScalingController.cpp
+    src/SetupController.h
+    src/SetupController.cpp
+    src/NativeHostIntegrator.h
+    src/NativeHostIntegrator.cpp
+    src/NativeMessagingService.h
+    src/NativeMessagingService.cpp
+    src/HostRuntimeController.h
+    src/HostRuntimeController.cpp
+    src/MainWindow.h
+    src/MainWindow.cpp
+    src/ComponentDownloader.h
+    src/ComponentDownloader.cpp
+    src/SecureNetwork.h
+    src/UpdateController.h
+    src/UpdateController.cpp
 )
 
 add_executable(szafir-host-proxy ${SZAFIR_HOST_PROXY_SOURCES})
@@ -145,7 +145,7 @@ qt_add_resources(szafir-host-proxy "download-manifest"
     system_components.json
 )
 
-target_include_directories(szafir-host-proxy PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(szafir-host-proxy PRIVATE ${CMAKE_CURRENT_BINARY_DIR} src)
 
 target_compile_definitions(szafir-host-proxy PRIVATE
     $<$<BOOL:${ENABLE_FLATPAK_HOST_ICONS_LOOKUP}>:ENABLE_FLATPAK_HOST_ICONS_LOOKUP>

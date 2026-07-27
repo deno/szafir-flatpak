@@ -36,7 +36,7 @@ jobs:
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            VERSION=$(scripts/get_proxy_version.sh)
+            VERSION=$(python3 scripts/query_releases.py --current-version)
           fi
           if [ -z "$VERSION" ]; then
             echo "Failed to determine proxy version" >&2

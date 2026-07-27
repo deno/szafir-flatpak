@@ -123,30 +123,30 @@ msgid "Menu"
 msgstr "Menu"
 
 # Tray context menu: GDK_SCALE submenu for Szafir app
-#: szafir-host-proxy/qml/StatusPage.qml:32 szafir-host-proxy/main.cpp:331
+#: szafir-host-proxy/qml/StatusPage.qml:32 szafir-host-proxy/src/main.cpp:331
 msgid "Szafir scaling"
 msgstr "Skalowanie Szafir"
 
 # Tray context menu: HiDPI submenu item — no GDK_SCALE override
 #: szafir-host-proxy/qml/StatusPage.qml:35
-#: szafir-host-proxy/qml/StatusPage.qml:61 szafir-host-proxy/main.cpp:109
+#: szafir-host-proxy/qml/StatusPage.qml:61 szafir-host-proxy/src/main.cpp:109
 msgid "Auto"
 msgstr "Automatyczne"
 
 # Tray context menu: HiDPI submenu item — GDK_SCALE=2
 #: szafir-host-proxy/qml/StatusPage.qml:42
-#: szafir-host-proxy/qml/StatusPage.qml:68 szafir-host-proxy/main.cpp:110
+#: szafir-host-proxy/qml/StatusPage.qml:68 szafir-host-proxy/src/main.cpp:110
 msgid "2x scaling"
 msgstr "Skalowanie 2x"
 
 # Tray context menu: HiDPI submenu item — GDK_SCALE=1
 #: szafir-host-proxy/qml/StatusPage.qml:49
-#: szafir-host-proxy/qml/StatusPage.qml:75 szafir-host-proxy/main.cpp:111
+#: szafir-host-proxy/qml/StatusPage.qml:75 szafir-host-proxy/src/main.cpp:111
 msgid "1x scaling"
 msgstr "Skalowanie 1x"
 
 # Tray context menu: GDK_SCALE submenu for SzafirHost
-#: szafir-host-proxy/qml/StatusPage.qml:58 szafir-host-proxy/main.cpp:334
+#: szafir-host-proxy/qml/StatusPage.qml:58 szafir-host-proxy/src/main.cpp:334
 msgid "SzafirHost scaling"
 msgstr "Skalowanie SzafirHost"
 
@@ -247,11 +247,11 @@ msgstr "SzafirHost Proxy — Konfiguracja"
 msgid "SzafirHost Proxy"
 msgstr "SzafirHost Proxy"
 
-#: szafir-host-proxy/MainWindow.cpp:26
+#: szafir-host-proxy/src/MainWindow.cpp:26
 msgid "KIR SzafirHost"
 msgstr "KIR SzafirHost"
 
-#: szafir-host-proxy/MainWindow.cpp:31
+#: szafir-host-proxy/src/MainWindow.cpp:31
 msgid ""
 "A secure Native Messaging bridge between web browsers and qualified "
 "electronic signature smart cards."
@@ -259,57 +259,57 @@ msgstr ""
 "Bezpieczny most komunikacyjny Native Messaging pomiędzy przeglądarkami "
 "internetowymi a kartami inteligentnymi kwalifikowanego podpisu elektronicznego."
 
-#: szafir-host-proxy/MainWindow.cpp:32
+#: szafir-host-proxy/src/MainWindow.cpp:32
 msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
 msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
 
-#: szafir-host-proxy/MainWindow.cpp:38
+#: szafir-host-proxy/src/MainWindow.cpp:38
 msgid "Krajowa Izba Rozliczeniowa S.A."
 msgstr "Krajowa Izba Rozliczeniowa S.A."
 
-#: szafir-host-proxy/MainWindow.cpp:39
+#: szafir-host-proxy/src/MainWindow.cpp:39
 msgid "Developer and Trust Service Provider"
 msgstr "Twórca i Dostawca Usług Zaufania"
 
-#: szafir-host-proxy/MainWindow.cpp:44
+#: szafir-host-proxy/src/MainWindow.cpp:44
 msgid "Szafir Technical Support"
 msgstr "Wsparcie techniczne Szafir"
 
-#: szafir-host-proxy/MainWindow.cpp:45
+#: szafir-host-proxy/src/MainWindow.cpp:45
 msgid "Helpdesk and Troubleshooting"
 msgstr "Pomoc i rozwiązywanie problemów"
 
 # Tray tooltip: active host count
-#: szafir-host-proxy/main.cpp:71
+#: szafir-host-proxy/src/main.cpp:71
 msgid "Active hosts: %1"
 msgstr "Aktywne hosty: %1"
 
 # Tray tooltip: no hosts active
-#: szafir-host-proxy/main.cpp:77 szafir-host-proxy/main.cpp:321
+#: szafir-host-proxy/src/main.cpp:77 szafir-host-proxy/src/main.cpp:321
 msgid "No active hosts"
 msgstr "Brak aktywnych hostów"
 
 # KAboutData short description
-#: szafir-host-proxy/main.cpp:159
+#: szafir-host-proxy/src/main.cpp:159
 msgid "Szafir native messaging proxy and host integrator."
 msgstr "Proxy komunikacji natywnej i integrator hosta aplikacji Szafir."
 
 # CLI option: --install
-#: szafir-host-proxy/main.cpp:184
+#: szafir-host-proxy/src/main.cpp:184
 msgid "Install native host definitions and wrappers, then exit."
 msgstr "Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ działanie."
 "Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ "
 "działanie."
 
 # CLI option: --uninstall
-#: szafir-host-proxy/main.cpp:187
+#: szafir-host-proxy/src/main.cpp:187
 msgid "Remove native host definitions/wrappers and permissions, then exit."
 msgstr "Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i zakończ działanie."
 "Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i "
 "zakończ działanie."
 
 # CLI option: --dry-run
-#: szafir-host-proxy/main.cpp:190
+#: szafir-host-proxy/src/main.cpp:190
 msgid ""
 "Print planned file/permission operations without performing them. Requires --"
 "install or --uninstall."
@@ -317,71 +317,71 @@ msgstr ""
 "Wyświetl planowane operacje na plikach/uprawnieniach bez ich wykonywania. "
 "Wymaga podania opcji --install lub --uninstall."
 
-#: szafir-host-proxy/main.cpp:193
+#: szafir-host-proxy/src/main.cpp:193
 msgid "Show modeless status window when launched."
 msgstr "Pokaż niemodalne okno statusu podczas uruchamiania."
 
-#: szafir-host-proxy/main.cpp:196
+#: szafir-host-proxy/src/main.cpp:196
 msgid "Show the first-run setup wizard even if all checks already pass."
 msgstr "Pokaż kreator konfiguracji nawet jeśli wszystkie testy zostały spełnione."
 
 # CLI error: conflicting options
-#: szafir-host-proxy/main.cpp:214
+#: szafir-host-proxy/src/main.cpp:214
 msgid "Use either --install or --uninstall, not both."
 msgstr "Użyj opcji --install albo --uninstall, nie obu jednocześnie."
 
 # CLI error: dry-run without action
-#: szafir-host-proxy/main.cpp:219
+#: szafir-host-proxy/src/main.cpp:219
 msgid "--dry-run requires --install or --uninstall."
 msgstr "Opcja --dry-run wymaga podania opcji --install lub --uninstall."
 
 # CLI error: install failed
-#: szafir-host-proxy/main.cpp:227
+#: szafir-host-proxy/src/main.cpp:227
 msgid "Failed to install native host integration."
 msgstr "Nie udało się zainstalować integracji natywnego hosta."
 
 # CLI info: dry-run install done
-#: szafir-host-proxy/main.cpp:230
+#: szafir-host-proxy/src/main.cpp:230
 msgid "Dry-run install complete."
 msgstr "Próbna instalacja zakończona."
 
 # CLI info: install succeeded
-#: szafir-host-proxy/main.cpp:230
+#: szafir-host-proxy/src/main.cpp:230
 msgid "Native host integration installed."
 msgstr "Pomyślnie zainstalowano integrację natywnego hosta."
 
 # CLI error: uninstall failed
-#: szafir-host-proxy/main.cpp:236
+#: szafir-host-proxy/src/main.cpp:236
 msgid "Failed to uninstall native host integration."
 msgstr "Nie udało się odinstalować integracji natywnego hosta."
 
 # CLI info: dry-run uninstall done
-#: szafir-host-proxy/main.cpp:239
+#: szafir-host-proxy/src/main.cpp:239
 msgid "Dry-run uninstall complete."
 msgstr "Próbne odinstalowanie zakończone."
 
 # CLI info: uninstall succeeded
-#: szafir-host-proxy/main.cpp:239
+#: szafir-host-proxy/src/main.cpp:239
 msgid "Native host integration removed."
 msgstr "Pomyślnie usunięto integrację natywnego hosta."
 
 # CLI error: D-Bus session bus unavailable
-#: szafir-host-proxy/main.cpp:245
+#: szafir-host-proxy/src/main.cpp:245
 msgid "Cannot connect to the D-Bus session bus."
 msgstr "Nie można połączyć się z magistralą sesji D-Bus."
 
 # CLI info: already running
-#: szafir-host-proxy/main.cpp:251
+#: szafir-host-proxy/src/main.cpp:251
 msgid "szafir-host-proxy is already running."
 msgstr "Program szafir-host-proxy jest już uruchomiony."
 
 # CLI error: D-Bus object registration failed
-#: szafir-host-proxy/main.cpp:257
+#: szafir-host-proxy/src/main.cpp:257
 msgid "Failed to register D-Bus object."
 msgstr "Nie udało się zarejestrować obiektu D-Bus."
 
 # Warning: auto-install on startup failed
-#: szafir-host-proxy/main.cpp:262
+#: szafir-host-proxy/src/main.cpp:262
 msgid "Failed to fully install native host integration; continuing startup."
 msgstr "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie będzie kontynuowane."
 "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
