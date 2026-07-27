@@ -473,7 +473,7 @@ permission_groups:
       - template: "{xdg_data_home}/szafir-host-proxy/components"
         landlock_access: read_only
         note: "verified component store"
-      - template: "{xdg_data_home}/szafir_host"
+      - template: "{xdg_data_home}/szafir-host-proxy/szafir_host"
         landlock_access: read_write_create
         note: "SzafirHost install dir"
       - template: "{xdg_data_home}"

@@ -21,7 +21,7 @@ if [ ! -f "${INSTALLER_JAR}" ]; then
     exit 1
 fi
 
-INSTALL_DIR="${XDG_DATA_HOME}/szafir_host"
+INSTALL_DIR="${XDG_DATA_HOME}/szafir-host-proxy/szafir_host"
 LOCK_FILE="${INSTALL_DIR}/.install.lock"
 JAR_PATH="${INSTALL_DIR}/SzafirHost.jar"
 INSTALLED_FROM="${INSTALL_DIR}/.installed-from"

@@ -471,7 +471,7 @@ void UpdateController::runInstaller()
             qWarning() << "UpdateController: installer process error:" << err;
         });
 
-    QDir().mkpath(QString::fromStdString(launcherXdgDataHome + "/szafir_host"));
+    QDir().mkpath(QString::fromStdString(launcherXdgDataHome + "/szafir-host-proxy/szafir_host"));
     m_installerProcess->start();
 
     QTimer::singleShot(kInstallerTimeoutMs, this, [this]() {

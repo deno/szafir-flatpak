@@ -278,7 +278,7 @@ void NativeMessagingService::spawnHost(const QStringList &args,
     process->setProcessEnvironment(env);
 
     // Ensure the install dir exists before the child runs
-    QDir().mkpath(QString::fromStdString(launcherXdgDataHome + "/szafir_host"));
+    QDir().mkpath(QString::fromStdString(launcherXdgDataHome + "/szafir-host-proxy/szafir_host"));
 
     process->start();
     if (!process->waitForStarted()) {

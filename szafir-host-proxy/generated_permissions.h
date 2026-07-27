@@ -127,7 +127,7 @@ inline void forEachLauncherDynamicRule(
     fn(_buf1, Landlock::kReadOnly);
 
     char _buf2[4096];
-    snprintf(_buf2, sizeof(_buf2), "%s/szafir_host", xdgDataHome);
+    snprintf(_buf2, sizeof(_buf2), "%s/szafir-host-proxy/szafir_host", xdgDataHome);
     fn(_buf2, Landlock::kReadWriteCreate);
 
     fn(xdgDataHome, Landlock::kReadDirOnly);
