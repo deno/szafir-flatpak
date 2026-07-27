@@ -208,6 +208,9 @@ void UpdateController::evaluateDiscovery(const DiscoveryResult &discovered, bool
             qDebug() << "UpdateController: skipping previously declined runtime update";
             runtimeChanged = false;
         }
+
+        if (!runtimeChanged && m_forceUpdateAvailable)
+            runtimeChanged = true;
     }
 
     // --- Library evaluation ---

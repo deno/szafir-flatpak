@@ -232,6 +232,9 @@ int main(int argc, char *argv[])
     const QCommandLineOption freshEnvOpt(
         QStringLiteral("fresh-env"),
         i18n("Run with a throwaway XDG environment (dev builds only)."));
+    const QCommandLineOption testingUpdateOpt(
+        QStringLiteral("testing-update-available"),
+        i18n("Force update checks to always report an update (dev builds only)."));
 #endif
 
     parser.addOption(debugOpt);
@@ -243,6 +246,7 @@ int main(int argc, char *argv[])
     parser.addOption(updateAndExitOpt);
 #ifdef SZAFIR_DEV_BUILD
     parser.addOption(freshEnvOpt);
+    parser.addOption(testingUpdateOpt);
 #endif
 
     parser.process(app);
@@ -393,6 +397,10 @@ int main(int argc, char *argv[])
     componentDownloader->discoverComponents();
 
     auto *updateController = new UpdateController(componentDownloader, service, &app);
+#ifdef SZAFIR_DEV_BUILD
+    if (parser.isSet(testingUpdateOpt))
+        updateController->setForceUpdateAvailable(true);
+#endif
 
     setupController->computePages();
 

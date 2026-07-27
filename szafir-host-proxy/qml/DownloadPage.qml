@@ -8,6 +8,18 @@ Kirigami.Page {
     title: i18n("Download Components")
 
     property bool standalone: false  // true when opened from hamburger menu
+    readonly property bool updateMode: typeof updateController !== "undefined"
+        && updateController !== null
+        && updateController.state === UpdateController.UpdateAvailable
+
+    function hasUpdateForId(id) {
+        if (!updateMode) return false
+        if (id === "szafirhost-installer")
+            return (updateController?.availableVersion ?? "") !== ""
+        if (id === "libccgraphite")
+            return (updateController?.availableLibraryVersion ?? "") !== ""
+        return false
+    }
 
     ListView {
         id: componentList
@@ -33,6 +45,7 @@ Kirigami.Page {
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
+                visible: !page.updateMode
                 text: i18n("The following components need to be downloaded to enable Szafir browser integration.")
             }
 
@@ -81,8 +94,11 @@ Kirigami.Page {
                 CheckBox {
                     id: compCheckbox
                     focusPolicy: Qt.NoFocus
-                    checked: !model.present && model.enabled && model.downloadable
-                    enabled: !model.component.required && !model.present && model.downloadable && !componentDownloader.isDownloading
+                    checked: page.hasUpdateForId(model.component.id)
+                             || (!model.present && model.enabled && model.downloadable)
+                    enabled: page.updateMode
+                        ? page.hasUpdateForId(model.component.id) && !model.component.required
+                        : (!model.component.required && !model.present && model.downloadable && !componentDownloader.isDownloading)
                     onToggled: componentDownloader.setComponentEnabled(model.component.id, checked)
                 }
 
@@ -100,7 +116,15 @@ Kirigami.Page {
                     Label {
                         Layout.fillWidth: true
                         text: {
-                            if (model.present) return i18n("Already installed")
+                            if (model.present) {
+                                if (page.hasUpdateForId(model.component.id)) {
+                                    const ver = model.component.id === "szafirhost-installer"
+                                        ? updateController?.availableVersion
+                                        : updateController?.availableLibraryVersion
+                                    return i18n("Update to %1 available", ver ?? "")
+                                }
+                                return i18n("Already installed")
+                            }
                             const sizeMb = (model.component.size / 1048576).toFixed(1)
                             const estMb = (model.component.estimatedSize / 1048576).toFixed(1)
                             switch (model.state) {
@@ -175,7 +199,31 @@ Kirigami.Page {
 
             Item { Layout.fillWidth: true }
 
+            Button {
+                visible: page.updateMode
+                text: i18n("Later")
+                onClicked: {
+                    updateController.dismissOffer()
+                    applicationWindow().pageStack.layers.pop()
+                }
+            }
+
+            Button {
+                visible: page.updateMode
+                text: {
+                    const hasUpdates = page.hasUpdateForId("szafirhost-installer")
+                        || page.hasUpdateForId("libccgraphite")
+                    const hasInstalls = componentDownloader.canStartDownload
+                    if (hasUpdates && hasInstalls) return i18n("Install && Update")
+                    if (hasUpdates) return i18n("Update")
+                    return i18n("Install now")
+                }
+                icon.name: "download"
+                onClicked: updateController.applyUpdate()
+            }
+
             AnimatedStateButton {
+                visible: !page.updateMode
                 // Animate between Download and Next states
                 // state 0 = download, state 1 = next
                 state: (!page.standalone && (!componentDownloader.canStartDownload || componentDownloader.hasBrokenComponents)) ? 1 : 0

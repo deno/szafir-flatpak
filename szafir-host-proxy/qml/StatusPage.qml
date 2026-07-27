@@ -16,6 +16,14 @@ Kirigami.Page {
             || updateController.state === UpdateController.StoppingHosts
             || updateController.state === UpdateController.Installing)
 
+    property string statusMessage: ""
+
+    Timer {
+        interval: 5000
+        running: page.statusMessage !== ""
+        onTriggered: page.statusMessage = ""
+    }
+
     footer: Rectangle {
         implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
         color: Kirigami.Theme.backgroundColor
@@ -23,7 +31,7 @@ Kirigami.Page {
         Kirigami.Separator {
             anchors.top: parent.top
             width: parent.width
-            visible: updateActive
+            visible: updateActive || page.statusMessage !== ""
         }
 
         RowLayout {
@@ -33,34 +41,34 @@ Kirigami.Page {
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
-            visible: updateActive
+            visible: updateActive || page.statusMessage !== ""
 
             BusyIndicator {
                 Layout.preferredWidth: Kirigami.Units.iconSizes.small
                 Layout.preferredHeight: Kirigami.Units.iconSizes.small
                 running: updateActive
+                visible: updateActive
             }
 
             Label {
                 Layout.fillWidth: true
                 elide: Text.ElideRight
                 text: {
-                    if (typeof updateController === "undefined" || updateController === null)
-                        return ""
-                    switch (updateController.state) {
-                    case UpdateController.Checking:
-                        return i18n("Checking for updates...")
-                    case UpdateController.Downloading:
-                        if (updateController.progress >= 0)
-                            return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
-                        return i18n("Downloading update...")
-                    case UpdateController.StoppingHosts:
-                        return i18n("Stopping active connections...")
-                    case UpdateController.Installing:
-                        return i18n("Installing update...")
-                    default:
-                        return ""
+                    if (updateActive && typeof updateController !== "undefined" && updateController !== null) {
+                        switch (updateController.state) {
+                        case UpdateController.Checking:
+                            return i18n("Checking for updates...")
+                        case UpdateController.Downloading:
+                            if (updateController.progress >= 0)
+                                return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
+                            return i18n("Downloading update...")
+                        case UpdateController.StoppingHosts:
+                            return i18n("Stopping active connections...")
+                        case UpdateController.Installing:
+                            return i18n("Installing update...")
+                        }
                     }
+                    return page.statusMessage
                 }
             }
 
@@ -271,58 +279,6 @@ Kirigami.Page {
     }
 
     Dialog {
-        id: updateOfferDialog
-        title: i18n("Update Available")
-        modal: true
-
-        contentItem: ColumnLayout {
-            spacing: Kirigami.Units.smallSpacing
-            width: Kirigami.Units.gridUnit * 22
-
-            Label {
-                Layout.fillWidth: true
-                visible: (updateController?.availableVersion ?? "") !== ""
-                text: i18n("SzafirHost %1 is available (installed: %2).",
-                           updateController?.availableVersion ?? "",
-                           updateController?.installedVersion || i18n("unknown"))
-                wrapMode: Text.Wrap
-            }
-            Label {
-                Layout.fillWidth: true
-                visible: (updateController?.availableLibraryVersion ?? "") !== ""
-                text: (updateController?.availableVersion ?? "") !== ""
-                    ? i18n("Also updates the Graphite PKCS#11 library to version %1.",
-                           updateController?.availableLibraryVersion ?? "")
-                    : i18n("A new version of the Graphite PKCS#11 library (%1) is available.",
-                           updateController?.availableLibraryVersion ?? "")
-                wrapMode: Text.Wrap
-            }
-            CheckBox {
-                id: autoUpdateCheckBox
-                text: i18n("Automatically install future updates")
-                checked: updateController?.autoUpdate ?? false
-            }
-        }
-
-        footer: DialogButtonBox {
-            Button {
-                text: i18n("Install now")
-                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-            }
-            Button {
-                text: i18n("Later")
-                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-            }
-        }
-
-        onAccepted: {
-            updateController.autoUpdate = autoUpdateCheckBox.checked
-            updateController.applyUpdate()
-        }
-        onRejected: updateController.dismissOffer()
-    }
-
-    Dialog {
         id: interruptionDialog
         title: i18n("Active Connections")
         modal: true
@@ -348,49 +304,20 @@ Kirigami.Page {
         onRejected: updateController.confirmInterruption(false)
     }
 
-    Dialog {
-        id: updateResultDialog
-        title: updateResultOk ? i18n("Update Complete") : i18n("Update Failed")
-        modal: true
-        standardButtons: Dialog.Ok
-
-        property bool updateResultOk: true
-        property string resultMessage: ""
-
-        contentItem: ColumnLayout {
-            spacing: Kirigami.Units.smallSpacing
-            width: Kirigami.Units.gridUnit * 22
-
-            Label {
-                Layout.fillWidth: true
-                text: updateResultDialog.resultMessage
-                wrapMode: Text.Wrap
-            }
-            Button {
-                visible: !updateResultDialog.updateResultOk
-                text: i18n("Install from file...")
-                onClicked: {
-                    updateResultDialog.close()
-                    jarFileDialog.open()
-                }
-            }
-        }
-    }
-
     Connections {
         target: typeof updateController !== "undefined" ? updateController : null
 
         function onStateChanged() {
-            if (updateController.state === UpdateController.UpdateAvailable)
-                updateOfferDialog.open()
-            else if (updateController.state === UpdateController.UpToDate) {
-                updateResultDialog.updateResultOk = true
-                updateResultDialog.resultMessage = i18n("You are already running the latest version.")
-                updateResultDialog.open()
+            if (updateController.state === UpdateController.Checking) {
+                page.statusMessage = ""
+            } else if (updateController.state === UpdateController.UpdateAvailable) {
+                page.statusMessage = ""
+                if (applicationWindow().pageStack.layers.depth === 1)
+                    applicationWindow().pageStack.layers.push(Qt.resolvedUrl("DownloadPage.qml"), { standalone: true })
+            } else if (updateController.state === UpdateController.UpToDate) {
+                page.statusMessage = i18n("You are already running the latest version.")
             } else if (updateController.state === UpdateController.Error) {
-                updateResultDialog.updateResultOk = false
-                updateResultDialog.resultMessage = updateController.errorString
-                updateResultDialog.open()
+                page.statusMessage = updateController.errorString
             }
         }
 
@@ -399,11 +326,9 @@ Kirigami.Page {
         }
 
         function onUpdateFinished(success) {
-            updateResultDialog.updateResultOk = success
-            updateResultDialog.resultMessage = success
+            page.statusMessage = success
                 ? i18n("SzafirHost runtime has been updated successfully.")
                 : updateController.errorString
-            updateResultDialog.open()
         }
     }
     // ─────────────────────────────────────────────────────────────────────

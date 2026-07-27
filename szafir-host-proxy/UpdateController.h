@@ -62,6 +62,7 @@ public:
     Q_INVOKABLE void confirmInterruption(bool proceed);
 
     void startScheduling();
+    void setForceUpdateAvailable(bool force) { m_forceUpdateAvailable = force; }
 
 Q_SIGNALS:
     void settingsChanged();
@@ -109,6 +110,7 @@ private:
     DiscoveredComponent m_pendingLibrary;
     bool m_manualCheck = false;
     bool m_forceMode = false;
+    bool m_forceUpdateAvailable = false;
     bool m_deferUntilIdle = false;
     QProcess *m_installerProcess = nullptr;
 };
