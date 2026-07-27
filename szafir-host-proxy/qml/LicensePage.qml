@@ -5,7 +5,7 @@ import org.kde.kirigami as Kirigami
 
 Kirigami.Page {
     id: page
-    title: i18n("License Agreement")
+    title: i18n("SzafirHost license agreement")
 
     property string licenseTextData: typeof szafirHostLicenseText === "string" ? szafirHostLicenseText : ""
 
