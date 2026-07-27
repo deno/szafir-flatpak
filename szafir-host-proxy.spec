@@ -5,7 +5,7 @@ Summary:        Browser bridge for Szafir website signing
 
 License:        GPL-2.0-only
 URL:            https://github.com/deno/szafir-flatpak
-Source0:        %{name}-%{version}-source.tar.gz
+Source0:        szafir-host-proxy-0.3.0-source.tar.gz
 
 BuildRequires:  cmake
 BuildRequires:  ninja-build
@@ -22,8 +22,11 @@ BuildRequires:  python3
 BuildRequires:  python3-pyyaml
 
 Requires:       bubblewrap
-Requires:       java-21-openjdk-headless
-Requires:       pcsclite-libs
+# Capability deps (preferred over package names): java-headless resolves to the
+# default JDK >= 21 on any Fedora release; the soname covers the PC/SC library
+# the JVM dlopens at runtime (resolves to pcsc-lite-libs).
+Requires:       java-headless >= 1:21
+Requires:       libpcsclite.so.1()(64bit)
 
 %description
 SzafirHostProxy is an open-source Native Messaging bridge for Szafir on Linux.
@@ -32,7 +35,7 @@ signatures can work on supported websites. The bridge downloads required
 upstream runtime components during first-run setup instead of bundling them.
 
 %prep
-%autosetup -n %{name}-%{version}-source
+%autosetup -n szafir-host-proxy-0.3.0-source
 
 %build
 %cmake \
@@ -68,5 +71,8 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Mon Jul 27 2026 deno - 0.3.0-1.20260727230709449376.master.0.ga0b846b
+- Packaging support now includes Nix and RPM definitions. Bubblewrap is used as a sandboxing mechanism when running outside of Flatpak. SzafirHost runtime and components are automatically updated, eliminating the need for manual version management. The bundled pcsc-lite was upgraded from 2.3.3 to 2.5.1.
+
 * Mon Jul 27 2026 deno <deno@users.noreply.github.com> - 0.3.0-1
 - Unified component discovery on the web; dropped the bundled manifest.
