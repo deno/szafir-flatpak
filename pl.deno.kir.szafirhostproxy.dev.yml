@@ -92,8 +92,8 @@ modules:
       - install -Dm644 ../COPYING /app/share/licenses/$FLATPAK_ID/pcsc-lite/COPYING
     sources:
       - type: archive
-        url: https://pcsclite.apdu.fr/files/pcsc-lite-2.5.1.tar.xz
-        sha256: bfcfe38a20afc49849c6bf55325e38f449fc4b26d3923fdc32b969ae41a8741b
+        url: https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz
+        sha256: cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7
 
   # Build-time dep: CMake configure runs generate_permissions_header.py (imports yaml);
   # the KDE SDK ships no yaml module, so vendor PyYAML into the prefix.
@@ -110,7 +110,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DAPP_ID=pl.deno.kir.szafirhostproxy
-      - -DAPP_VERSION=0.3.0
+      - -DAPP_VERSION=0.3.1
       - -DSZAFIR_DEV=ON
     sources:
       - type: dir

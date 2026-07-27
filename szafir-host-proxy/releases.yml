@@ -1,4 +1,13 @@
 releases:
+  - version: 0.3.1
+    date: 2026-07-27
+    description:
+      en: >-
+        Revert pcsc-lite to 2.3.3 for Flatpak version for broader
+        compatibility.
+      pl: >-
+        Przywrócono pcsc-lite do wersji 2.3.3 w wersji Flatpak dla
+        szerszej kompatybilności.
   - version: 0.3.0
     date: 2026-07-27
     description:
