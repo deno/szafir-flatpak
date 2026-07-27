@@ -47,12 +47,6 @@
           "-DSZAFIR_DEV=ON"
         ];
 
-        preConfigure = ''
-          python3 scripts/generate_permissions_header.py \
-            --runtime-prefix "$out" \
-            szafir-host-proxy/permissions.yml szafir-host-proxy/generated_permissions.h
-        '';
-
         postInstall = ''
           ln -s ${pkgs.jdk21}/lib/openjdk $out/jre
         '';

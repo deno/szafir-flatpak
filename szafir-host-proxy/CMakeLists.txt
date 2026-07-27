@@ -66,6 +66,22 @@ find_package(KF6StatusNotifierItem REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
+# Generate the permissions header from permissions.yml at configure time so it
+# always reflects the current RUNTIME_PREFIX and is never committed prebaked.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(_permissions_header "${CMAKE_CURRENT_BINARY_DIR}/generated_permissions.h")
+execute_process(
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_permissions_header.py"
+            --runtime-prefix "${RUNTIME_PREFIX}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/permissions.yml"
+            "${_permissions_header}"
+    RESULT_VARIABLE _permissions_gen_result
+)
+if(NOT _permissions_gen_result EQUAL 0)
+    message(FATAL_ERROR "generate_permissions_header.py failed (exit ${_permissions_gen_result})")
+endif()
+
 set(SZAFIR_HOST_PROXY_SOURCES
     main.cpp
     AppSettings.h
@@ -181,6 +197,7 @@ set(CPACK_SOURCE_IGNORE_FILES
     "/_CPack_Packages/"
     "/\\.vscode/"
     "/\\.idea/"
+    "generated_permissions\\.h$"
     "~$"
     "\\\\.swp$"
 )

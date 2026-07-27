@@ -6,6 +6,7 @@ repo
 .logs
 result
 szafir-host-proxy/build
+szafir-host-proxy/generated_permissions.h
 
 # packit / mock build output
 szafir-host-proxy-*.tar.gz

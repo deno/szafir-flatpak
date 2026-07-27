@@ -9,7 +9,7 @@ actions:
   changelog-entry:
     - python3 scripts/query_releases.py --current-changelog
   create-archive:
-    - bash -c "v=$(python3 scripts/query_releases.py --current-version) && git archive --format=tar.gz --prefix=szafir-host-proxy-${v}/ -o szafir-host-proxy-${v}.tar.gz HEAD && echo szafir-host-proxy-${v}.tar.gz"
+    - bash scripts/packit_create_archive.sh
 
 jobs:
   - job: copr_build

@@ -10,7 +10,6 @@ manifests:
 
 .PHONY: permissions
 permissions:
-	python3 scripts/generate_permissions_header.py --runtime-prefix /app
 	python3 scripts/render_manifest.py all
 
 .PHONY: dist

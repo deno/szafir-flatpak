@@ -6,11 +6,12 @@
 # from Flatpak manifest comments.
 # (fe = Flatpak Exclude)
 # Consumed by:
-#   scripts/render_manifest.py               → Flatpak manifest finish-args (via Jinja2 templates)
-#   scripts/generate_permissions_header.py   → szafir-host-proxy/generated_permissions.h
-#                                          (C++ build artifact)
+#   scripts/render_manifest.py                          → Flatpak manifest finish-args (via Jinja2 templates)
+#   szafir-host-proxy/scripts/generate_permissions_header.py → generated_permissions.h
+#                                                          (C++ header, built at CMake configure time)
 #
-# Regenerate after editing this file:
+# The C++ header is regenerated automatically on every CMake configure.
+# Re-render the Flatpak manifests after editing this file:
 #   make permissions
 #
 # ── Access type nomenclature (fine-grained Landlock flag sets) ───────────────

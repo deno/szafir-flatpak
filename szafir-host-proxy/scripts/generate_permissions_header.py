@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate szafir-host-proxy/generated_permissions.h from szafir-host-proxy/permissions.yml.
+"""Generate generated_permissions.h from permissions.yml in the app source dir.
 
 Usage:
     generate_permissions_header.py          Generate the header (default paths)
@@ -20,8 +20,8 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INPUT = ROOT / "szafir-host-proxy" / "permissions.yml"
-DEFAULT_OUTPUT = ROOT / "szafir-host-proxy" / "generated_permissions.h"
+DEFAULT_INPUT = ROOT / "permissions.yml"
+DEFAULT_OUTPUT = ROOT / "generated_permissions.h"
 
 # ── YAML config_layout → C++ enum literal ────────────────────────────────────
 
@@ -385,8 +385,8 @@ def generate(input_path: Path, output_path: Path, runtime_prefix: str = "/app") 
     header = f"""\
 // GENERATED FILE — DO NOT EDIT.
 // Source:    {rel_input}
-// Generator: scripts/generate_permissions_header.py
-// Run 'make permissions' to regenerate after editing permissions.yml.
+// Generator: szafir-host-proxy/scripts/generate_permissions_header.py
+// Regenerated automatically at CMake configure time after editing permissions.yml.
 
 #pragma once
 
