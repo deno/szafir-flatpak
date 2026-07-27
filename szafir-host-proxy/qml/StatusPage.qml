@@ -25,13 +25,18 @@ Kirigami.Page {
     }
 
     footer: Rectangle {
+        id: statusFooter
         implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
         color: Kirigami.Theme.backgroundColor
+        clip: true
+
+        readonly property bool contentShown: updateActive || page.statusMessage !== ""
 
         Kirigami.Separator {
             anchors.top: parent.top
             width: parent.width
-            visible: updateActive || page.statusMessage !== ""
+            opacity: statusFooter.contentShown ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
         RowLayout {
@@ -41,7 +46,11 @@ Kirigami.Page {
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
-            visible: updateActive || page.statusMessage !== ""
+
+            transform: Translate {
+                y: statusFooter.contentShown ? 0 : statusFooter.height
+                Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            }
 
             BusyIndicator {
                 Layout.preferredWidth: Kirigami.Units.iconSizes.small
