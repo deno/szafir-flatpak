@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
     aboutData.addAuthor(QStringLiteral("deno"));
     aboutData.setHomepage(QStringLiteral("https://github.com/deno/szafirhostproxy/"));
     aboutData.setBugAddress("https://github.com/deno/szafirhostproxy/issues");
+    aboutData.setDesktopFileName(QStringLiteral(APP_ID));
     KAboutData::setApplicationData(aboutData);
 
     app.setApplicationName(QStringLiteral("szafirhostproxy"));
