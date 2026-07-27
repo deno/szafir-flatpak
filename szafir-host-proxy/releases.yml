@@ -2,8 +2,18 @@ releases:
   - version: 0.3.0
     date: 2026-07-27
     description:
-      en: Unified component discovery on the web; dropped the bundled manifest. Shows download sizes, reworked update flow into the Download view.
-      pl: Ujednolicono wykrywanie komponentów w sieci; usunięto dołączony manifest. Pokazywanie rozmiarów pobierania, przebudowany przepływ aktualizacji w widoku Pobierania.
+      en: >-
+        Packaging support now includes Nix and RPM definitions. Bubblewrap is
+        used as a sandboxing mechanism when running outside of Flatpak.
+        SzafirHost runtime and components are automatically updated, eliminating
+        the need for manual version management. The bundled pcsc-lite was
+        upgraded from 2.3.3 to 2.5.1.
+      pl: >-
+        Dodano definicje Nix oraz RPM. Przy uruchamianiu poza środowiskiem
+        Flatpak, funkcję sandboxa pełni Bubblewrap. Runtime i komponenty
+        SzafirHost aktualizują się automatycznie, co eliminuje konieczność
+        ręcznego zarządzania wersjami. Dołączony pcsc-lite został
+        zaktualizowany z wersji 2.3.3 do 2.5.1.
   - version: 0.2.5
     date: 2026-04-28
     description:
