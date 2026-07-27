@@ -51,6 +51,9 @@ modules:
     config-opts:
       - -DAPP_ID={{ app_id }}
       - -DAPP_VERSION={{ app_version }}
+{% if szafir_dev %}
+      - -DSZAFIR_DEV=ON
+{% endif %}
     sources:
       - type: dir
         path: szafir-host-proxy
