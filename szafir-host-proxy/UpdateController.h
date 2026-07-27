@@ -10,11 +10,17 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QProcess;
 
-struct DiscoveredRuntime {
+struct DiscoveredComponent {
     QUrl url;
     QString urlHash;
     QString version;
+    QString filename;
     bool valid = false;
+};
+
+struct DiscoveryResult {
+    DiscoveredComponent runtime;
+    DiscoveredComponent library;
 };
 
 class UpdateController : public QObject
@@ -25,6 +31,7 @@ class UpdateController : public QObject
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
     Q_PROPERTY(QString installedVersion READ installedVersion NOTIFY runtimeInfoChanged)
     Q_PROPERTY(QString availableVersion READ availableVersion NOTIFY stateChanged)
+    Q_PROPERTY(QString availableLibraryVersion READ availableLibraryVersion NOTIFY stateChanged)
     Q_PROPERTY(QString lastCheckTime READ lastCheckTime NOTIFY settingsChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY stateChanged)
     Q_PROPERTY(qreal progress READ progress NOTIFY progressChanged)
@@ -55,6 +62,7 @@ public:
     State state() const { return m_state; }
     QString installedVersion() const { return m_installedVersion; }
     QString availableVersion() const { return m_availableVersion; }
+    QString availableLibraryVersion() const { return m_availableLibraryVersion; }
     QString lastCheckTime() const { return m_lastCheckTime; }
     QString errorString() const { return m_errorString; }
     qreal progress() const { return m_progress; }
@@ -88,7 +96,7 @@ private:
     void saveRuntimeState();
 
     void onDiscoveryFinished(QNetworkReply *reply, bool manual);
-    void evaluateDiscovery(const DiscoveredRuntime &discovered, bool manual);
+    void evaluateDiscovery(const DiscoveryResult &discovered, bool manual);
     void beginInstallSequence();
     void onHostsStopped();
     void runInstaller();
@@ -104,18 +112,21 @@ private:
     qreal m_progress = -1;
     QString m_errorString;
     QString m_availableVersion;
+    QString m_availableLibraryVersion;
 
     bool m_autoUpdate = false;
     bool m_allowDowngrades = true;
     QString m_lastCheckTime;
     QString m_lastDeclinedUrlHash;
+    QString m_lastDeclinedLibUrlHash;
     int m_checkIntervalHours = 24;
 
     QString m_installedUrlHash;
     QString m_installedVersion;
     QString m_installedSource;
 
-    DiscoveredRuntime m_pendingUpdate;
+    DiscoveredComponent m_pendingUpdate;
+    DiscoveredComponent m_pendingLibrary;
     bool m_manualCheck = false;
     bool m_forceMode = false;
     bool m_deferUntilIdle = false;

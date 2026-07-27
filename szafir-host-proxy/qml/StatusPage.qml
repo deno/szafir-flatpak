@@ -283,9 +283,20 @@ Kirigami.Page {
 
             Label {
                 Layout.fillWidth: true
+                visible: (updateController?.availableVersion ?? "") !== ""
                 text: i18n("SzafirHost %1 is available (installed: %2).",
                            updateController?.availableVersion ?? "",
                            updateController?.installedVersion || i18n("unknown"))
+                wrapMode: Text.Wrap
+            }
+            Label {
+                Layout.fillWidth: true
+                visible: (updateController?.availableLibraryVersion ?? "") !== ""
+                text: (updateController?.availableVersion ?? "") !== ""
+                    ? i18n("Also updates the Graphite PKCS#11 library to version %1.",
+                           updateController?.availableLibraryVersion ?? "")
+                    : i18n("A new version of the Graphite PKCS#11 library (%1) is available.",
+                           updateController?.availableLibraryVersion ?? "")
                 wrapMode: Text.Wrap
             }
             CheckBox {

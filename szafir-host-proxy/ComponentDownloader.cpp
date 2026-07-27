@@ -263,6 +263,7 @@ void ComponentDownloader::loadManifest()
                     entry.info.version = compState[QStringLiteral("version")].toString(entry.info.version);
                     entry.info.url = compState[QStringLiteral("url")].toString(entry.info.url);
                     entry.info.hash = stateHash;
+                    entry.info.filename = compState[QStringLiteral("filename")].toString(entry.info.filename);
                     entry.trustFirstDownload = true;
                 }
             }
@@ -745,7 +746,17 @@ void ComponentDownloader::onDownloadFinished()
 
     entry.state = Done;
     entry.present = true;
+
+    // Clean up the previous version's file if the filename changed (e.g. versioned .so).
+    const std::filesystem::path oldVerifiedPath = entry.verifiedPath;
     entry.verifiedPath = promotedPath;
+    if (!oldVerifiedPath.empty() && oldVerifiedPath != promotedPath
+        && oldVerifiedPath.parent_path() == verifiedComponentsPath()) {
+        std::error_code removeEc;
+        std::filesystem::remove(oldVerifiedPath, removeEc);
+        if (!removeEc)
+            qDebug() << "ComponentDownloader: removed old component file" << PathUtils::toQString(oldVerifiedPath);
+    }
 
     // Save to local state
     QJsonObject stateObj = loadComponentsState();
@@ -760,6 +771,8 @@ void ComponentDownloader::onDownloadFinished()
         newState[QStringLiteral("version")] = entry.info.version;
     if (!entry.info.url.isEmpty())
         newState[QStringLiteral("url")] = entry.info.url;
+    if (!entry.info.filename.isEmpty())
+        newState[QStringLiteral("filename")] = entry.info.filename;
     componentsState[entry.info.id] = newState;
     
     stateObj[QStringLiteral("components")] = componentsState;
@@ -810,7 +823,8 @@ void ComponentDownloader::writeExternalProvidersXml()
 }
 
 bool ComponentDownloader::overrideComponentSource(const QString &id, const QUrl &url,
-                                                   const QString &version, const QString &urlHash)
+                                                   const QString &version, const QString &urlHash,
+                                                   const QString &filename)
 {
     if (m_downloading) {
         qWarning() << "ComponentDownloader: overrideComponentSource refused while downloading";
@@ -834,6 +848,8 @@ bool ComponentDownloader::overrideComponentSource(const QString &id, const QUrl 
         e.state = Pending;
         e.bytesReceived = 0;
         e.info.size = 0;
+        if (!filename.isEmpty())
+            e.info.filename = filename;
 
         emitRowChanged(i, {ComponentRole, StateRole, PresentRole, BytesReceivedRole, DownloadableRole});
         emitSummaryStateChanged();

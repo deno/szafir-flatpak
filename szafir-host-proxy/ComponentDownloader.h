@@ -100,7 +100,8 @@ public:
     Q_INVOKABLE void setComponentEnabled(const QString &id, bool enabled);
     Q_INVOKABLE void startDownloads();
     Q_INVOKABLE bool overrideComponentSource(const QString &id, const QUrl &url,
-                                             const QString &version, const QString &urlHash);
+                                             const QString &version, const QString &urlHash,
+                                             const QString &filename = {});
     Q_INVOKABLE bool adoptLocalFile(const QString &id, const QString &sourcePath,
                                     const QString &sha256);
 

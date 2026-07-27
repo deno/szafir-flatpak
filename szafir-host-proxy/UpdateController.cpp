@@ -43,14 +43,14 @@ std::filesystem::path updateSettingsPath()
     return configHome / "szafir-host-proxy" / "update-settings.json";
 }
 
-DiscoveredRuntime parseDiscoveryPage(const QByteArray &html)
+DiscoveryResult parseDiscoveryPage(const QByteArray &html)
 {
-    DiscoveredRuntime result;
+    DiscoveryResult result;
+    const QString page = QString::fromUtf8(html);
 
-    static const QRegularExpression linkRe(
+    // --- Runtime (szafirhost-install.jar) ---
+    static const QRegularExpression runtimeLinkRe(
         QStringLiteral(R"re(href\s*=\s*"(https?://[^"]*/([0-9a-fA-F]{32})/szafirhost-install\.jar)")re"));
-
-    QRegularExpressionMatchIterator it = linkRe.globalMatch(QString::fromUtf8(html));
 
     struct Candidate {
         QUrl url;
@@ -59,43 +59,75 @@ DiscoveredRuntime parseDiscoveryPage(const QByteArray &html)
     };
     QList<Candidate> candidates;
 
-    while (it.hasNext()) {
-        QRegularExpressionMatch m = it.next();
-        QUrl url(m.captured(1));
-        if (url.scheme() != QLatin1String("https"))
-            continue;
-        if (url.host() != QLatin1String("www.elektronicznypodpis.pl"))
-            continue;
-        candidates.append({url, m.captured(2), m.capturedStart()});
-    }
-
-    if (candidates.isEmpty())
-        return result;
-
-    const Candidate *best = &candidates.first();
-    for (const Candidate &c : candidates) {
-        int ctxStart = qMax(0, c.pos - 400);
-        int ctxEnd = qMin(html.size(), c.pos + 400);
-        QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart)).toLower();
-        if (ctx.contains(QLatin1String("macos")) || ctx.contains(QLatin1String("linux"))) {
-            best = &c;
-            break;
+    {
+        QRegularExpressionMatchIterator it = runtimeLinkRe.globalMatch(page);
+        while (it.hasNext()) {
+            QRegularExpressionMatch m = it.next();
+            QUrl url(m.captured(1));
+            if (url.scheme() != QLatin1String("https"))
+                continue;
+            if (url.host() != QLatin1String("www.elektronicznypodpis.pl"))
+                continue;
+            candidates.append({url, m.captured(2), static_cast<int>(m.capturedStart())});
         }
     }
 
-    result.url = best->url;
-    result.urlHash = best->hash;
-    result.valid = true;
+    if (!candidates.isEmpty()) {
+        const Candidate *best = &candidates.first();
+        for (const Candidate &c : candidates) {
+            int ctxStart = qMax(0, c.pos - 400);
+            int ctxEnd = qMin(html.size(), c.pos + 400);
+            QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart)).toLower();
+            if (ctx.contains(QLatin1String("macos")) || ctx.contains(QLatin1String("linux"))) {
+                best = &c;
+                break;
+            }
+        }
 
-    int ctxStart = qMax(0, best->pos - 400);
-    int ctxEnd = qMin(html.size(), best->pos + 400);
-    QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart));
+        result.runtime.url = best->url;
+        result.runtime.urlHash = best->hash;
+        result.runtime.valid = true;
 
-    static const QRegularExpression versionRe(
-        QStringLiteral(R"(wersja\s+([0-9]+(?:\.[0-9]+)+))"), QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch vm = versionRe.match(ctx);
-    if (vm.hasMatch())
-        result.version = vm.captured(1);
+        int ctxStart = qMax(0, best->pos - 400);
+        int ctxEnd = qMin(html.size(), best->pos + 400);
+        QString ctx = QString::fromUtf8(html.mid(ctxStart, ctxEnd - ctxStart));
+
+        static const QRegularExpression versionRe(
+            QStringLiteral(R"(wersja\s+([0-9]+(?:\.[0-9]+)+))"), QRegularExpression::CaseInsensitiveOption);
+        QRegularExpressionMatch vm = versionRe.match(ctx);
+        if (vm.hasMatch())
+            result.runtime.version = vm.captured(1);
+    }
+
+    // --- Library (libCCGraphiteP*.so) ---
+    static const QRegularExpression libLinkRe(
+        QStringLiteral(R"re(href\s*=\s*"(https?://[^"]*/([0-9a-fA-F]{32})/(libCCGraphiteP(?:[0-9]+(?:\.[0-9]+)+)\.so))")re"));
+
+    {
+        QRegularExpressionMatchIterator it = libLinkRe.globalMatch(page);
+        while (it.hasNext()) {
+            QRegularExpressionMatch m = it.next();
+            QUrl url(m.captured(1));
+            if (url.scheme() != QLatin1String("https"))
+                continue;
+            if (url.host() != QLatin1String("www.elektronicznypodpis.pl"))
+                continue;
+
+            result.library.url = url;
+            result.library.urlHash = m.captured(2);
+            result.library.filename = m.captured(3);
+            result.library.valid = true;
+
+            // Extract version from filename: libCCGraphiteP11.2.0.5.6.so → 11.2.0.5.6
+            static const QRegularExpression libVersionRe(
+                QStringLiteral(R"(libCCGraphiteP((?:[0-9]+\.)+[0-9]+)\.so)"));
+            QRegularExpressionMatch vm = libVersionRe.match(m.captured(3));
+            if (vm.hasMatch())
+                result.library.version = vm.captured(1);
+
+            break; // single Linux link expected
+        }
+    }
 
     return result;
 }
@@ -165,6 +197,7 @@ void UpdateController::loadSettings()
     m_allowDowngrades = obj[QStringLiteral("allowDowngrades")].toBool(true);
     m_lastCheckTime = obj[QStringLiteral("lastCheckTime")].toString();
     m_lastDeclinedUrlHash = obj[QStringLiteral("lastDeclinedUrlHash")].toString();
+    m_lastDeclinedLibUrlHash = obj[QStringLiteral("lastDeclinedLibUrlHash")].toString();
     m_checkIntervalHours = obj[QStringLiteral("checkIntervalHours")].toInt(24);
 }
 
@@ -175,6 +208,7 @@ void UpdateController::saveSettings()
     obj[QStringLiteral("allowDowngrades")] = m_allowDowngrades;
     obj[QStringLiteral("lastCheckTime")] = m_lastCheckTime;
     obj[QStringLiteral("lastDeclinedUrlHash")] = m_lastDeclinedUrlHash;
+    obj[QStringLiteral("lastDeclinedLibUrlHash")] = m_lastDeclinedLibUrlHash;
     obj[QStringLiteral("checkIntervalHours")] = m_checkIntervalHours;
 
     std::error_code ec;
@@ -271,8 +305,8 @@ void UpdateController::onDiscoveryFinished(QNetworkReply *reply, bool manual)
     m_lastCheckTime = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
     saveSettings();
 
-    DiscoveredRuntime discovered = parseDiscoveryPage(body);
-    if (!discovered.valid) {
+    DiscoveryResult discovered = parseDiscoveryPage(body);
+    if (!discovered.runtime.valid && !discovered.library.valid) {
         if (manual) {
             setError(i18n("Could not find SzafirHost download link on the website. "
                           "The site layout may have changed. You can install from a local file instead."));
@@ -286,12 +320,64 @@ void UpdateController::onDiscoveryFinished(QNetworkReply *reply, bool manual)
     evaluateDiscovery(discovered, manual);
 }
 
-void UpdateController::evaluateDiscovery(const DiscoveredRuntime &discovered, bool manual)
+void UpdateController::evaluateDiscovery(const DiscoveryResult &discovered, bool manual)
 {
-    bool changed = (discovered.urlHash != m_installedUrlHash)
-                || (!discovered.version.isEmpty() && discovered.version != m_installedVersion);
+    // --- Runtime evaluation (unchanged logic) ---
+    bool runtimeChanged = false;
+    if (discovered.runtime.valid) {
+        runtimeChanged = (discovered.runtime.urlHash != m_installedUrlHash)
+                      || (!discovered.runtime.version.isEmpty() && discovered.runtime.version != m_installedVersion);
 
-    if (!changed && !m_forceMode) {
+        if (runtimeChanged && !m_allowDowngrades && !m_forceMode
+            && !discovered.runtime.version.isEmpty() && !m_installedVersion.isEmpty()) {
+            QVersionNumber discoveredV = QVersionNumber::fromString(discovered.runtime.version);
+            QVersionNumber installedV = QVersionNumber::fromString(m_installedVersion);
+            if (!discoveredV.isNull() && !installedV.isNull() && discoveredV < installedV) {
+                qDebug() << "UpdateController: suppressing runtime downgrade" << discovered.runtime.version << "<" << m_installedVersion;
+                runtimeChanged = false;
+            }
+        }
+
+        if (runtimeChanged && !manual && discovered.runtime.urlHash == m_lastDeclinedUrlHash) {
+            qDebug() << "UpdateController: skipping previously declined runtime update";
+            runtimeChanged = false;
+        }
+    }
+
+    // --- Library evaluation ---
+    bool libraryChanged = false;
+    if (discovered.library.valid) {
+        // Only offer library updates when the component is already installed (user opted in).
+        const ComponentDownloader::ComponentEntry *libEntry = nullptr;
+        for (const auto &e : m_downloader->components()) {
+            if (e.info.id == QLatin1String("libccgraphite")) {
+                libEntry = &e;
+                break;
+            }
+        }
+
+        if (libEntry && libEntry->present) {
+            libraryChanged = (!discovered.library.version.isEmpty() && discovered.library.version != libEntry->info.version)
+                          || (!libEntry->urlHash.isEmpty() && discovered.library.urlHash != libEntry->urlHash);
+
+            if (libraryChanged && !m_allowDowngrades && !m_forceMode
+                && !discovered.library.version.isEmpty() && !libEntry->info.version.isEmpty()) {
+                QVersionNumber discoveredV = QVersionNumber::fromString(discovered.library.version);
+                QVersionNumber installedV = QVersionNumber::fromString(libEntry->info.version);
+                if (!discoveredV.isNull() && !installedV.isNull() && discoveredV < installedV) {
+                    qDebug() << "UpdateController: suppressing library downgrade" << discovered.library.version << "<" << libEntry->info.version;
+                    libraryChanged = false;
+                }
+            }
+
+            if (libraryChanged && !manual && discovered.library.urlHash == m_lastDeclinedLibUrlHash) {
+                qDebug() << "UpdateController: skipping previously declined library update";
+                libraryChanged = false;
+            }
+        }
+    }
+
+    if (!runtimeChanged && !libraryChanged && !m_forceMode) {
         if (manual)
             setState(UpToDate);
         else
@@ -299,25 +385,18 @@ void UpdateController::evaluateDiscovery(const DiscoveredRuntime &discovered, bo
         return;
     }
 
-    if (!m_allowDowngrades && !m_forceMode
-        && !discovered.version.isEmpty() && !m_installedVersion.isEmpty()) {
-        QVersionNumber discoveredV = QVersionNumber::fromString(discovered.version);
-        QVersionNumber installedV = QVersionNumber::fromString(m_installedVersion);
-        if (!discoveredV.isNull() && !installedV.isNull() && discoveredV < installedV) {
-            qDebug() << "UpdateController: suppressing downgrade" << discovered.version << "<" << m_installedVersion;
-            setState(manual ? UpToDate : Idle);
-            return;
-        }
-    }
+    if (runtimeChanged)
+        m_pendingUpdate = discovered.runtime;
+    else
+        m_pendingUpdate = {};
 
-    if (!manual && discovered.urlHash == m_lastDeclinedUrlHash) {
-        qDebug() << "UpdateController: skipping previously declined update";
-        setState(Idle);
-        return;
-    }
+    if (libraryChanged)
+        m_pendingLibrary = discovered.library;
+    else
+        m_pendingLibrary = {};
 
-    m_pendingUpdate = discovered;
-    m_availableVersion = discovered.version;
+    m_availableVersion = m_pendingUpdate.valid ? m_pendingUpdate.version : QString();
+    m_availableLibraryVersion = m_pendingLibrary.valid ? m_pendingLibrary.version : QString();
 
     if (m_autoUpdate && !manual) {
         applyUpdate();
@@ -325,22 +404,23 @@ void UpdateController::evaluateDiscovery(const DiscoveredRuntime &discovered, bo
     }
 
     bool isDowngrade = false;
-    if (!discovered.version.isEmpty() && !m_installedVersion.isEmpty()) {
-        QVersionNumber dV = QVersionNumber::fromString(discovered.version);
+    if (m_pendingUpdate.valid && !m_pendingUpdate.version.isEmpty() && !m_installedVersion.isEmpty()) {
+        QVersionNumber dV = QVersionNumber::fromString(m_pendingUpdate.version);
         QVersionNumber iV = QVersionNumber::fromString(m_installedVersion);
         isDowngrade = !dV.isNull() && !iV.isNull() && dV < iV;
     }
 
     setState(UpdateAvailable);
-    Q_EMIT updateAvailable(discovered.version, isDowngrade);
+    Q_EMIT updateAvailable(m_pendingUpdate.valid ? m_pendingUpdate.version : QString(), isDowngrade);
 }
 
 void UpdateController::applyUpdate()
 {
-    if (!m_pendingUpdate.valid)
+    if (!m_pendingUpdate.valid && !m_pendingLibrary.valid)
         return;
 
-    if (m_service->activeHostCount() > 0) {
+    // Only runtime updates require stopping hosts; library updates are file-only.
+    if (m_pendingUpdate.valid && m_service->activeHostCount() > 0) {
         m_deferUntilIdle = true;
         Q_EMIT interruptionConfirmationNeeded();
         return;
@@ -373,22 +453,36 @@ void UpdateController::beginInstallSequence()
     setState(Downloading);
     setProgress(0);
 
-    m_downloader->overrideComponentSource(
-        QStringLiteral("szafirhost-installer"),
-        m_pendingUpdate.url,
-        m_pendingUpdate.version,
-        m_pendingUpdate.urlHash);
+    if (m_pendingUpdate.valid) {
+        m_downloader->overrideComponentSource(
+            QStringLiteral("szafirhost-installer"),
+            m_pendingUpdate.url,
+            m_pendingUpdate.version,
+            m_pendingUpdate.urlHash);
+    }
+
+    if (m_pendingLibrary.valid) {
+        m_downloader->overrideComponentSource(
+            QStringLiteral("libccgraphite"),
+            m_pendingLibrary.url,
+            m_pendingLibrary.version,
+            m_pendingLibrary.urlHash,
+            m_pendingLibrary.filename);
+    }
 
     connect(m_downloader, &ComponentDownloader::allDownloadsComplete, this,
         [this]() {
             disconnect(m_downloader, &ComponentDownloader::allDownloadsComplete, this, nullptr);
             disconnect(m_downloader, &ComponentDownloader::downloadFailed, this, nullptr);
-            onHostsStopped();
+            if (m_pendingUpdate.valid)
+                onHostsStopped();
+            else
+                finalizeUpdate(true);
         }, Qt::SingleShotConnection);
 
     connect(m_downloader, &ComponentDownloader::downloadFailed, this,
         [this](const QString &id, const QString &err) {
-            if (id == QLatin1String("szafirhost-installer")) {
+            if (id == QLatin1String("szafirhost-installer") || id == QLatin1String("libccgraphite")) {
                 disconnect(m_downloader, &ComponentDownloader::allDownloadsComplete, this, nullptr);
                 disconnect(m_downloader, &ComponentDownloader::downloadFailed, this, nullptr);
                 setError(i18n("Download failed: %1", err));
@@ -498,17 +592,25 @@ void UpdateController::onInstallerFinished(int exitCode)
 void UpdateController::finalizeUpdate(bool success)
 {
     if (success) {
-        m_installedUrlHash = m_pendingUpdate.urlHash;
-        m_installedVersion = m_pendingUpdate.version;
-        m_installedSource = m_forceMode ? QStringLiteral("force") : QStringLiteral("web");
-        saveRuntimeState();
+        if (m_pendingUpdate.valid) {
+            m_installedUrlHash = m_pendingUpdate.urlHash;
+            m_installedVersion = m_pendingUpdate.version;
+            m_installedSource = m_forceMode ? QStringLiteral("force") : QStringLiteral("web");
+            saveRuntimeState();
 
-        qDebug() << "UpdateController: runtime updated to" << m_installedVersion
-                 << "hash:" << m_installedUrlHash;
+            qDebug() << "UpdateController: runtime updated to" << m_installedVersion
+                     << "hash:" << m_installedUrlHash;
+        }
+        if (m_pendingLibrary.valid) {
+            qDebug() << "UpdateController: library updated to" << m_pendingLibrary.version
+                     << "hash:" << m_pendingLibrary.urlHash;
+        }
     }
 
     m_service->setAcceptingConnections(true);
     m_pendingUpdate = {};
+    m_pendingLibrary = {};
+    m_availableLibraryVersion.clear();
     setProgress(-1);
 
     if (success) {
@@ -551,9 +653,14 @@ void UpdateController::forceReinstall()
 
 void UpdateController::dismissOffer()
 {
-    m_lastDeclinedUrlHash = m_pendingUpdate.urlHash;
+    if (m_pendingUpdate.valid)
+        m_lastDeclinedUrlHash = m_pendingUpdate.urlHash;
+    if (m_pendingLibrary.valid)
+        m_lastDeclinedLibUrlHash = m_pendingLibrary.urlHash;
     saveSettings();
     m_pendingUpdate = {};
+    m_pendingLibrary = {};
+    m_availableLibraryVersion.clear();
     setState(Idle);
 }
 
