@@ -17,16 +17,13 @@ Kirigami.Page {
             || updateController.state === UpdateController.Installing)
 
     footer: Rectangle {
-        implicitHeight: updateActive ? updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2 : 0
-        visible: updateActive
+        implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
         color: Kirigami.Theme.backgroundColor
-        clip: true
-
-        Behavior on implicitHeight { NumberAnimation { duration: 150 } }
 
         Kirigami.Separator {
             anchors.top: parent.top
             width: parent.width
+            visible: updateActive
         }
 
         RowLayout {
@@ -36,6 +33,7 @@ Kirigami.Page {
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Kirigami.Units.smallSpacing
             spacing: Kirigami.Units.smallSpacing
+            visible: updateActive
 
             BusyIndicator {
                 Layout.preferredWidth: Kirigami.Units.iconSizes.small
