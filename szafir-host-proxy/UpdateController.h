@@ -47,7 +47,7 @@ public:
     void setAllowDowngrades(bool allowed);
 
     State state() const { return m_state; }
-    QString installedVersion() const { return m_installedVersion; }
+    QString installedVersion() const;
     QString availableVersion() const { return m_availableVersion; }
     QString availableLibraryVersion() const { return m_availableLibraryVersion; }
     QString lastCheckTime() const { return m_lastCheckTime; }
@@ -79,8 +79,6 @@ private:
 
     void loadSettings();
     void saveSettings();
-    void loadRuntimeState();
-    void saveRuntimeState();
 
     void onDiscoveryFinished(const DiscoveryResult &result, bool manual);
     void evaluateDiscovery(const DiscoveryResult &discovered, bool manual);
@@ -106,10 +104,6 @@ private:
     QString m_lastDeclinedUrlHash;
     QString m_lastDeclinedLibUrlHash;
     int m_checkIntervalHours = 24;
-
-    QString m_installedUrlHash;
-    QString m_installedVersion;
-    QString m_installedSource;
 
     DiscoveredComponent m_pendingUpdate;
     DiscoveredComponent m_pendingLibrary;

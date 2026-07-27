@@ -52,7 +52,6 @@ UpdateController::UpdateController(ComponentDownloader *downloader,
     , m_service(service)
 {
     loadSettings();
-    loadRuntimeState();
 }
 
 void UpdateController::setAutoUpdate(bool enabled)
@@ -129,49 +128,13 @@ void UpdateController::saveSettings()
     }
 }
 
-void UpdateController::loadRuntimeState()
+QString UpdateController::installedVersion() const
 {
-    QFile f(PathUtils::toQString(componentStatePath()));
-    if (!f.open(QIODevice::ReadOnly))
-        return;
-
-    QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
-    QJsonObject runtime = obj[QStringLiteral("runtime")].toObject();
-    m_installedUrlHash = runtime[QStringLiteral("installedUrlHash")].toString();
-    m_installedVersion = runtime[QStringLiteral("installedVersion")].toString();
-    m_installedSource = runtime[QStringLiteral("source")].toString();
-
-    if (m_installedVersion.isEmpty() && m_installedUrlHash.isEmpty()) {
-        QJsonObject components = obj[QStringLiteral("components")].toObject();
-        QJsonObject installer = components[QStringLiteral("szafirhost-installer")].toObject();
-        if (installer.contains(QStringLiteral("urlHash"))) {
-            m_installedUrlHash = installer[QStringLiteral("urlHash")].toString();
-            m_installedVersion = installer[QStringLiteral("version")].toString();
-        }
+    for (const auto &e : m_downloader->components()) {
+        if (e.info.id == QLatin1String("szafirhost-installer"))
+            return e.info.version;
     }
-}
-
-void UpdateController::saveRuntimeState()
-{
-    QFile f(PathUtils::toQString(componentStatePath()));
-    QJsonObject obj;
-    if (f.open(QIODevice::ReadOnly))
-        obj = QJsonDocument::fromJson(f.readAll()).object();
-
-    QJsonObject runtime;
-    runtime[QStringLiteral("installedUrlHash")] = m_installedUrlHash;
-    runtime[QStringLiteral("installedVersion")] = m_installedVersion;
-    runtime[QStringLiteral("installedAt")] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    runtime[QStringLiteral("source")] = m_installedSource;
-    obj[QStringLiteral("runtime")] = runtime;
-
-    QSaveFile sf(PathUtils::toQString(componentStatePath()));
-    if (sf.open(QIODevice::WriteOnly)) {
-        sf.write(QJsonDocument(obj).toJson());
-        sf.commit();
-    }
-
-    Q_EMIT runtimeInfoChanged();
+    return {};
 }
 
 void UpdateController::checkForUpdates(bool manual)
@@ -214,18 +177,29 @@ void UpdateController::onDiscoveryFinished(const DiscoveryResult &discovered, bo
 
 void UpdateController::evaluateDiscovery(const DiscoveryResult &discovered, bool manual)
 {
-    // --- Runtime evaluation (unchanged logic) ---
+    // --- Runtime evaluation ---
     bool runtimeChanged = false;
     if (discovered.runtime.valid) {
-        runtimeChanged = (discovered.runtime.urlHash != m_installedUrlHash)
-                      || (!discovered.runtime.version.isEmpty() && discovered.runtime.version != m_installedVersion);
+        const ComponentDownloader::ComponentEntry *rtEntry = nullptr;
+        for (const auto &e : m_downloader->components()) {
+            if (e.info.id == QLatin1String("szafirhost-installer")) {
+                rtEntry = &e;
+                break;
+            }
+        }
+
+        const QString installedHash = rtEntry ? rtEntry->urlHash : QString();
+        const QString installedVersion = rtEntry ? rtEntry->info.version : QString();
+
+        runtimeChanged = (discovered.runtime.urlHash != installedHash)
+                      || (!discovered.runtime.version.isEmpty() && discovered.runtime.version != installedVersion);
 
         if (runtimeChanged && !m_allowDowngrades && !m_forceMode
-            && !discovered.runtime.version.isEmpty() && !m_installedVersion.isEmpty()) {
+            && !discovered.runtime.version.isEmpty() && !installedVersion.isEmpty()) {
             QVersionNumber discoveredV = QVersionNumber::fromString(discovered.runtime.version);
-            QVersionNumber installedV = QVersionNumber::fromString(m_installedVersion);
+            QVersionNumber installedV = QVersionNumber::fromString(installedVersion);
             if (!discoveredV.isNull() && !installedV.isNull() && discoveredV < installedV) {
-                qDebug() << "UpdateController: suppressing runtime downgrade" << discovered.runtime.version << "<" << m_installedVersion;
+                qDebug() << "UpdateController: suppressing runtime downgrade" << discovered.runtime.version << "<" << installedVersion;
                 runtimeChanged = false;
             }
         }
@@ -296,9 +270,10 @@ void UpdateController::evaluateDiscovery(const DiscoveryResult &discovered, bool
     }
 
     bool isDowngrade = false;
-    if (m_pendingUpdate.valid && !m_pendingUpdate.version.isEmpty() && !m_installedVersion.isEmpty()) {
+    const QString curVersion = installedVersion();
+    if (m_pendingUpdate.valid && !m_pendingUpdate.version.isEmpty() && !curVersion.isEmpty()) {
         QVersionNumber dV = QVersionNumber::fromString(m_pendingUpdate.version);
-        QVersionNumber iV = QVersionNumber::fromString(m_installedVersion);
+        QVersionNumber iV = QVersionNumber::fromString(curVersion);
         isDowngrade = !dV.isNull() && !iV.isNull() && dV < iV;
     }
 
@@ -485,13 +460,9 @@ void UpdateController::finalizeUpdate(bool success)
 {
     if (success) {
         if (m_pendingUpdate.valid) {
-            m_installedUrlHash = m_pendingUpdate.urlHash;
-            m_installedVersion = m_pendingUpdate.version;
-            m_installedSource = m_forceMode ? QStringLiteral("force") : QStringLiteral("web");
-            saveRuntimeState();
-
-            qDebug() << "UpdateController: runtime updated to" << m_installedVersion
-                     << "hash:" << m_installedUrlHash;
+            qDebug() << "UpdateController: runtime updated to" << m_pendingUpdate.version
+                     << "hash:" << m_pendingUpdate.urlHash;
+            Q_EMIT runtimeInfoChanged();
         }
         if (m_pendingLibrary.valid) {
             qDebug() << "UpdateController: library updated to" << m_pendingLibrary.version
@@ -519,18 +490,18 @@ void UpdateController::forceReinstall()
     m_forceMode = true;
     m_manualCheck = true;
 
-    bool hasLocalInstaller = false;
+    const ComponentDownloader::ComponentEntry *rtEntry = nullptr;
     for (const auto &e : m_downloader->components()) {
         if (e.info.id == QLatin1String("szafirhost-installer") && e.present) {
-            hasLocalInstaller = true;
+            rtEntry = &e;
             break;
         }
     }
 
-    if (hasLocalInstaller) {
+    if (rtEntry) {
         m_pendingUpdate.valid = true;
-        m_pendingUpdate.urlHash = m_installedUrlHash;
-        m_pendingUpdate.version = m_installedVersion;
+        m_pendingUpdate.urlHash = rtEntry->urlHash;
+        m_pendingUpdate.version = rtEntry->info.version;
         onHostsStopped();
     } else {
         checkForUpdates(true);
@@ -608,7 +579,6 @@ void UpdateController::installFromFile(const QUrl &localFile)
     m_pendingUpdate.valid = true;
     m_pendingUpdate.urlHash = QString();
     m_pendingUpdate.version = QString();
-    m_installedSource = QStringLiteral("file");
 
     onHostsStopped();
 }
