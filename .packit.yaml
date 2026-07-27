@@ -1,0 +1,16 @@
+specfile_path: szafir-host-proxy.spec
+upstream_package_name: szafir-host-proxy
+downstream_package_name: szafir-host-proxy
+upstream_project_url: https://github.com/deno/szafir-flatpak
+
+actions:
+  get-current-version:
+    - python3 scripts/query_releases.py --current-version
+  create-archive:
+    - bash -c "v=$(python3 scripts/query_releases.py --current-version) && git archive --format=tar.gz --prefix=szafir-host-proxy-${v}/ -o szafir-host-proxy-${v}.tar.gz HEAD && echo szafir-host-proxy-${v}.tar.gz"
+
+jobs:
+  - job: copr_build
+    trigger: pull_request
+    targets:
+      - fedora-all-x86_64

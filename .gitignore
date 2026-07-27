@@ -6,3 +6,15 @@ repo
 .logs
 result
 szafir-host-proxy/build
+
+# packit / mock build output
+szafir-host-proxy-*.tar.gz
+*.src.rpm
+*.x86_64.rpm
+*.noarch.rpm
+build.log
+root.log
+state.log
+hw_info.log
+installed_pkgs.log
+mock.log
