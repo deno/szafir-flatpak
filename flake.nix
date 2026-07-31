@@ -17,6 +17,7 @@
         nativeBuildInputs = [
           pkgs.cmake
           pkgs.ninja
+          pkgs.pkg-config
           pkgs.python3
           pkgs.python3Packages.pyyaml
           pkgs.kdePackages.wrapQtAppsHook
@@ -33,7 +34,7 @@
           pkgs.kdePackages.kstatusnotifieritem
           pkgs.bubblewrap
           pkgs.mesa
-          pkgs.pcsclite.lib
+          pkgs.pcsclite
         ];
 
         cmakeDir = "../szafir-host-proxy";

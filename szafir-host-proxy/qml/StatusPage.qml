@@ -24,68 +24,120 @@ Kirigami.Page {
         onTriggered: page.statusMessage = ""
     }
 
-    footer: Rectangle {
-        id: statusFooter
-        implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
-        color: Kirigami.Theme.backgroundColor
-        clip: true
+    footer: ColumnLayout {
+        spacing: 0
 
-        readonly property bool contentShown: updateActive || page.statusMessage !== ""
+        // ── Smart card status (always visible) ────────────────────────
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: cardStatusLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
+            color: Kirigami.Theme.backgroundColor
 
-        Kirigami.Separator {
-            anchors.top: parent.top
-            width: parent.width
-            opacity: statusFooter.contentShown ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-        }
-
-        RowLayout {
-            id: updateFooterLayout
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: Kirigami.Units.smallSpacing
-            spacing: Kirigami.Units.smallSpacing
-
-            transform: Translate {
-                y: statusFooter.contentShown ? 0 : statusFooter.height
-                Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            Kirigami.Separator {
+                anchors.top: parent.top
+                width: parent.width
             }
 
-            BusyIndicator {
-                Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                Layout.preferredHeight: Kirigami.Units.iconSizes.small
-                running: updateActive
-                visible: updateActive
-            }
+            RowLayout {
+                id: cardStatusLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Kirigami.Units.smallSpacing
+                spacing: Kirigami.Units.smallSpacing
 
-            Label {
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-                text: {
-                    if (updateActive && typeof updateController !== "undefined" && updateController !== null) {
-                        switch (updateController.state) {
-                        case UpdateController.Checking:
-                            return i18n("Checking for updates...")
-                        case UpdateController.Downloading:
-                            if (updateController.progress >= 0)
-                                return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
-                            return i18n("Downloading update...")
-                        case UpdateController.StoppingHosts:
-                            return i18n("Stopping active connections...")
-                        case UpdateController.Installing:
-                            return i18n("Installing update...")
+                Kirigami.Icon {
+                    Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                    Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                    source: smartCardMonitor.cardPresent
+                        ? "qrc:/icons/smartcard_present.svg"
+                        : "qrc:/icons/smartcard_fail.svg"
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: {
+                        if (!smartCardMonitor.available)
+                            return i18n("Smart card service unavailable")
+                        if (!smartCardMonitor.cardPresent)
+                            return i18n("No smart cards detected")
+                        var names = []
+                        for (var i = 0; i < smartCardMonitor.readers.length; ++i) {
+                            if (smartCardMonitor.readers[i].present)
+                                names.push(smartCardMonitor.readers[i].name)
                         }
+                        return i18n("Card present: %1", names.join(", "))
                     }
-                    return page.statusMessage
                 }
             }
+        }
 
-            ProgressBar {
-                Layout.preferredWidth: Kirigami.Units.gridUnit * 8
-                visible: updateController?.state === UpdateController.Downloading
-                value: updateController?.progress >= 0 ? updateController.progress : 0
-                indeterminate: updateController?.progress < 0
+        // ── Update status ─────────────────────────────────────────────
+        Rectangle {
+            id: statusFooter
+            Layout.fillWidth: true
+            implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
+            color: Kirigami.Theme.backgroundColor
+            clip: true
+
+            readonly property bool contentShown: updateActive || page.statusMessage !== ""
+
+            Kirigami.Separator {
+                anchors.top: parent.top
+                width: parent.width
+                opacity: statusFooter.contentShown ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 150 } }
+            }
+
+            RowLayout {
+                id: updateFooterLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Kirigami.Units.smallSpacing
+                spacing: Kirigami.Units.smallSpacing
+
+                transform: Translate {
+                    y: statusFooter.contentShown ? 0 : statusFooter.height
+                    Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                }
+
+                BusyIndicator {
+                    Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                    Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                    running: updateActive
+                    visible: updateActive
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: {
+                        if (updateActive && typeof updateController !== "undefined" && updateController !== null) {
+                            switch (updateController.state) {
+                            case UpdateController.Checking:
+                                return i18n("Checking for updates...")
+                            case UpdateController.Downloading:
+                                if (updateController.progress >= 0)
+                                    return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
+                                return i18n("Downloading update...")
+                            case UpdateController.StoppingHosts:
+                                return i18n("Stopping active connections...")
+                            case UpdateController.Installing:
+                                return i18n("Installing update...")
+                            }
+                        }
+                        return page.statusMessage
+                    }
+                }
+
+                ProgressBar {
+                    Layout.preferredWidth: Kirigami.Units.gridUnit * 8
+                    visible: updateController?.state === UpdateController.Downloading
+                    value: updateController?.progress >= 0 ? updateController.progress : 0
+                    indeterminate: updateController?.progress < 0
+                }
             }
         }
     }

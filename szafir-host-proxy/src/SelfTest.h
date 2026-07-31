@@ -15,4 +15,8 @@ int fdPassthrough(int argc, char *argv[]);
 // the component download host). Returns 0 when the TLS handshake succeeds.
 int tlsProbe(int argc, char *argv[]);
 
+// Verify PC/SC connectivity: establish a context, enumerate readers, and query
+// card state. Returns 0 on PASS or SKIP (no pcscd running), 1 on FAIL.
+int pcscProbe(int argc, char *argv[]);
+
 } // namespace SelfTest

@@ -24,6 +24,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <winscard.h>
+
 namespace {
 
 // Create a pipe with both ends close-on-exec. The child's fork handler dup2()s the
@@ -242,6 +244,68 @@ int tlsProbe(int argc, char *argv[])
 
     app.exec();
     return result;
+}
+
+int pcscProbe(int argc, char *argv[])
+{
+    SCARDCONTEXT ctx = 0;
+    LONG rv = SCardEstablishContext(SCARD_SCOPE_SYSTEM, nullptr, nullptr, &ctx);
+    if (rv == SCARD_E_NO_SERVICE || rv == SCARD_E_SERVICE_STOPPED) {
+        printf("selftest-pcsc: SKIP (no pcscd running)\n");
+        return 0;
+    }
+    if (rv != SCARD_S_SUCCESS) {
+        fprintf(stderr, "selftest-pcsc: FAIL (SCardEstablishContext: 0x%08lX)\n",
+                static_cast<unsigned long>(rv));
+        return 1;
+    }
+
+    DWORD len = 0;
+    rv = SCardListReaders(ctx, nullptr, nullptr, &len);
+    if (rv == SCARD_E_NO_READERS_AVAILABLE) {
+        printf("selftest-pcsc: PASS (daemon reachable, no readers attached)\n");
+        SCardReleaseContext(ctx);
+        return 0;
+    }
+    if (rv != SCARD_S_SUCCESS) {
+        fprintf(stderr, "selftest-pcsc: FAIL (SCardListReaders: 0x%08lX)\n",
+                static_cast<unsigned long>(rv));
+        SCardReleaseContext(ctx);
+        return 1;
+    }
+
+    std::vector<char> buf(len);
+    rv = SCardListReaders(ctx, nullptr, buf.data(), &len);
+    if (rv != SCARD_S_SUCCESS) {
+        fprintf(stderr, "selftest-pcsc: FAIL (SCardListReaders fill: 0x%08lX)\n",
+                static_cast<unsigned long>(rv));
+        SCardReleaseContext(ctx);
+        return 1;
+    }
+
+    std::vector<SCARD_READERSTATE> states;
+    for (const char *p = buf.data(); *p; p += strlen(p) + 1) {
+        SCARD_READERSTATE rs{};
+        rs.szReader = p;
+        rs.dwCurrentState = SCARD_STATE_UNAWARE;
+        states.push_back(rs);
+    }
+
+    rv = SCardGetStatusChange(ctx, 0, states.data(), static_cast<DWORD>(states.size()));
+    if (rv != SCARD_S_SUCCESS && rv != SCARD_E_TIMEOUT) {
+        fprintf(stderr, "selftest-pcsc: FAIL (SCardGetStatusChange: 0x%08lX)\n",
+                static_cast<unsigned long>(rv));
+        SCardReleaseContext(ctx);
+        return 1;
+    }
+
+    for (const auto &rs : states)
+        printf("selftest-pcsc: reader \"%s\" cardPresent=%d\n",
+               rs.szReader, (rs.dwEventState & SCARD_STATE_PRESENT) != 0);
+
+    printf("selftest-pcsc: PASS (%zu reader(s))\n", states.size());
+    SCardReleaseContext(ctx);
+    return 0;
 }
 
 } // namespace SelfTest

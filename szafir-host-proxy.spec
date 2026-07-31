@@ -20,6 +20,8 @@ BuildRequires:  kf6-kirigami-devel
 BuildRequires:  kf6-kstatusnotifieritem-devel
 BuildRequires:  python3
 BuildRequires:  python3-pyyaml
+BuildRequires:  pkgconf-pkg-config
+BuildRequires:  pcsc-lite-devel
 
 Requires:       bubblewrap
 # Capability deps (preferred over package names): java-headless resolves to the

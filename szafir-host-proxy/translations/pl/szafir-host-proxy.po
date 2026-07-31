@@ -386,3 +386,16 @@ msgid "Failed to fully install native host integration; continuing startup."
 msgstr "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie będzie kontynuowane."
 "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
 "będzie kontynuowane."
+
+#. ── Smart card status ───────────────────────────────────────────
+#: szafir-host-proxy/qml/StatusPage.qml
+msgid "Smart card service unavailable"
+msgstr "Usługa kart inteligentnych niedostępna"
+
+#: szafir-host-proxy/qml/StatusPage.qml
+msgid "No smart cards detected"
+msgstr "Nie wykryto kart inteligentnych"
+
+#: szafir-host-proxy/qml/StatusPage.qml
+msgid "Card present: %1"
+msgstr "Wykryto kartę: %1"

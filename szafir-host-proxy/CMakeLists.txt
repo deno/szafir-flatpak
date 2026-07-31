@@ -62,6 +62,8 @@ find_package(KF6DBusAddons REQUIRED)
 find_package(KF6I18n REQUIRED)
 find_package(KF6Kirigami REQUIRED)
 find_package(KF6StatusNotifierItem REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PCSC REQUIRED IMPORTED_TARGET libpcsclite)
 
 
 qt_standard_project_setup(REQUIRES 6.8)
@@ -114,6 +116,8 @@ set(SZAFIR_HOST_PROXY_SOURCES
     src/ComponentDownloader.h
     src/ComponentDownloader.cpp
     src/SecureNetwork.h
+    src/SmartCardMonitor.h
+    src/SmartCardMonitor.cpp
     src/UpdateController.h
     src/UpdateController.cpp
 )
@@ -138,6 +142,8 @@ qt_add_resources(szafir-host-proxy "szafir-host-proxy-static-assets"
     FILES
     szafir_license_en.md
     szafir_license_pl.md
+    icons/smartcard_fail.svg
+    icons/smartcard_present.svg
 )
 qt_add_resources(szafir-host-proxy "download-manifest"
     PREFIX "/szafir-host-proxy"
@@ -169,6 +175,7 @@ target_link_libraries(szafir-host-proxy
     KF6::I18nQml
     KF6::Kirigami
     KF6::StatusNotifierItem
+    PkgConfig::PCSC
 )
 
 

@@ -28,6 +28,7 @@
 #include "HostLauncher.h"
 #include "SelfTest.h"
 #include "ComponentDownloader.h"
+#include "SmartCardMonitor.h"
 #include "UpdateController.h"
 
 #include <KSignalHandler>
@@ -115,6 +116,10 @@ int main(int argc, char *argv[])
     // Hidden self-test: verify HTTPS certificate verification under Landlock.
     if (argc >= 2 && strcmp(argv[1], "--selftest-tls") == 0)
         return SelfTest::tlsProbe(argc, argv);
+
+    // Hidden self-test: verify PC/SC daemon connectivity.
+    if (argc >= 2 && strcmp(argv[1], "--selftest-pcsc") == 0)
+        return SelfTest::pcscProbe(argc, argv);
 
 #ifdef SZAFIR_DEV_BUILD
     // Dev-only: wipe the proxy's own XDG state so the app starts as if
@@ -407,10 +412,13 @@ int main(int argc, char *argv[])
 
     setupController->computePages();
 
+    auto *smartCardMonitor = new SmartCardMonitor(&app);
+
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,
                                        componentDownloader,
-                                       updateController));
+                                       updateController,
+                                       smartCardMonitor));
 
     auto showMainWindow = [&mainWindow]() {
         mainWindow->show();

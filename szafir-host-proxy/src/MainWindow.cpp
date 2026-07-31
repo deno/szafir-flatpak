@@ -5,6 +5,7 @@
 #include "SetupController.h"
 #include "NativeMessagingService.h"
 #include "ComponentDownloader.h"
+#include "SmartCardMonitor.h"
 #include "UpdateController.h"
 #include "config.h"
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
                        SetupController *setupController,
                        ComponentDownloader *componentDownloader,
                        UpdateController *updateController,
+                       SmartCardMonitor *smartCardMonitor,
                        QObject *parent)
     : QObject(parent)
     , m_hostRuntime(new HostRuntimeController(this))
@@ -63,6 +65,7 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
     , m_setupController(setupController)
     , m_componentDownloader(componentDownloader)
     , m_updateController(updateController)
+    , m_smartCardMonitor(smartCardMonitor)
     , m_activeHostCount(service->activeHostCount())
 {
     connect(m_service, &NativeMessagingService::activeHostCountChanged,
@@ -173,6 +176,7 @@ void MainWindow::ensureWindow()
     m_engine->rootContext()->setContextProperty(QStringLiteral("setupController"), m_setupController);
     m_engine->rootContext()->setContextProperty(QStringLiteral("componentDownloader"), m_componentDownloader);
     m_engine->rootContext()->setContextProperty(QStringLiteral("updateController"), m_updateController);
+    m_engine->rootContext()->setContextProperty(QStringLiteral("smartCardMonitor"), m_smartCardMonitor);
     m_engine->load(QUrl(QStringLiteral("qrc:/qt/qml/SzafirHostProxy/qml/MainWindow.qml")));
 
     if (m_engine->rootObjects().isEmpty()) {

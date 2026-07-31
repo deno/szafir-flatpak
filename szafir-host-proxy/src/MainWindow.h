@@ -13,6 +13,7 @@ class QQmlApplicationEngine;
 class QWindow;
 class ComponentDownloader;
 class UpdateController;
+class SmartCardMonitor;
 
 class MainWindow : public QObject
 {
@@ -25,6 +26,7 @@ public:
                         SetupController *setupController,
                         ComponentDownloader *componentDownloader,
                         UpdateController *updateController,
+                        SmartCardMonitor *smartCardMonitor,
                         QObject *parent = nullptr);
     ~MainWindow() override;
 
@@ -53,6 +55,7 @@ private:
     SetupController *m_setupController;
     ComponentDownloader *m_componentDownloader;
     UpdateController *m_updateController;
+    SmartCardMonitor *m_smartCardMonitor;
     int m_activeHostCount = 0;
     QQmlApplicationEngine *m_engine = nullptr;
     QPointer<QWindow> m_window;
