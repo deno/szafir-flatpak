@@ -8,8 +8,8 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       version = "0.3.2";
-    in {
-      packages.${system}.default = pkgs.stdenv.mkDerivation {
+
+      mkProxy = { dev }: pkgs.stdenv.mkDerivation {
         pname = "szafir-host-proxy";
         inherit version;
         src = ./.;
@@ -45,7 +45,7 @@
           "-DRUNTIME_PREFIX=${placeholder "out"}"
           "-DSZAFIR_BWRAP=ON"
           "-DSZAFIR_BWRAP_PATH=${pkgs.bubblewrap}/bin/bwrap"
-          "-DSZAFIR_DEV=ON"
+          "-DSZAFIR_DEV=${if dev then "ON" else "OFF"}"
         ];
 
         postInstall = ''
@@ -70,9 +70,15 @@
           )
         '';
       };
+    in {
+      packages.${system} = {
+        default = mkProxy { dev = false; };
+        release = mkProxy { dev = false; };
+        dev = mkProxy { dev = true; };
+      };
 
       devShells.${system}.default = pkgs.mkShell {
-        inputsFrom = [ self.packages.${system}.default ];
+        inputsFrom = [ self.packages.${system}.dev ];
       };
     };
 }
