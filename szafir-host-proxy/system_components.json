@@ -23,7 +23,8 @@
           "-Dlibusb=false",
           "-Dpolkit=false",
           "-Dserial=false",
-          "-Dipcdir=/run/pcscd"
+          "-Dipcdir=/run/pcscd",
+          "--libdir=lib"
         ]
       }
     }

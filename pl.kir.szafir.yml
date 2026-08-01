@@ -43,6 +43,7 @@ modules:
       - -Dpolkit=false
       - -Dserial=false
       - -Dipcdir=/run/pcscd
+      - --libdir=lib
     post-install:
       - install -Dm644 ../COPYING /app/share/licenses/$FLATPAK_ID/pcsc-lite/COPYING
     sources:
