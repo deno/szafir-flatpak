@@ -20,13 +20,19 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
       <h3>Szafir</h3>
       <p>The standalone desktop application for signing, verifying, timestamping, encrypting, and managing qualified electronic signature workflows.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
-      <img src="screenshots/szafirapp/en/home.png" alt="Szafir home screen" />
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/en/home-dark.png" />
+        <img src="screenshots/szafirapp/en/home.png" alt="Szafir home screen" />
+      </picture>
     </td>
     <td width="50%" valign="top">
       <h3>SzafirHost Proxy</h3>
       <p>An open-source bridge that connects supported browsers with the Szafir environment so signing on supported websites works from Flatpak and host-installed browsers.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
-      <img src="screenshots/proxy/en/wizard.png" alt="SzafirHost Proxy setup wizard" />
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/wizard-dark.png" />
+        <img src="screenshots/proxy/en/wizard.png" alt="SzafirHost Proxy setup wizard" />
+      </picture>
     </td>
   </tr>
 </table>
@@ -44,15 +50,27 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
 ### Szafir
 
 <p>
-  <img src="screenshots/szafirapp/en/home.png" alt="Szafir start screen" width="48%" />
-  <img src="screenshots/szafirapp/en/signing_pades.png" alt="Signing a PDF in Szafir" width="48%" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/en/home-dark.png" />
+    <img src="screenshots/szafirapp/en/home.png" alt="Szafir start screen" width="48%" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/en/signing_pades-dark.png" />
+    <img src="screenshots/szafirapp/en/signing_pades.png" alt="Signing a PDF in Szafir" width="48%" />
+  </picture>
 </p>
 
 ### SzafirHost Proxy
 
 <p>
-  <img src="screenshots/proxy/en/status.png" alt="Proxy waiting for browser activity" width="48%" />
-  <img src="screenshots/proxy/en/components.png" alt="Proxy component download screen" width="48%" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/status-dark.png" />
+    <img src="screenshots/proxy/en/status.png" alt="Proxy waiting for browser activity" width="48%" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/components-dark.png" />
+    <img src="screenshots/proxy/en/components.png" alt="Proxy component download screen" width="48%" />
+  </picture>
 </p>
 
 ## Install

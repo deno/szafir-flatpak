@@ -20,7 +20,10 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
       <h3>Szafir</h3>
       <p>Samodzielna aplikacja desktopowa do podpisywania, weryfikacji, znakowania czasem, szyfrowania i obsługi kwalifikowanych podpisów elektronicznych.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
-      <img src="screenshots/szafirapp/pl/home.png" alt="Ekran główny aplikacji Szafir" />
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/pl/home-dark.png" />
+        <img src="screenshots/szafirapp/pl/home.png" alt="Ekran główny aplikacji Szafir" />
+      </picture>
     </td>
     <td width="50%" valign="top">
       <h3>SzafirHost Proxy</h3>
@@ -44,8 +47,14 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
 ### Szafir
 
 <p>
-  <img src="screenshots/szafirapp/pl/home.png" alt="Ekran startowy aplikacji Szafir" width="48%" />
-  <img src="screenshots/szafirapp/pl/signing_pades.png" alt="Podpisywanie dokumentu PDF w Szafir" width="48%" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/pl/home-dark.png" />
+    <img src="screenshots/szafirapp/pl/home.png" alt="Ekran startowy aplikacji Szafir" width="48%" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/pl/signing_pades-dark.png" />
+    <img src="screenshots/szafirapp/pl/signing_pades.png" alt="Podpisywanie dokumentu PDF w Szafir" width="48%" />
+  </picture>
 </p>
 
 ### SzafirHost Proxy
