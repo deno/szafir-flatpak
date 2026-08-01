@@ -17,22 +17,29 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>Szafir</h3>
-      <p>The standalone desktop application for signing, verifying, timestamping, encrypting, and managing qualified electronic signature workflows.</p>
-      <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/en/home-dark.png" />
         <img src="screenshots/szafirapp/en/home.png" alt="Szafir home screen" />
       </picture>
     </td>
     <td width="50%" valign="top">
-      <h3>SzafirHost Proxy</h3>
-      <p>An open-source bridge that connects supported browsers with the Szafir environment so signing on supported websites works from Flatpak and host-installed browsers.</p>
-      <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/status-dark.png" />
         <img src="screenshots/proxy/en/status.png" alt="Proxy waiting for browser activity" />
       </picture>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>Szafir</h3>
+      <p>The standalone desktop application for signing, verifying, timestamping, encrypting, and managing qualified electronic signature workflows.</p>
+      <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>SzafirHost Proxy</h3>
+      <p>An open-source bridge that connects supported browsers with the Szafir environment so signing on supported websites works from Flatpak and host-installed browsers.</p>
+      <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
+      <br><br>
     </td>
   </tr>
 </table>

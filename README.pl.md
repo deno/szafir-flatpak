@@ -17,19 +17,26 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>Szafir</h3>
-      <p>Samodzielna aplikacja desktopowa do podpisywania, weryfikacji, znakowania czasem, szyfrowania i obsługi kwalifikowanych podpisów elektronicznych.</p>
-      <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="screenshots/szafirapp/pl/home-dark.png" />
         <img src="screenshots/szafirapp/pl/home.png" alt="Ekran główny aplikacji Szafir" />
       </picture>
     </td>
     <td width="50%" valign="top">
+      <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>Szafir</h3>
+      <p>Samodzielna aplikacja desktopowa do podpisywania, weryfikacji, znakowania czasem, szyfrowania i obsługi kwalifikowanych podpisów elektronicznych.</p>
+      <p><strong>Flatpak ID:</strong> <code>pl.kir.szafir</code></p>
+    </td>
+    <td width="50%" valign="top">
       <h3>SzafirHost Proxy</h3>
       <p>Otwartoźródłowy most łączący wspierane przeglądarki ze środowiskiem Szafir, aby podpis na obsługiwanych stronach WWW działał zarówno dla aplikacji hosta, jak i przeglądarek Flatpak.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
-      <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" />
+      <br><br>
     </td>
   </tr>
 </table>
