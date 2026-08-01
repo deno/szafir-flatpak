@@ -500,35 +500,24 @@ void SmartCardMonitor::poll()
             .arg(reader.value(QStringLiteral("atr")).toString()));
 
         if (present) {
+            // Direct, protocol-less connection: reads reader attributes without
+            // negotiating a card protocol or taking a card handle. A shared
+            // T=0/T=1/RAW card connection here disturbs libCCGraphite's internal
+            // reader monitor, which then reports the inserted token as absent for
+            // every PC/SC client. ATR already comes from SCardGetStatusChange.
             SCARDHANDLE card = 0;
             DWORD protocol = 0;
-            LONG connectRv = SCardConnect(m_context,
-                                          names[i].constData(),
-                                          SCARD_SHARE_SHARED,
-                                          SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1 | SCARD_PROTOCOL_RAW,
-                                          &card,
-                                          &protocol);
-            const bool cardConnection = connectRv == SCARD_S_SUCCESS;
-            debugLog(QStringLiteral("reader \"%1\": SCardConnect(shared) -> %2 protocol=%3")
-                .arg(readerName)
-                .arg(pcscReturnValue(connectRv))
-                .arg(protocolText(protocol)));
-
-            if (!cardConnection) {
-                card = 0;
-                protocol = 0;
-                connectRv = SCardConnect(m_context,
-                                         names[i].constData(),
-                                         SCARD_SHARE_DIRECT,
-                                         0,
-                                         &card,
-                                         &protocol);
-                debugLog(QStringLiteral("reader \"%1\": SCardConnect(direct) -> %2")
-                    .arg(readerName).arg(pcscReturnValue(connectRv)));
-            }
+            const LONG connectRv = SCardConnect(m_context,
+                                                names[i].constData(),
+                                                SCARD_SHARE_DIRECT,
+                                                0,
+                                                &card,
+                                                &protocol);
+            debugLog(QStringLiteral("reader \"%1\": SCardConnect(direct) -> %2")
+                .arg(readerName).arg(pcscReturnValue(connectRv)));
 
             if (connectRv == SCARD_S_SUCCESS) {
-                enrichReaderFromHandle(reader, card, protocol, cardConnection);
+                enrichReaderFromHandle(reader, card, protocol, false);
                 SCardDisconnect(card, SCARD_LEAVE_CARD);
             }
         }
