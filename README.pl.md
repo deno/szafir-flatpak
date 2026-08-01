@@ -47,6 +47,7 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
 - `pl.deno.kir.szafirhostproxy` dostarcza most przeglądarkowy i pierwszą konfigurację potrzebną do podpisywania na stronach WWW.
 - Publikowane wydanie proxy nie zawiera komponentów objętych prawami autorskimi wewnątrz obrazu Flatpak.
 - Przy pierwszym uruchomieniu proxy może pobrać wymagane komponenty producenta bezpośrednio z ich oryginalnych źródeł po przejściu kreatora i akceptacji licencji.
+- Właściwy runtime SzafirHost jest zamknięty w dodatkowym sandboxie Landlock nakładanym na sandbox Flatpak: jego dostęp do systemu plików ograniczony jest wyłącznie do ścieżek potrzebnych do podpisywania, a po konfiguracji proxy dodatkowo odbiera dostęp do katalogów konfiguracji przeglądarek, których już nie potrzebuje.
 - Wydania są publikowane jako podpisane repozytorium Flatpak w GitHub Pages i można je dodać bezpośrednio przez `flatpak remote-add`.
 
 ## Zrzuty ekranu

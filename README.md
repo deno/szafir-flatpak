@@ -50,6 +50,7 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
 - `pl.deno.kir.szafirhostproxy` provides the browser bridge and first-run setup needed for website-based signing.
 - The published proxy build keeps copyrighted runtime components out of the Flatpak image itself.
 - On first launch, the proxy can download required upstream runtime components directly from their original sources after showing the setup flow and license.
+- The actual SzafirHost runtime is confined by additional Landlock sandboxing on top of the Flatpak sandbox: its filesystem access is restricted to only what signing needs, and after setup the proxy drops access to the browser-config directories it no longer needs.
 - Releases are published as a signed Flatpak repository on GitHub Pages and can be added directly with `flatpak remote-add`.
 
 ## Screenshots
