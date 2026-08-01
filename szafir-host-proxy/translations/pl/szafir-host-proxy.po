@@ -595,6 +595,66 @@ msgstr "Rozszerzenie Chrome"
 msgid "Firefox extension"
 msgstr "Rozszerzenie Firefox"
 
+msgid "Smart card details"
+msgstr "Szczegóły karty inteligentnej"
+
+msgid "Reader"
+msgstr "Czytnik"
+
+msgid "Card"
+msgstr "Karta"
+
+msgid "Provider"
+msgstr "Dostawca"
+
+msgid "Certificate"
+msgstr "Certyfikat"
+
+msgid "Reader name"
+msgstr "Nazwa czytnika"
+
+msgid "Vendor"
+msgstr "Producent"
+
+msgid "Model"
+msgstr "Model"
+
+msgid "Serial number"
+msgstr "Numer seryjny"
+
+msgid "Firmware version"
+msgstr "Wersja oprogramowania sprzętowego"
+
+msgid "Protocol"
+msgstr "Protokół"
+
+msgid "Card type"
+msgstr "Typ karty"
+
+msgid "Provider name"
+msgstr "Nazwa dostawcy"
+
+msgid "Certificate subject"
+msgstr "Podmiot certyfikatu"
+
+msgid "Certificate issuer"
+msgstr "Wystawca certyfikatu"
+
+msgid "Certificate serial number"
+msgstr "Numer seryjny certyfikatu"
+
+msgid "Valid from"
+msgstr "Ważny od"
+
+msgid "Valid until"
+msgstr "Ważny do"
+
+msgid "Not available"
+msgstr "Niedostępne"
+
+msgid "Reader is no longer available"
+msgstr "Czytnik nie jest już dostępny"
+
 #: szafir-host-proxy/qml/MainWindow.qml:14
 msgid "Setup"
 msgstr "Konfiguracja"

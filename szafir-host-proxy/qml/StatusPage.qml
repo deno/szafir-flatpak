@@ -428,6 +428,12 @@ Kirigami.Page {
                             width: smartCardsList.width
                             height: implicitHeight
                             down: false
+                            onClicked: {
+                                if (applicationWindow().pageStack.layers.depth === 1)
+                                    applicationWindow().pageStack.layers.push(
+                                        Qt.resolvedUrl("SmartCardDetailsPage.qml"),
+                                        { readerName: modelData.name })
+                            }
                             contentItem: RowLayout {
                                 spacing: Kirigami.Units.largeSpacing
 

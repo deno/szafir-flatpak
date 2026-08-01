@@ -133,6 +133,7 @@ qt_add_qml_module(szafir-host-proxy
         qml/DownloadPage.qml
         qml/LicensePage.qml
         qml/StatusPage.qml
+        qml/SmartCardDetailsPage.qml
         qml/SzafirHostAboutPage.qml
         qml/AnimatedStateButton.qml
 )

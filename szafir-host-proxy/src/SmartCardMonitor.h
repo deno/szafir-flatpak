@@ -21,6 +21,9 @@ public:
 
     bool available() const { return m_available; }
     bool cardPresent() const { return m_cardPresent; }
+    // Each reader map always contains name/present and optional diagnostic or
+    // provider metadata fields. Unsupported values are represented by empty
+    // strings so QML can render them as unavailable.
     QVariantList readers() const { return m_readers; }
 
 Q_SIGNALS:
