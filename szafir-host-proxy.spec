@@ -22,6 +22,8 @@ BuildRequires:  python3
 BuildRequires:  python3-pyyaml
 BuildRequires:  pkgconf-pkg-config
 BuildRequires:  pcsc-lite-devel
+BuildRequires:  gnutls-devel
+BuildRequires:  p11-kit-devel
 
 Requires:       bubblewrap
 # Capability deps (preferred over package names): java-headless resolves to the
@@ -64,6 +66,7 @@ install -D -p -m 0644 proxy_icon.svg \
 %files
 %license LICENSE
 %{_bindir}/szafir-host-proxy
+%{_bindir}/szafir-pkcs11-probe
 %{_bindir}/start-szafir-host-native.sh
 %{_datadir}/szafir-host-proxy/
 %{_datadir}/dbus-1/services/pl.deno.kir.szafirhostproxy.service

@@ -121,6 +121,11 @@ int main(int argc, char *argv[])
     if (argc >= 2 && strcmp(argv[1], "--selftest-pcsc") == 0)
         return SelfTest::pcscProbe(argc, argv);
 
+    // Hidden self-test: run the PKCS#11 provider probe under the same Landlock
+    // restrictions as the application and its helper process.
+    if (argc >= 2 && strcmp(argv[1], "--selftest-pkcs11") == 0)
+        return SelfTest::pkcs11Probe(argc, argv);
+
 #ifdef SZAFIR_DEV_BUILD
     // Dev-only: wipe the proxy's own XDG state so the app starts as if
     // freshly installed. Host override files are preserved.
@@ -250,6 +255,9 @@ int main(int argc, char *argv[])
     const QCommandLineOption mockBrowsersOpt(
         QStringLiteral("mock-browsers"),
         i18n("Show several mock connected browsers without accepting native messaging connections (dev builds only)."));
+    const QCommandLineOption debugSmartCardsOpt(
+        QStringLiteral("debug-smart-cards"),
+        i18n("Enable smart card and PKCS#11 debug logging (dev builds only)."));
 #endif
 
     parser.addOption(debugOpt);
@@ -265,10 +273,16 @@ int main(int argc, char *argv[])
     parser.addOption(mockReadersEmptyOpt);
     parser.addOption(mockReadersOpt);
     parser.addOption(mockBrowsersOpt);
+    parser.addOption(debugSmartCardsOpt);
 #endif
 
     parser.process(app);
     aboutData.processCommandLine(&parser);
+
+    bool debugSmartCards = false;
+#ifdef SZAFIR_DEV_BUILD
+    debugSmartCards = parser.isSet(debugSmartCardsOpt);
+#endif
 
     if (parser.isSet(debugOpt) || qgetenv("SZAFIR_DEBUG") == "1")
         QLoggingCategory::setFilterRules(QStringLiteral("*.debug=true"));
@@ -436,7 +450,7 @@ int main(int argc, char *argv[])
     else if (parser.isSet(mockReadersOpt))
         scMode = SmartCardMonitor::Mode::Mock;
 #endif
-    auto *smartCardMonitor = new SmartCardMonitor(scMode, &app);
+    auto *smartCardMonitor = new SmartCardMonitor(scMode, componentDownloader, &app, debugSmartCards);
 
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,

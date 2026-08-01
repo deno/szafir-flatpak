@@ -16,7 +16,7 @@ set(FIREFOX_EXTENSION_URL "https://www.elektronicznypodpis.pl/download/webmodule
 set(RUNTIME_PREFIX "/app" CACHE STRING "Runtime prefix for installed assets (Flatpak: /app, Nix: \$out)")
 option(SZAFIR_BWRAP "Re-exec under bubblewrap in non-Flatpak builds" OFF)
 set(SZAFIR_BWRAP_PATH "" CACHE STRING "Absolute path to bwrap (empty = search PATH)")
-option(SZAFIR_DEV "Enable dev-only CLI options (--fresh-env)" OFF)
+option(SZAFIR_DEV "Enable dev-only CLI options (--fresh-env, --debug-smart-cards)" OFF)
 
 # Derive D-Bus service/interface ID from APP_ID by dropping the final
 # hyphenated suffix, e.g. "...-fh" -> "...".
@@ -64,6 +64,8 @@ find_package(KF6Kirigami REQUIRED)
 find_package(KF6StatusNotifierItem REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PCSC REQUIRED IMPORTED_TARGET libpcsclite)
+pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
+pkg_check_modules(P11KIT REQUIRED IMPORTED_TARGET p11-kit-1)
 
 
 qt_standard_project_setup(REQUIRES 6.8)
@@ -101,6 +103,10 @@ set(SZAFIR_HOST_PROXY_SOURCES
     src/HostLauncher.cpp
     src/SelfTest.h
     src/SelfTest.cpp
+    src/Pkcs11Probe.h
+    src/Pkcs11Probe.cpp
+    src/CertificateParser.h
+    src/CertificateParser.cpp
     src/ScalingController.h
     src/ScalingController.cpp
     src/SetupController.h
@@ -134,6 +140,7 @@ qt_add_qml_module(szafir-host-proxy
         qml/LicensePage.qml
         qml/StatusPage.qml
         qml/SmartCardDetailsPage.qml
+        qml/CertificateDetailsPage.qml
         qml/SzafirHostAboutPage.qml
         qml/AnimatedStateButton.qml
 )
@@ -177,11 +184,32 @@ target_link_libraries(szafir-host-proxy
     KF6::Kirigami
     KF6::StatusNotifierItem
     PkgConfig::PCSC
+    PkgConfig::GNUTLS
+    PkgConfig::P11KIT
 )
+
+add_executable(szafir-pkcs11-probe
+    src/pkcs11-probe.cpp
+    src/Pkcs11Probe.h
+    src/Pkcs11Probe.cpp
+    src/CertificateParser.h
+    src/CertificateParser.cpp
+)
+
+target_link_libraries(szafir-pkcs11-probe
+    PRIVATE
+    Qt6::Core
+    PkgConfig::GNUTLS
+    PkgConfig::P11KIT
+    PkgConfig::PCSC
+)
+
+target_include_directories(szafir-pkcs11-probe PRIVATE src)
 
 
 
 install(TARGETS szafir-host-proxy DESTINATION bin)
+install(TARGETS szafir-pkcs11-probe DESTINATION bin)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/start-szafir-host-native.sh DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/flatpak-host-wrapper DESTINATION share/szafir-host-proxy)
 install(FILES flatpak-host-wrapper.d/50-icon-example.sh DESTINATION share/szafir-host-proxy/flatpak-host-wrapper.d)

@@ -632,6 +632,9 @@ msgstr "Wersja oprogramowania sprzętowego"
 msgid "Protocol"
 msgstr "Protokół"
 
+msgid "ATR"
+msgstr "ATR"
+
 msgid "Card type"
 msgstr "Typ karty"
 
@@ -658,6 +661,138 @@ msgstr "Niedostępne"
 
 msgid "Reader is no longer available"
 msgstr "Czytnik nie jest już dostępny"
+
+msgid "Retry"
+msgstr "Ponów"
+
+msgid "The Graphite cryptographic provider is not installed."
+msgstr "Dostawca kryptograficzny Graphite nie jest zainstalowany."
+
+msgid "No token was found through the cryptographic provider."
+msgstr "Dostawca kryptograficzny nie znalazł tokenu."
+
+msgid "No public certificates were found on this card."
+msgstr "Na tej karcie nie znaleziono publicznych certyfikatów."
+
+msgid "The card requires authentication before its certificates can be read."
+msgstr "Karta wymaga uwierzytelnienia, aby można było odczytać jej certyfikaty."
+
+msgid "The cryptographic provider could not associate a token with this reader."
+msgstr "Dostawca kryptograficzny nie może przypisać tokenu do tego czytnika."
+
+msgid "The cryptographic provider did not respond in time."
+msgstr "Dostawca kryptograficzny nie odpowiedział w wymaganym czasie."
+
+msgid "The cryptographic provider could not be loaded."
+msgstr "Nie można załadować dostawcy kryptograficznego."
+
+msgid "Certificate details are not available."
+msgstr "Szczegóły certyfikatu są niedostępne."
+
+msgid "Certificate details"
+msgstr "Szczegóły certyfikatu"
+
+msgid "Token"
+msgstr "Token"
+
+msgid "Token label"
+msgstr "Etykieta tokenu"
+
+msgid "Manufacturer"
+msgstr "Producent"
+
+msgid "Token serial number"
+msgstr "Numer seryjny tokenu"
+
+msgid "Hardware version"
+msgstr "Wersja sprzętu"
+
+msgid "Slot"
+msgstr "Gniazdo"
+
+msgid "Provider manufacturer"
+msgstr "Producent dostawcy"
+
+msgid "Provider description"
+msgstr "Opis dostawcy"
+
+msgid "Cryptoki version"
+msgstr "Wersja Cryptoki"
+
+msgid "Library version"
+msgstr "Wersja biblioteki"
+
+msgid "Certificates"
+msgstr "Certyfikaty"
+
+msgid "Issuer not available"
+msgstr "Wystawca niedostępny"
+
+msgid "Valid %1 to %2"
+msgstr "Ważny od %1 do %2"
+
+msgid "Validity period not available"
+msgstr "Okres ważności niedostępny"
+
+msgid "Enable smart card and PKCS#11 debug logging (dev builds only)."
+msgstr "Włącz debugowanie kart inteligentnych i PKCS#11 (tylko kompilacje deweloperskie)."
+
+msgid "General"
+msgstr "Ogólne"
+
+msgid "Subject"
+msgstr "Podmiot"
+
+msgid "Issuer"
+msgstr "Wystawca"
+
+msgid "Serial number (hexadecimal)"
+msgstr "Numer seryjny (szesnastkowo)"
+
+msgid "Public key"
+msgstr "Klucz publiczny"
+
+msgid "Algorithm"
+msgstr "Algorytm"
+
+msgid "Key size"
+msgstr "Rozmiar klucza"
+
+msgid "%1 bits"
+msgstr "%1 bitów"
+
+msgid "Signature algorithm"
+msgstr "Algorytm podpisu"
+
+msgid "Key usage"
+msgstr "Zastosowanie klucza"
+
+msgid "Extended key usage"
+msgstr "Rozszerzone zastosowanie klucza"
+
+msgid "Identifiers"
+msgstr "Identyfikatory"
+
+msgid "Subject alternative names"
+msgstr "Alternatywne nazwy podmiotu"
+
+msgid "Certificate policies"
+msgstr "Zasady certyfikatu"
+
+msgid "Certificate statements"
+msgstr "Oświadczenia certyfikatu"
+
+msgid "Private key match"
+msgstr "Powiązanie z kluczem prywatnym"
+
+msgid "Fingerprints"
+msgstr "Odciski"
+
+msgid "SHA-256"
+msgstr "SHA-256"
+
+msgid "SHA-1"
+msgstr "SHA-1"
 
 #: szafir-host-proxy/qml/MainWindow.qml:14
 msgid "Setup"

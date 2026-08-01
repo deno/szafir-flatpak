@@ -37,6 +37,9 @@
           pkgs.bubblewrap
           pkgs.mesa
           pkgs.pcsclite
+          pkgs.gnutls
+          pkgs.libtasn1
+          pkgs.p11-kit
         ];
 
         cmakeDir = "../szafir-host-proxy";

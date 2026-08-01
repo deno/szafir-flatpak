@@ -2,10 +2,12 @@
 #include "BwrapSandbox.h"
 #include "LandlockEnv.h"
 #include "LandlockSandbox.h"
+#include "Pkcs11Probe.h"
 #include "SecureNetwork.h"
 
 #include <QByteArray>
 #include <QCoreApplication>
+#include <QJsonDocument>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -306,6 +308,34 @@ int pcscProbe(int argc, char *argv[])
     printf("selftest-pcsc: PASS (%zu reader(s))\n", states.size());
     SCardReleaseContext(ctx);
     return 0;
+}
+
+int pkcs11Probe(int argc, char *argv[])
+{
+    QCoreApplication app(argc, argv);
+
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_1")) {
+        if (!LandlockSandbox::limitOverrides()) {
+            fprintf(stderr, "selftest-pkcs11: FAIL (Landlock Phase 1 failed)\n");
+            return 1;
+        }
+    }
+    if (LandlockEnv::isModuleEnabled("LANDLOCK_PHASE_2")) {
+        if (!LandlockSandbox::dropBrowserAccess()) {
+            fprintf(stderr, "selftest-pkcs11: FAIL (Landlock Phase 2 failed)\n");
+            return 1;
+        }
+    }
+
+    if (argc < 3 || argv[2][0] == '\0') {
+        fprintf(stderr, "selftest-pkcs11: FAIL (provider path is required)\n");
+        return 1;
+    }
+
+    const QJsonObject result = Pkcs11Probe::run(QString::fromLocal8Bit(argv[2]));
+    printf("selftest-pkcs11: %s\n",
+           QJsonDocument(result).toJson(QJsonDocument::Compact).constData());
+    return result.value(QStringLiteral("ok")).toBool() ? 0 : 1;
 }
 
 } // namespace SelfTest

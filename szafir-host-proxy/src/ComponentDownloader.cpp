@@ -204,6 +204,28 @@ std::span<const ComponentDownloader::ComponentEntry> ComponentDownloader::compon
     return {m_components.data(), static_cast<std::size_t>(m_components.size())};
 }
 
+std::filesystem::path ComponentDownloader::verifiedComponentPath(const QString &id) const
+{
+    for (const ComponentEntry &entry : m_components) {
+        if (entry.info.id != id || !entry.present || entry.verifiedPath.empty())
+            continue;
+
+        std::error_code ec;
+        const std::filesystem::path canonicalPath = std::filesystem::canonical(entry.verifiedPath, ec);
+        if (ec || canonicalPath.parent_path() != verifiedComponentsPath()
+            || !std::filesystem::is_regular_file(canonicalPath, ec)) {
+            return {};
+        }
+
+        // Provider libraries are executable third-party code. Recheck the
+        // persisted digest immediately before handing a path to a loader.
+        if (entry.info.hash.isEmpty() || computeFileSha256(canonicalPath) != entry.info.hash)
+            return {};
+        return canonicalPath;
+    }
+    return {};
+}
+
 void ComponentDownloader::loadInstalledState()
 {
     cleanupDownloadDir();
@@ -878,6 +900,7 @@ void ComponentDownloader::onDownloadFinished()
     emitRowChanged(m_currentDownloadIndex, {StateRole, PresentRole});
     emitSummaryStateChanged();
     writeExternalProvidersXml();
+    Q_EMIT componentChanged(entry.info.id);
     downloadNext();
 }
 
@@ -950,6 +973,7 @@ bool ComponentDownloader::overrideComponentSource(const QString &id, const QUrl 
 
         emitRowChanged(i, {ComponentRole, StateRole, PresentRole, BytesReceivedRole, DownloadableRole});
         emitSummaryStateChanged();
+        Q_EMIT componentChanged(id);
         return true;
     }
 
@@ -998,6 +1022,7 @@ bool ComponentDownloader::adoptLocalFile(const QString &id, const QString &sourc
         emitRowChanged(i, {ComponentRole, StateRole, PresentRole, DownloadableRole});
         emitSummaryStateChanged();
         writeExternalProvidersXml();
+        Q_EMIT componentChanged(id);
 
         qDebug() << "ComponentDownloader: adopted local file for" << id << "at" << PathUtils::toQString(promotedPath);
         return true;

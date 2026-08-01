@@ -94,6 +94,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     std::span<const ComponentEntry> components() const;
+    std::filesystem::path verifiedComponentPath(const QString &id) const;
     QList<Component> presentDisplayEntries() const;
     bool isDownloading() const { return m_downloading; }
     bool isDiscovering() const { return m_discovering; }
@@ -122,6 +123,7 @@ Q_SIGNALS:
     void allDownloadsComplete();
     void downloadFailed(const QString &id, const QString &errorString);
     void discoveryFinished(const DiscoveryResult &result);
+    void componentChanged(const QString &id);
 
 private:
     void loadInstalledState();
