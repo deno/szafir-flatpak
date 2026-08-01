@@ -30,6 +30,7 @@
 #include "ComponentDownloader.h"
 #include "SmartCardMonitor.h"
 #include "UpdateController.h"
+#include "ThemeController.h"
 
 #include <KSignalHandler>
 
@@ -452,11 +453,15 @@ int main(int argc, char *argv[])
 #endif
     auto *smartCardMonitor = new SmartCardMonitor(scMode, componentDownloader, &app, debugSmartCards);
 
+    // Applies the persisted color scheme before any window is shown.
+    auto *themeController = new ThemeController(&app);
+
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,
                                        componentDownloader,
                                        updateController,
-                                       smartCardMonitor));
+                                       smartCardMonitor,
+                                       themeController));
 
     auto showMainWindow = [&mainWindow]() {
         mainWindow->show();

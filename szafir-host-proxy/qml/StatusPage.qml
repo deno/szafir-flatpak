@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import org.kde.kirigami as Kirigami
 
 Kirigami.Page {
@@ -170,6 +171,32 @@ Kirigami.Page {
                 autoExclusive: true
                 checked: scalingController?.hostScale === "1"
                 onTriggered: scalingController.setHostScale("1")
+            }
+        }
+
+        Menu {
+            title: i18n("Theme")
+
+            MenuItem {
+                text: i18n("System")
+                checkable: true
+                autoExclusive: true
+                checked: themeController?.theme === ThemeController.System
+                onTriggered: themeController.setTheme(ThemeController.System)
+            }
+            MenuItem {
+                text: i18n("Light")
+                checkable: true
+                autoExclusive: true
+                checked: themeController?.theme === ThemeController.Light
+                onTriggered: themeController.setTheme(ThemeController.Light)
+            }
+            MenuItem {
+                text: i18n("Dark")
+                checkable: true
+                autoExclusive: true
+                checked: themeController?.theme === ThemeController.Dark
+                onTriggered: themeController.setTheme(ThemeController.Dark)
             }
         }
 
@@ -437,13 +464,27 @@ Kirigami.Page {
                             contentItem: RowLayout {
                                 spacing: Kirigami.Units.largeSpacing
 
-                                Kirigami.Icon {
-                                    source: modelData.present
-                                        ? "qrc:/icons/smartcard_present.svg"
-                                        : "qrc:/icons/smartcard_fail.svg"
+                                Item {
                                     Layout.preferredWidth: Kirigami.Units.iconSizes.medium
                                     Layout.preferredHeight: Kirigami.Units.iconSizes.medium
                                     Layout.alignment: Qt.AlignVCenter
+
+                                    Kirigami.Icon {
+                                        id: smartCardBodyIcon
+                                        anchors.fill: parent
+                                        source: "smartcard-symbolic"
+                                    }
+                                    ColorOverlay {
+                                        anchors.fill: parent
+                                        source: smartCardBodyIcon
+                                        color: Kirigami.Theme.textColor
+                                    }
+                                    Kirigami.Icon {
+                                        anchors.fill: parent
+                                        source: modelData.present
+                                            ? "qrc:/icons/smartcard_present_badge.svg"
+                                            : "qrc:/icons/smartcard_fail_badge.svg"
+                                    }
                                 }
 
                                 ColumnLayout {
@@ -478,7 +519,8 @@ Kirigami.Page {
                     width: parent.width - Kirigami.Units.gridUnit * 4
                     height: implicitHeight
                     visible: smartCardMonitor.readers.length === 0
-                    icon.source: "qrc:/icons/smartcard_fail.svg"
+                    icon.source: "smartcard-symbolic"
+                    icon.color: Kirigami.Theme.textColor
                     text: smartCardMonitor.available
                         ? i18n("No smart card readers detected")
                         : i18n("Smart card service unavailable")

@@ -140,6 +140,26 @@ msgstr "Skalowanie 2x"
 msgid "1x scaling"
 msgstr "Skalowanie 1x"
 
+# Hamburger menu: Theme submenu title
+#: szafir-host-proxy/qml/StatusPage.qml:177
+msgid "Theme"
+msgstr "Motyw"
+
+# Hamburger menu: Theme submenu item — follow the desktop color scheme
+#: szafir-host-proxy/qml/StatusPage.qml:180
+msgid "System"
+msgstr "Systemowy"
+
+# Hamburger menu: Theme submenu item — force light colors
+#: szafir-host-proxy/qml/StatusPage.qml:187
+msgid "Light"
+msgstr "Jasny"
+
+# Hamburger menu: Theme submenu item — force dark colors
+#: szafir-host-proxy/qml/StatusPage.qml:194
+msgid "Dark"
+msgstr "Ciemny"
+
 # KAboutData short description
 #: szafir-host-proxy/src/main.cpp:191
 msgid "Szafir native messaging proxy and host integrator."

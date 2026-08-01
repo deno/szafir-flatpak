@@ -62,6 +62,7 @@ find_package(KF6DBusAddons REQUIRED)
 find_package(KF6I18n REQUIRED)
 find_package(KF6Kirigami REQUIRED)
 find_package(KF6StatusNotifierItem REQUIRED)
+find_package(KF6ColorScheme REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PCSC REQUIRED IMPORTED_TARGET libpcsclite)
 pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
@@ -126,6 +127,8 @@ set(SZAFIR_HOST_PROXY_SOURCES
     src/SmartCardMonitor.cpp
     src/UpdateController.h
     src/UpdateController.cpp
+    src/ThemeController.h
+    src/ThemeController.cpp
 )
 
 add_executable(szafir-host-proxy ${SZAFIR_HOST_PROXY_SOURCES})
@@ -150,8 +153,8 @@ qt_add_resources(szafir-host-proxy "szafir-host-proxy-static-assets"
     FILES
     szafir_license_en.md
     szafir_license_pl.md
-    icons/smartcard_fail.svg
-    icons/smartcard_present.svg
+    icons/smartcard_present_badge.svg
+    icons/smartcard_fail_badge.svg
 )
 qt_add_resources(szafir-host-proxy "download-manifest"
     PREFIX "/szafir-host-proxy"
@@ -183,6 +186,7 @@ target_link_libraries(szafir-host-proxy
     KF6::I18nQml
     KF6::Kirigami
     KF6::StatusNotifierItem
+    KF6::ColorScheme
     PkgConfig::PCSC
     PkgConfig::GNUTLS
     PkgConfig::P11KIT
@@ -216,6 +220,7 @@ install(FILES flatpak-host-wrapper.d/50-icon-example.sh DESTINATION share/szafir
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DBUS_APP_ID}.service DESTINATION share/dbus-1/services)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${APP_ID}.desktop DESTINATION share/applications)
 install(FILES LICENSE DESTINATION share/licenses/${APP_ID}/szafir-host-proxy)
+install(FILES icons/smartcard.svg DESTINATION share/icons/hicolor/scalable/actions RENAME smartcard-symbolic.svg)
 include(GNUInstallDirs)
 set(KDE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale")
 ki18n_install(translations)

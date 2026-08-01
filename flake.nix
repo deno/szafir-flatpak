@@ -26,6 +26,7 @@
         buildInputs = [
           pkgs.qt6.qtbase
           pkgs.qt6.qtdeclarative
+          pkgs.qt6.qt5compat
           pkgs.kdePackages.kcoreaddons
           pkgs.kdePackages.kconfig
           pkgs.kdePackages.kdbusaddons
@@ -34,6 +35,7 @@
           pkgs.kdePackages.plasma-integration
           pkgs.kdePackages.qqc2-desktop-style
           pkgs.kdePackages.kstatusnotifieritem
+          pkgs.kdePackages.kcolorscheme
           pkgs.bubblewrap
           pkgs.mesa
           pkgs.pcsclite
