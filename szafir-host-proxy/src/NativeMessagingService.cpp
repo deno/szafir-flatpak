@@ -27,12 +27,53 @@
 
 // ---- NativeMessagingService ------------------------------------------------
 
-NativeMessagingService::NativeMessagingService(QObject *parent)
+namespace {
+
+QList<ClientInfo> mockClients()
+{
+    return {
+        ClientInfo{
+            QStringLiteral("Mozilla Firefox"),
+            QStringLiteral("firefox"),
+            QStringLiteral("org.mozilla.firefox"),
+            QStringLiteral("/usr/lib/firefox/firefox"),
+            QStringLiteral("firefox"),
+            QStringLiteral("mock-firefox"),
+            41001,
+        },
+        ClientInfo{
+            QStringLiteral("Google Chrome"),
+            QStringLiteral("google-chrome"),
+            QStringLiteral("com.google.Chrome"),
+            QStringLiteral("/opt/google/chrome/chrome"),
+            QStringLiteral("chrome"),
+            QStringLiteral("mock-google-chrome"),
+            41002,
+        },
+        ClientInfo{
+            QStringLiteral("Chromium"),
+            QStringLiteral("chromium-browser"),
+            QStringLiteral("org.chromium.Chromium"),
+            QStringLiteral("/usr/lib/chromium/chromium"),
+            QStringLiteral("chrome"),
+            QStringLiteral("mock-chromium"),
+            41003,
+        },
+    };
+}
+
+} // namespace
+
+NativeMessagingService::NativeMessagingService(Mode mode, QObject *parent)
     : QAbstractListModel(parent)
+    , m_mode(mode)
 {
     // Create the D-Bus adaptor as a child; Qt will export it automatically
     // when this object is registered on the bus.
     new NativeMessagingAdaptor(this);
+
+    if (m_mode == Mode::Mock)
+        m_clientList = mockClients();
 }
 
 NativeMessagingService::~NativeMessagingService()
@@ -142,6 +183,11 @@ void NativeMessagingService::spawnHost(const QStringList &args,
                                         const QDBusUnixFileDescriptor &fdErr,
                                         const ClientInfo &clientInfo)
 {
+    if (m_mode == Mode::Mock) {
+        qDebug() << "Ignoring native messaging connection while browser mock mode is active";
+        return;
+    }
+
     if (!m_acceptingConnections) {
         qDebug() << "Link called but connections are not accepted yet (wizard in progress), ignoring";
         return;
@@ -300,6 +346,20 @@ void NativeMessagingService::spawnHost(const QStringList &args,
 
 void NativeMessagingService::stopClient(qint64 pid)
 {
+    if (m_mode == Mode::Mock) {
+        const int idx = clientListIndexByPid(pid);
+        if (idx < 0)
+            return;
+
+        beginRemoveRows({}, idx, idx);
+        m_clientList.removeAt(idx);
+        endRemoveRows();
+        Q_EMIT activeHostCountChanged(m_clientList.size());
+        if (m_clientList.isEmpty())
+            Q_EMIT allClientsStopped();
+        return;
+    }
+
     for (auto it = m_activeClients.begin(); it != m_activeClients.end(); ++it) {
         if (it.key()->processId() == pid) {
             qDebug() << "Terminating bundled SzafirHost process" << pid;
@@ -312,6 +372,17 @@ void NativeMessagingService::stopClient(qint64 pid)
 
 void NativeMessagingService::stopAllClients()
 {
+    if (m_mode == Mode::Mock) {
+        if (!m_clientList.isEmpty()) {
+            beginResetModel();
+            m_clientList.clear();
+            endResetModel();
+        }
+        Q_EMIT activeHostCountChanged(0);
+        Q_EMIT allClientsStopped();
+        return;
+    }
+
     if (m_activeClients.isEmpty()) {
         Q_EMIT allClientsStopped();
         return;

@@ -192,6 +192,10 @@ msgstr "Pokaż pustą listę czytników kart inteligentnych bez odpytywania pcsc
 msgid "Show several mock smart card readers without querying pcscd (dev builds only)."
 msgstr "Pokaż kilka testowych czytników kart inteligentnych bez odpytywania pcscd (tylko kompilacje deweloperskie)."
 
+# CLI option: --mock-browsers
+msgid "Show several mock connected browsers without accepting native messaging connections (dev builds only)."
+msgstr "Pokaż kilka testowych połączonych przeglądarek bez akceptowania połączeń natywnego przesyłania wiadomości (tylko kompilacje deweloperskie)."
+
 # CLI error: conflicting options
 #: szafir-host-proxy/src/main.cpp:279
 msgid "Use either --install or --uninstall, not both."

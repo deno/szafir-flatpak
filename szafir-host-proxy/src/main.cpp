@@ -247,6 +247,9 @@ int main(int argc, char *argv[])
     const QCommandLineOption mockReadersOpt(
         QStringLiteral("mock-readers"),
         i18n("Show several mock smart card readers without querying pcscd (dev builds only)."));
+    const QCommandLineOption mockBrowsersOpt(
+        QStringLiteral("mock-browsers"),
+        i18n("Show several mock connected browsers without accepting native messaging connections (dev builds only)."));
 #endif
 
     parser.addOption(debugOpt);
@@ -261,6 +264,7 @@ int main(int argc, char *argv[])
     parser.addOption(testingUpdateOpt);
     parser.addOption(mockReadersEmptyOpt);
     parser.addOption(mockReadersOpt);
+    parser.addOption(mockBrowsersOpt);
 #endif
 
     parser.process(app);
@@ -368,7 +372,12 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    auto *service = new NativeMessagingService(&app);
+    auto browserMode = NativeMessagingService::Mode::Live;
+#ifdef SZAFIR_DEV_BUILD
+    if (parser.isSet(mockBrowsersOpt))
+        browserMode = NativeMessagingService::Mode::Mock;
+#endif
+    auto *service = new NativeMessagingService(browserMode, &app);
     if (!bus.registerObject(QStringLiteral("/pl/deno/kir/szafirhostproxy/NativeMessaging"), service)) {
         qCritical().noquote() << i18n("Failed to register D-Bus object.");
         return 1;

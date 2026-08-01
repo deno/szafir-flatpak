@@ -36,6 +36,8 @@ class NativeMessagingService : public QAbstractListModel, protected QDBusContext
 {
     Q_OBJECT
 public:
+    enum class Mode { Live, Mock };
+
     enum Role {
         ClientNameRole = Qt::UserRole + 1,
         IconRole,
@@ -46,7 +48,7 @@ public:
         PidRole,
     };
 
-    explicit NativeMessagingService(QObject *parent = nullptr);
+    explicit NativeMessagingService(Mode mode = Mode::Live, QObject *parent = nullptr);
     ~NativeMessagingService() override;
 
     // QAbstractListModel
@@ -65,7 +67,7 @@ public:
                    const QDBusUnixFileDescriptor &fdErr,
                    const ClientInfo &clientInfo);
 
-    int activeHostCount() const { return m_activeClients.size(); }
+    int activeHostCount() const { return m_mode == Mode::Mock ? m_clientList.size() : m_activeClients.size(); }
     QString currentDbusSender() const;
     void stopClient(qint64 pid);
     void stopAllClients();
@@ -75,6 +77,7 @@ Q_SIGNALS:
     void allClientsStopped();
 
 private:
+    Mode m_mode = Mode::Live;
     bool m_acceptingConnections = false;
 
     QMap<QProcess *, ClientInfo> m_activeClients;
