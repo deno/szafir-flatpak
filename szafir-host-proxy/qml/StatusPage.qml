@@ -416,7 +416,7 @@ Kirigami.Page {
                     anchors.top: parent.top
                     anchors.topMargin: Kirigami.Units.largeSpacing
                     anchors.left: parent.left
-                    anchors.leftMargin: Kirigami.Units.smallSpacing
+                    anchors.leftMargin: Kirigami.Units.largeSpacing * 2
                     text: i18n("Smart cards")
                     font.bold: true
                 }
@@ -455,6 +455,8 @@ Kirigami.Page {
                             width: smartCardsList.width
                             height: implicitHeight
                             down: false
+                            leftPadding: Kirigami.Units.largeSpacing * 2
+                            rightPadding: Kirigami.Units.largeSpacing * 2
                             onClicked: {
                                 if (applicationWindow().pageStack.layers.depth === 1)
                                     applicationWindow().pageStack.layers.push(
@@ -545,7 +547,7 @@ Kirigami.Page {
                     anchors.top: parent.top
                     anchors.topMargin: Kirigami.Units.largeSpacing
                     anchors.left: parent.left
-                    anchors.leftMargin: Kirigami.Units.smallSpacing
+                    anchors.leftMargin: Kirigami.Units.largeSpacing * 2
                     text: i18n("Connected browsers")
                     font.bold: true
                 }
@@ -584,6 +586,8 @@ Kirigami.Page {
                             width: connectedBrowsersList.width
                             height: implicitHeight
                             down: false
+                            leftPadding: Kirigami.Units.largeSpacing * 2
+                            rightPadding: Kirigami.Units.largeSpacing * 2
                             contentItem: RowLayout {
                                 spacing: Kirigami.Units.largeSpacing
 

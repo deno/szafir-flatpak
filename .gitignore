@@ -5,6 +5,8 @@ repo
 .vscode
 .logs
 result
+result-dev
+build-dev/
 szafir-host-proxy/build
 szafir-host-proxy/generated_permissions.h
 
