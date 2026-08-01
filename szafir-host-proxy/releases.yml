@@ -1,4 +1,23 @@
 releases:
+  - version: 0.4.0
+    date: 2026-08-01
+    description:
+      en: >-
+        The proxy can now see your smart card. The status page shows whether a
+        card is inserted, updating live as you plug and remove it. A new details
+        page lists your card's readers, tokens, and certificates — tap a
+        certificate to inspect it. The app verifies the card provider's integrity
+        before use and re-checks it if the file changes. Also fixes RPM
+        installation on current Fedora and desktop registration so portal
+        prompts (file picker, etc.) work correctly.
+      pl: >-
+        Proxy widzi teraz twoją kartę kryptograficzną. Strona stanu pokazuje na
+        bieżąco, czy karta jest włożona, i reaguje na jej włożenie lub wyjęcie.
+        Nowa strona szczegółów wyświetla czytniki, tokeny i certyfikaty karty —
+        dotknij certyfikatu, aby go obejrzeć. Aplikacja weryfikuje integralność
+        dostawcy karty przed użyciem i ponawia weryfikację po jego zmianie.
+        Poprawiono także instalację RPM na aktualnej Fedorze oraz rejestrację
+        w środowisku, dzięki czemu działają okna portalu (wybór plików itp.).
   - version: 0.3.2
     date: 2026-07-27
     description:
