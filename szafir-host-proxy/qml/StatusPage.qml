@@ -460,9 +460,7 @@ Kirigami.Page {
                                     Label {
                                         Layout.fillWidth: true
                                         text: modelData.present ? i18n("Card present") : i18n("No card")
-                                        font.family: Kirigami.Theme.smallFont.family
-                                        font.pointSize: Kirigami.Theme.smallFont.pointSize
-                                        font.weight: Kirigami.Theme.smallFont.weight
+                                        font: Kirigami.Theme.smallFont
                                         color: modelData.present
                                             ? Kirigami.Theme.positiveTextColor
                                             : Kirigami.Theme.disabledTextColor
@@ -570,10 +568,11 @@ Kirigami.Page {
                                         text: flatpakId
                                               ? flatpakId
                                               : (executable ? executable : dbusHandle)
-                                        font.family: Kirigami.Theme.smallFont.family
-                                        font.pointSize: Kirigami.Theme.smallFont.pointSize
-                                        font.weight: Kirigami.Theme.smallFont.weight
-                                        font.italic: !flatpakId && !executable
+                                        font: {
+                                            var smallFont = Kirigami.Theme.smallFont
+                                            smallFont.italic = !flatpakId && !executable
+                                            return smallFont
+                                        }
                                         color: Kirigami.Theme.disabledTextColor
                                         elide: Text.ElideRight
                                     }

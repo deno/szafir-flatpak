@@ -31,6 +31,8 @@
           pkgs.kdePackages.kdbusaddons
           pkgs.kdePackages.ki18n
           pkgs.kdePackages.kirigami
+          pkgs.kdePackages.plasma-integration
+          pkgs.kdePackages.qqc2-desktop-style
           pkgs.kdePackages.kstatusnotifieritem
           pkgs.bubblewrap
           pkgs.mesa
@@ -66,6 +68,7 @@
             --prefix LIBGL_DRIVERS_PATH : "${pkgs.mesa}/lib/dri"
             --prefix LD_LIBRARY_PATH : "${pkgs.mesa}/lib"
             --prefix LD_LIBRARY_PATH : "${pkgs.pcsclite.lib}/lib"
+            --set QT_QUICK_CONTROLS_STYLE "org.kde.desktop"
             --set-default SSL_CERT_FILE "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
           )
         '';
