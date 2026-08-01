@@ -43,6 +43,23 @@ def _comment_lines(description: str, width: int = 90) -> list[str]:
     return textwrap.wrap(normalized, width=width)
 
 
+def _rpm_date(date: Any) -> str:
+    """Format a release date as an RPM %%changelog date, e.g. 'Sat Aug 01 2026'."""
+    return date.strftime("%a %b %d %Y")
+
+
+def _build_changelog(releases: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Build RPM %%changelog entries from releases (newest first)."""
+    return [
+        {
+            "version": release["version"],
+            "date": _rpm_date(release["date"]),
+            "text": " ".join(release["description"]["en"].split()),
+        }
+        for release in releases
+    ]
+
+
 def _build_finish_arg_groups(permissions: dict[str, Any]) -> list[dict[str, Any]]:
     """Build ordered finish-args grouped by permission group with comment text."""
     groups = permissions["permission_groups"]
@@ -223,6 +240,24 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "releases": RELEASES,
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
+        },
+    },
+    # RPM spec and Nix flake (version + changelog driven by releases.yml)
+    "proxy.spec": {
+        "output": "szafir-host-proxy.spec",
+        "template_root": "rpm",
+        "template": "proxy.spec.j2",
+        "context": {
+            "app_version": APP_VERSION,
+            "changelog": _build_changelog(RELEASES),
+        },
+    },
+    "proxy.flake": {
+        "output": "flake.nix",
+        "template_root": "nix",
+        "template": "flake.nix.j2",
+        "context": {
+            "app_version": APP_VERSION,
         },
     },
 }

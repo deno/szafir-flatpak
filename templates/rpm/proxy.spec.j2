@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.0
+Version:        {{ app_version }}
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,36 +76,8 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
-* Sat Aug 01 2026 deno <deno@users.noreply.github.com> - 0.5.0-1
-- Added a dark mode.
+{% for entry in changelog %}
+* {{ entry.date }} deno <deno@users.noreply.github.com> - {{ entry.version }}-1
+- {{ entry.text }}
 
-* Sat Aug 01 2026 deno <deno@users.noreply.github.com> - 0.4.0-1
-- The proxy can now see your smart card. The status page shows whether a card is inserted, updating live as you plug and remove it. A new details page lists your card's readers, tokens, and certificates — tap a certificate to inspect it. The app verifies the card provider's integrity before use and re-checks it if the file changes. Also fixes RPM installation on current Fedora and desktop registration so portal prompts (file picker, etc.) work correctly.
-
-* Mon Jul 27 2026 deno <deno@users.noreply.github.com> - 0.3.2-1
-- Switch pcsc-lite 2.3.3 download URL to Fedora lookaside mirror; upstream removed older releases from their site, breaking CI builds.
-
-* Mon Jul 27 2026 deno <deno@users.noreply.github.com> - 0.3.1-1
-- Revert pcsc-lite to 2.3.3 for Flatpak version for broader compatibility.
-
-* Mon Jul 27 2026 deno <deno@users.noreply.github.com> - 0.3.0-1
-- Packaging support now includes Nix and RPM definitions. Bubblewrap is used as a sandboxing mechanism when running outside of Flatpak. SzafirHost runtime and components are automatically updated, eliminating the need for manual version management. The bundled pcsc-lite was upgraded from 2.3.3 to 2.5.1.
-
-* Tue Apr 28 2026 deno <deno@users.noreply.github.com> - 0.2.5-1
-- Update to new version of SzafirHost (1.2.2)
-
-* Tue Apr 28 2026 deno <deno@users.noreply.github.com> - 0.2.4-1
-- Update to new version of SzafirHost (1.2.1)
-
-* Tue Apr 07 2026 deno <deno@users.noreply.github.com> - 0.2.3-1
-- fixed: Landlock launcher sandbox was too restrictive
-
-* Sun Apr 05 2026 deno <deno@users.noreply.github.com> - 0.2.2-1
-- Added animations to the status page.
-
-* Sat Apr 04 2026 deno <deno@users.noreply.github.com> - 0.2.1-1
-- Bug fixes and README updates.
-
-* Wed Apr 01 2026 deno <deno@users.noreply.github.com> - 0.2.0-1
-- Metadata refresh for the GitHub-hosted Flatpak repository release.
-
+{% endfor %}

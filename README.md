@@ -150,3 +150,14 @@ After setup, the proxy stays available and waits for browser activity.
 - This repository is community-maintained and is not an official KIR release channel.
 - The proxy can remove its browser integrations with `flatpak run pl.deno.kir.szafirhostproxy --uninstall`.
 
+## Releasing
+
+`szafir-host-proxy/releases.yml` is the single source of truth for the proxy
+version. Everything else — the Flatpak manifests, metainfo, RPM spec, and Nix
+flake — is generated from it, so a release only touches that one file by hand:
+
+1. Add a new entry to the top of `szafir-host-proxy/releases.yml` (version, date, en/pl description).
+2. `make manifests` to regenerate the manifests, metainfo, `szafir-host-proxy.spec`, and `flake.nix` (the pre-commit hook does this too).
+3. Commit (`release X.Y.Z`), tag `vX.Y.Z`, and push — the tag drives the release workflow.
+
+
