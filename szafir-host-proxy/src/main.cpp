@@ -241,6 +241,12 @@ int main(int argc, char *argv[])
     const QCommandLineOption testingUpdateOpt(
         QStringLiteral("testing-update-available"),
         i18n("Force update checks to always report an update (dev builds only)."));
+    const QCommandLineOption mockReadersEmptyOpt(
+        QStringLiteral("mock-readers-empty"),
+        i18n("Show an empty smart card reader list without querying pcscd (dev builds only)."));
+    const QCommandLineOption mockReadersOpt(
+        QStringLiteral("mock-readers"),
+        i18n("Show several mock smart card readers without querying pcscd (dev builds only)."));
 #endif
 
     parser.addOption(debugOpt);
@@ -253,6 +259,8 @@ int main(int argc, char *argv[])
     parser.addOption(updateAndExitOpt);
     parser.addOption(freshEnvOpt);
     parser.addOption(testingUpdateOpt);
+    parser.addOption(mockReadersEmptyOpt);
+    parser.addOption(mockReadersOpt);
 #endif
 
     parser.process(app);
@@ -412,7 +420,14 @@ int main(int argc, char *argv[])
 
     setupController->computePages();
 
-    auto *smartCardMonitor = new SmartCardMonitor(&app);
+    auto scMode = SmartCardMonitor::Mode::Live;
+#ifdef SZAFIR_DEV_BUILD
+    if (parser.isSet(mockReadersEmptyOpt))
+        scMode = SmartCardMonitor::Mode::Empty;
+    else if (parser.isSet(mockReadersOpt))
+        scMode = SmartCardMonitor::Mode::Mock;
+#endif
+    auto *smartCardMonitor = new SmartCardMonitor(scMode, &app);
 
     // MainWindow is always created (shows wizard or status page based on SetupController state)
     std::unique_ptr<MainWindow> mainWindow(new MainWindow(service, scalingController, setupController,

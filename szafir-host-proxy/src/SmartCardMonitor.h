@@ -14,7 +14,9 @@ class SmartCardMonitor : public QObject
     Q_PROPERTY(QVariantList readers READ readers NOTIFY statusChanged)
 
 public:
-    explicit SmartCardMonitor(QObject *parent = nullptr);
+    enum class Mode { Live, Empty, Mock };
+
+    explicit SmartCardMonitor(Mode mode = Mode::Live, QObject *parent = nullptr);
     ~SmartCardMonitor() override;
 
     bool available() const { return m_available; }

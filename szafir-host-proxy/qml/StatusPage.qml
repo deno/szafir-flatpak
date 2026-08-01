@@ -6,8 +6,9 @@ import org.kde.kirigami as Kirigami
 
 Kirigami.Page {
     id: page
+    objectName: "statusPage"
     title: i18n("Status")
-    state: mainWindowController.activeHostCount > 0 ? "browsers" : "placeholder"
+    padding: 0
 
     readonly property bool updateActive: typeof updateController !== "undefined"
         && updateController !== null
@@ -24,120 +25,68 @@ Kirigami.Page {
         onTriggered: page.statusMessage = ""
     }
 
-    footer: ColumnLayout {
-        spacing: 0
+    footer: Rectangle {
+        id: statusFooter
+        implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
+        color: Kirigami.Theme.backgroundColor
+        clip: true
 
-        // ── Smart card status (always visible) ────────────────────────
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: cardStatusLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
-            color: Kirigami.Theme.backgroundColor
+        readonly property bool contentShown: updateActive || page.statusMessage !== ""
 
-            Kirigami.Separator {
-                anchors.top: parent.top
-                width: parent.width
-            }
-
-            RowLayout {
-                id: cardStatusLayout
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: Kirigami.Units.smallSpacing
-                spacing: Kirigami.Units.smallSpacing
-
-                Kirigami.Icon {
-                    Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                    Layout.preferredHeight: Kirigami.Units.iconSizes.small
-                    source: smartCardMonitor.cardPresent
-                        ? "qrc:/icons/smartcard_present.svg"
-                        : "qrc:/icons/smartcard_fail.svg"
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: {
-                        if (!smartCardMonitor.available)
-                            return i18n("Smart card service unavailable")
-                        if (!smartCardMonitor.cardPresent)
-                            return i18n("No smart cards detected")
-                        var names = []
-                        for (var i = 0; i < smartCardMonitor.readers.length; ++i) {
-                            if (smartCardMonitor.readers[i].present)
-                                names.push(smartCardMonitor.readers[i].name)
-                        }
-                        return i18n("Card present: %1", names.join(", "))
-                    }
-                }
-            }
+        Kirigami.Separator {
+            anchors.top: parent.top
+            width: parent.width
+            opacity: statusFooter.contentShown ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
-        // ── Update status ─────────────────────────────────────────────
-        Rectangle {
-            id: statusFooter
-            Layout.fillWidth: true
-            implicitHeight: updateFooterLayout.implicitHeight + Kirigami.Units.smallSpacing * 2
-            color: Kirigami.Theme.backgroundColor
-            clip: true
+        RowLayout {
+            id: updateFooterLayout
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.smallSpacing
 
-            readonly property bool contentShown: updateActive || page.statusMessage !== ""
-
-            Kirigami.Separator {
-                anchors.top: parent.top
-                width: parent.width
-                opacity: statusFooter.contentShown ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 150 } }
+            transform: Translate {
+                y: statusFooter.contentShown ? 0 : statusFooter.height
+                Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
             }
 
-            RowLayout {
-                id: updateFooterLayout
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: Kirigami.Units.smallSpacing
-                spacing: Kirigami.Units.smallSpacing
+            BusyIndicator {
+                Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                running: updateActive
+                visible: updateActive
+            }
 
-                transform: Translate {
-                    y: statusFooter.contentShown ? 0 : statusFooter.height
-                    Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                }
-
-                BusyIndicator {
-                    Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                    Layout.preferredHeight: Kirigami.Units.iconSizes.small
-                    running: updateActive
-                    visible: updateActive
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: {
-                        if (updateActive && typeof updateController !== "undefined" && updateController !== null) {
-                            switch (updateController.state) {
-                            case UpdateController.Checking:
-                                return i18n("Checking for updates...")
-                            case UpdateController.Downloading:
-                                if (updateController.progress >= 0)
-                                    return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
-                                return i18n("Downloading update...")
-                            case UpdateController.StoppingHosts:
-                                return i18n("Stopping active connections...")
-                            case UpdateController.Installing:
-                                return i18n("Installing update...")
-                            }
+            Label {
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+                text: {
+                    if (updateActive && typeof updateController !== "undefined" && updateController !== null) {
+                        switch (updateController.state) {
+                        case UpdateController.Checking:
+                            return i18n("Checking for updates...")
+                        case UpdateController.Downloading:
+                            if (updateController.progress >= 0)
+                                return i18n("Downloading update... %1%", Math.round(updateController.progress * 100))
+                            return i18n("Downloading update...")
+                        case UpdateController.StoppingHosts:
+                            return i18n("Stopping active connections...")
+                        case UpdateController.Installing:
+                            return i18n("Installing update...")
                         }
-                        return page.statusMessage
                     }
+                    return page.statusMessage
                 }
+            }
 
-                ProgressBar {
-                    Layout.preferredWidth: Kirigami.Units.gridUnit * 8
-                    visible: updateController?.state === UpdateController.Downloading
-                    value: updateController?.progress >= 0 ? updateController.progress : 0
-                    indeterminate: updateController?.progress < 0
-                }
+            ProgressBar {
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 8
+                visible: updateController?.state === UpdateController.Downloading
+                value: updateController?.progress >= 0 ? updateController.progress : 0
+                indeterminate: updateController?.progress < 0
             }
         }
     }
@@ -394,201 +343,283 @@ Kirigami.Page {
     }
     // ─────────────────────────────────────────────────────────────────────
 
-    states: [
-        State {
-            name: "placeholder"
-            PropertyChanges {
-                target: placeholderView
-                opacity: 1
-                scale: 1
-            }
-            PropertyChanges {
-                target: browsersList
-                opacity: 0
-                scale: 1
-            }
-        },
-        State {
-            name: "browsers"
-            PropertyChanges {
-                target: placeholderView
-                opacity: 0
-                scale: 0.85
-            }
-            PropertyChanges {
-                target: browsersList
-                opacity: 1
-                scale: 1
-            }
-        }
-    ]
-
-    transitions: [
-        Transition {
-            from: "placeholder"
-            to: "browsers"
-
-            ParallelAnimation {
-                NumberAnimation {
-                    target: placeholderView
-                    properties: "opacity,scale"
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-
-                NumberAnimation {
-                    target: browsersList
-                    property: "opacity"
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-
-                NumberAnimation {
-                    target: browsersList
-                    property: "scale"
-                    from: 1.1
-                    to: 1.0
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-            }
-        },
-        Transition {
-            from: "browsers"
-            to: "placeholder"
-
-            ParallelAnimation {
-                NumberAnimation {
-                    target: placeholderView
-                    property: "opacity"
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-
-                NumberAnimation {
-                    target: browsersList
-                    property: "opacity"
-                    duration: 250
-                    easing.type: Easing.OutCubic
-                }
-            }
-        }
-    ]
-
-    ColumnLayout {
-        id: placeholderView
-        anchors.centerIn: parent
-        width: parent.width - Kirigami.Units.gridUnit * 4
-        visible: opacity > 0
-        opacity: 1
-        scale: 1
-        spacing: Kirigami.Units.largeSpacing
-
-        Kirigami.PlaceholderMessage {
-            Layout.fillWidth: true
-            icon.name: "dialog-ok"
-            text: i18n("Waiting for browser activity...")
-            explanation: i18n("Make sure the browser extension is installed.")
-        }
-
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            spacing: Kirigami.Units.largeSpacing
-
-            Kirigami.UrlButton {
-                url: chromeExtensionUrl
-                text: i18n("Chrome extension")
-            }
-
-            Kirigami.UrlButton {
-                url: firefoxExtensionUrl
-                text: i18n("Firefox extension")
-            }
-        }
-    }
-
-    ListView {
-        id: browsersList
+    // ── Main content: fixed headers with state-dependent body areas ──
+    Flickable {
+        id: statusContentFlickable
         anchors.fill: parent
-        visible: opacity > 0
-        opacity: 0
-        scale: 1
-        model: mainWindowController.clientsModel
-        spacing: Kirigami.Units.smallSpacing
+        contentWidth: width
+        contentHeight: statusContent.height
+        implicitHeight: statusContent.implicitHeight
+        clip: true
 
-        add: Transition {
-            NumberAnimation {
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: 200
-                easing.type: Easing.OutCubic
-            }
-        }
+        Item {
+            id: statusContent
+            width: statusContentFlickable.width
+            readonly property real headersHeight:
+                smartCardsHeader.height + connectedBrowsersHeader.height
+            readonly property bool smartCardsHaveValues: smartCardMonitor.readers.length > 0
+            readonly property real bodyMinimumTotalHeight:
+                smartCardsHaveValues
+                    ? smartCardsBody.contentHeight + connectedBrowsersBody.contentHeight
+                    : Math.max(smartCardsBody.contentHeight, connectedBrowsersBody.contentHeight) * 2
+            readonly property real availableBodyHeight:
+                Math.max(0, height - headersHeight)
+            readonly property real smartCardsBodyHeight:
+                smartCardsHaveValues
+                    ? smartCardsBody.contentHeight
+                    : availableBodyHeight / 2
+            readonly property real connectedBrowsersBodyHeight:
+                smartCardsHaveValues
+                    ? Math.max(0, availableBodyHeight - smartCardsBodyHeight)
+                    : availableBodyHeight / 2
+            implicitHeight: headersHeight + bodyMinimumTotalHeight
+            height: Math.max(statusContentFlickable.height, implicitHeight)
 
-        remove: Transition {
-            NumberAnimation {
-                property: "opacity"
-                to: 0
-                duration: 200
-                easing.type: Easing.OutCubic
-            }
-        }
+            // ── Smart cards header ───────────────────────────────────
+            Item {
+                id: smartCardsHeader
+                width: parent.width
+                height: Kirigami.Units.largeSpacing
+                    + smartCardsHeading.implicitHeight
+                    + Kirigami.Units.smallSpacing
+                    + smartCardsSeparator.implicitHeight
 
-        displaced: Transition {
-            NumberAnimation {
-                properties: "x,y"
-                duration: 220
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        delegate: ItemDelegate {
-            width: ListView.view.width
-            down: false
-            contentItem: RowLayout {
-                spacing: Kirigami.Units.largeSpacing
-
-                Kirigami.Icon {
-                    source: browserIcon || "web-browser"
-                    Layout.preferredWidth: Kirigami.Units.iconSizes.medium
-                    Layout.preferredHeight: Kirigami.Units.iconSizes.medium
-                    Layout.alignment: Qt.AlignVCenter
+                Label {
+                    id: smartCardsHeading
+                    anchors.top: parent.top
+                    anchors.topMargin: Kirigami.Units.largeSpacing
+                    anchors.left: parent.left
+                    anchors.leftMargin: Kirigami.Units.smallSpacing
+                    text: i18n("Smart cards")
+                    font.bold: true
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
+                Kirigami.Separator {
+                    id: smartCardsSeparator
+                    anchors.top: smartCardsHeading.bottom
+                    anchors.topMargin: Kirigami.Units.smallSpacing
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: implicitHeight
+                }
+            }
 
-                    Label {
-                        Layout.fillWidth: true
-                        text: clientName
-                        font.bold: true
-                        elide: Text.ElideRight
-                    }
+            // ── Smart cards body ─────────────────────────────────────
+            Item {
+                id: smartCardsBody
+                anchors.top: smartCardsHeader.bottom
+                width: parent.width
+                height: statusContent.smartCardsBodyHeight
+                readonly property real contentHeight: smartCardMonitor.readers.length > 0
+                    ? smartCardsList.childrenRect.height
+                    : smartCardsPlaceholder.implicitHeight
 
-                    Label {
-                        Layout.fillWidth: true
-                        text: flatpakId
-                              ? flatpakId
-                              : (executable ? executable : dbusHandle)
-                        font.family: Kirigami.Theme.smallFont.family
-                        font.pointSize: Kirigami.Theme.smallFont.pointSize
-                        font.weight: Kirigami.Theme.smallFont.weight
-                        font.italic: !flatpakId && !executable
-                        color: Kirigami.Theme.disabledTextColor
-                        elide: Text.ElideRight
+                Column {
+                    id: smartCardsList
+                    anchors.top: parent.top
+                    width: parent.width
+                    spacing: Kirigami.Units.smallSpacing
+                    visible: smartCardMonitor.readers.length > 0
+
+                    Repeater {
+                        model: smartCardMonitor.readers
+
+                        ItemDelegate {
+                            width: smartCardsList.width
+                            height: implicitHeight
+                            down: false
+                            contentItem: RowLayout {
+                                spacing: Kirigami.Units.largeSpacing
+
+                                Kirigami.Icon {
+                                    source: modelData.present
+                                        ? "qrc:/icons/smartcard_present.svg"
+                                        : "qrc:/icons/smartcard_fail.svg"
+                                    Layout.preferredWidth: Kirigami.Units.iconSizes.medium
+                                    Layout.preferredHeight: Kirigami.Units.iconSizes.medium
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: modelData.name
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: modelData.present ? i18n("Card present") : i18n("No card")
+                                        font.family: Kirigami.Theme.smallFont.family
+                                        font.pointSize: Kirigami.Theme.smallFont.pointSize
+                                        font.weight: Kirigami.Theme.smallFont.weight
+                                        color: modelData.present
+                                            ? Kirigami.Theme.positiveTextColor
+                                            : Kirigami.Theme.disabledTextColor
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                ToolButton {
-                    icon.name: "process-stop"
-                    text: i18n("Stop")
-                    display: AbstractButton.IconOnly
-                    Layout.alignment: Qt.AlignVCenter
-                    ToolTip.text: text
-                    ToolTip.visible: hovered
-                    onClicked: mainWindowController.stopClient(pid)
+                Kirigami.PlaceholderMessage {
+                    id: smartCardsPlaceholder
+                    anchors.centerIn: parent
+                    width: parent.width - Kirigami.Units.gridUnit * 4
+                    height: implicitHeight
+                    visible: smartCardMonitor.readers.length === 0
+                    icon.source: "qrc:/icons/smartcard_fail.svg"
+                    text: smartCardMonitor.available
+                        ? i18n("No smart card readers detected")
+                        : i18n("Smart card service unavailable")
+                    explanation: smartCardMonitor.available
+                        ? i18n("Connect a reader to get started.")
+                        : i18n("Check that the smart card daemon (pcscd) is running.")
+                }
+            }
+
+            // ── Connected browsers header ─────────────────────────────
+            Item {
+                id: connectedBrowsersHeader
+                anchors.top: smartCardsBody.bottom
+                width: parent.width
+                height: Kirigami.Units.largeSpacing
+                    + connectedBrowsersHeading.implicitHeight
+                    + Kirigami.Units.smallSpacing
+                    + connectedBrowsersSeparator.implicitHeight
+
+                Label {
+                    id: connectedBrowsersHeading
+                    anchors.top: parent.top
+                    anchors.topMargin: Kirigami.Units.largeSpacing
+                    anchors.left: parent.left
+                    anchors.leftMargin: Kirigami.Units.smallSpacing
+                    text: i18n("Connected browsers")
+                    font.bold: true
+                }
+
+                Kirigami.Separator {
+                    id: connectedBrowsersSeparator
+                    anchors.top: connectedBrowsersHeading.bottom
+                    anchors.topMargin: Kirigami.Units.smallSpacing
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: implicitHeight
+                }
+            }
+
+            // ── Connected browsers body ───────────────────────────────
+            Item {
+                id: connectedBrowsersBody
+                anchors.top: connectedBrowsersHeader.bottom
+                width: parent.width
+                height: statusContent.connectedBrowsersBodyHeight
+                readonly property real contentHeight: mainWindowController.activeHostCount > 0
+                    ? connectedBrowsersList.childrenRect.height
+                    : connectedBrowsersPlaceholderContent.implicitHeight
+
+                Column {
+                    id: connectedBrowsersList
+                    anchors.top: parent.top
+                    width: parent.width
+                    spacing: Kirigami.Units.smallSpacing
+                    visible: mainWindowController.activeHostCount > 0
+
+                    Repeater {
+                        model: mainWindowController.clientsModel
+
+                        ItemDelegate {
+                            width: connectedBrowsersList.width
+                            height: implicitHeight
+                            down: false
+                            contentItem: RowLayout {
+                                spacing: Kirigami.Units.largeSpacing
+
+                                Kirigami.Icon {
+                                    source: browserIcon || "web-browser"
+                                    Layout.preferredWidth: Kirigami.Units.iconSizes.medium
+                                    Layout.preferredHeight: Kirigami.Units.iconSizes.medium
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: clientName
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: flatpakId
+                                              ? flatpakId
+                                              : (executable ? executable : dbusHandle)
+                                        font.family: Kirigami.Theme.smallFont.family
+                                        font.pointSize: Kirigami.Theme.smallFont.pointSize
+                                        font.weight: Kirigami.Theme.smallFont.weight
+                                        font.italic: !flatpakId && !executable
+                                        color: Kirigami.Theme.disabledTextColor
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                ToolButton {
+                                    icon.name: "process-stop"
+                                    text: i18n("Stop")
+                                    display: AbstractButton.IconOnly
+                                    Layout.alignment: Qt.AlignVCenter
+                                    ToolTip.text: text
+                                    ToolTip.visible: hovered
+                                    onClicked: mainWindowController.stopClient(pid)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    anchors.fill: parent
+                    visible: mainWindowController.activeHostCount === 0
+
+                    ColumnLayout {
+                        id: connectedBrowsersPlaceholderContent
+                        anchors.centerIn: parent
+                        width: parent.width - Kirigami.Units.gridUnit * 4
+                        height: implicitHeight
+                        spacing: Kirigami.Units.smallSpacing
+
+                        Kirigami.PlaceholderMessage {
+                            Layout.fillWidth: true
+                            icon.name: "dialog-ok"
+                            text: i18n("Waiting for browser activity...")
+                            explanation: i18n("Make sure the browser extension is installed.")
+                        }
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: Kirigami.Units.largeSpacing
+
+                            Kirigami.UrlButton {
+                                url: chromeExtensionUrl
+                                text: i18n("Chrome extension")
+                            }
+
+                            Kirigami.UrlButton {
+                                url: firefoxExtensionUrl
+                                text: i18n("Firefox extension")
+                            }
+                        }
+                    }
                 }
             }
         }

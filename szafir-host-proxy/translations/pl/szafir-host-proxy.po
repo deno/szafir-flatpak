@@ -6,20 +6,365 @@ msgid ""
 msgstr ""
 "Project-Id-Version: szafir-host-proxy 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-01 01:50+0200\n"
-"PO-Revision-Date: 2026-03-27\n"
+"POT-Creation-Date: 2026-08-01 11:31+0200\n"
+"PO-Revision-Date: 2026-08-01\n"
 "Last-Translator: \n"
 "Language-Team: Polish\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: szafir-host-proxy/src/ComponentDownloader.cpp:45
+msgid "SzafirHost Runtime"
+msgstr "Środowisko uruchomieniowe SzafirHost"
+
+#: szafir-host-proxy/src/ComponentDownloader.cpp:47
+msgid "libCCGraphite Cryptographic Provider"
+msgstr "Dostawca kryptograficzny libCCGraphite"
+
+#: szafir-host-proxy/src/ComponentDownloader.cpp:239
+msgid "SHA256 (installer):"
+msgstr "SHA256 (instalatora):"
+
+#: szafir-host-proxy/src/ComponentDownloader.cpp:239
+msgid "SHA256:"
+msgstr "SHA256:"
+
+#: szafir-host-proxy/src/ComponentInfo.cpp:44
+msgid "App system component"
+msgstr "Komponent systemowy aplikacji"
+
+#: szafir-host-proxy/src/ComponentInfo.cpp:45
+msgid "Runtime system component"
+msgstr "Komponent systemowy środowiska uruchomieniowego"
+
+#: szafir-host-proxy/src/ComponentInfo.cpp:47
+msgid "SHA256 (source):"
+msgstr "SHA256 (źródła):"
+
+#: szafir-host-proxy/src/UpdateController.cpp:166
+msgid "Could not find SzafirHost download link on the website. The site layout may have changed. You can install from a local file instead."
+msgstr "Nie udało się znaleźć odnośnika do pobrania SzafirHost na stronie internetowej. Układ strony mógł się zmienić. Zamiast tego możesz zainstalować program z pliku lokalnego."
+
+#: szafir-host-proxy/src/UpdateController.cpp:358
+msgid "Download failed: %1"
+msgstr "Pobieranie nie powiodło się: %1"
+
+#: szafir-host-proxy/src/UpdateController.cpp:485
+msgid "Installation failed. The previous runtime may still be usable."
+msgstr "Instalacja nie powiodła się. Poprzednie środowisko uruchomieniowe może nadal działać."
+
+#: szafir-host-proxy/src/UpdateController.cpp:537
+msgid "Invalid file path."
+msgstr "Nieprawidłowa ścieżka pliku."
+
+#: szafir-host-proxy/src/UpdateController.cpp:543
+msgid "File not found or not readable: %1"
+msgstr "Nie znaleziono pliku lub nie można go odczytać: %1"
+
+#: szafir-host-proxy/src/UpdateController.cpp:548
+msgid "File size is outside expected range (1 KB – 500 MB)."
+msgstr "Rozmiar pliku wykracza poza oczekiwany zakres (1 KB – 500 MB)."
+
+#: szafir-host-proxy/src/UpdateController.cpp:554
+msgid "Cannot open file: %1"
+msgstr "Nie można otworzyć pliku: %1"
+
+#: szafir-host-proxy/src/UpdateController.cpp:561
+msgid "The selected file does not appear to be a valid JAR/ZIP archive."
+msgstr "Wybrany plik nie wygląda na prawidłowe archiwum JAR/ZIP."
+
+#: szafir-host-proxy/src/UpdateController.cpp:568
+msgid "Failed to compute file checksum."
+msgstr "Nie udało się obliczyć sumy kontrolnej pliku."
+
+#: szafir-host-proxy/src/UpdateController.cpp:576
+msgid "Failed to import file into component store."
+msgstr "Nie udało się zaimportować pliku do magazynu komponentów."
+
+#: szafir-host-proxy/src/MainWindow.cpp:28
+msgid "KIR SzafirHost"
+msgstr "KIR SzafirHost"
+
+#: szafir-host-proxy/src/MainWindow.cpp:33
+msgid "A secure Native Messaging bridge between web browsers and qualified electronic signature smart cards."
+msgstr "Bezpieczny most Native Messaging między przeglądarkami internetowymi a kartami inteligentnymi używanymi do kwalifikowanego podpisu elektronicznego."
+
+#: szafir-host-proxy/src/MainWindow.cpp:34
+msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
+msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
+
+#: szafir-host-proxy/src/MainWindow.cpp:40
+msgid "Krajowa Izba Rozliczeniowa S.A."
+msgstr "Krajowa Izba Rozliczeniowa S.A."
+
+#: szafir-host-proxy/src/MainWindow.cpp:41
+msgid "Developer and Trust Service Provider"
+msgstr "Twórca i dostawca usług zaufania"
+
+#: szafir-host-proxy/src/MainWindow.cpp:46
+msgid "Szafir Technical Support"
+msgstr "Wsparcie techniczne Szafir"
+
+#: szafir-host-proxy/src/MainWindow.cpp:47
+msgid "Helpdesk and Troubleshooting"
+msgstr "Pomoc i rozwiązywanie problemów"
+
+# Tray tooltip: active host count
+#: szafir-host-proxy/src/main.cpp:51
+msgid "Active hosts: %1"
+msgstr "Aktywne hosty: %1"
+
+# Tray tooltip: no hosts active
+#: szafir-host-proxy/src/main.cpp:57 szafir-host-proxy/src/main.cpp:458
+msgid "No active hosts"
+msgstr "Brak aktywnych hostów"
+
+# Tray context menu: HiDPI submenu item — no GDK_SCALE override
+#: szafir-host-proxy/src/main.cpp:89 szafir-host-proxy/qml/StatusPage.qml:128
+#: szafir-host-proxy/qml/StatusPage.qml:154
+msgid "Auto"
+msgstr "Automatycznie"
+
+# Tray context menu: HiDPI submenu item — GDK_SCALE=2
+#: szafir-host-proxy/src/main.cpp:90 szafir-host-proxy/qml/StatusPage.qml:135
+#: szafir-host-proxy/qml/StatusPage.qml:161
+msgid "2x scaling"
+msgstr "Skalowanie 2x"
+
+# Tray context menu: HiDPI submenu item — GDK_SCALE=1
+#: szafir-host-proxy/src/main.cpp:91 szafir-host-proxy/qml/StatusPage.qml:142
+#: szafir-host-proxy/qml/StatusPage.qml:168
+msgid "1x scaling"
+msgstr "Skalowanie 1x"
+
+# KAboutData short description
+#: szafir-host-proxy/src/main.cpp:191
+msgid "Szafir native messaging proxy and host integrator."
+msgstr "Proxy komunikacji natywnej i integrator hosta aplikacji Szafir."
+
+#: szafir-host-proxy/src/main.cpp:218
+msgid "Enable debug logging."
+msgstr "Włącz rejestrowanie komunikatów debugowania."
+
+# CLI option: --install
+#: szafir-host-proxy/src/main.cpp:221
+msgid "Install native host definitions and wrappers, then exit."
+msgstr "Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ działanie."
+
+# CLI option: --uninstall
+#: szafir-host-proxy/src/main.cpp:224
+msgid "Remove native host definitions/wrappers and permissions, then exit."
+msgstr "Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i zakończ działanie."
+
+# CLI option: --dry-run
+#: szafir-host-proxy/src/main.cpp:227
+msgid "Print planned file/permission operations without performing them. Requires --install or --uninstall."
+msgstr "Wyświetl planowane operacje na plikach/uprawnieniach bez ich wykonywania. Wymaga podania opcji --install lub --uninstall."
+
+#: szafir-host-proxy/src/main.cpp:230
+msgid "Show modeless status window when launched."
+msgstr "Pokaż niemodalne okno statusu podczas uruchamiania."
+
+#: szafir-host-proxy/src/main.cpp:233
+msgid "Show the first-run setup wizard even if all checks already pass."
+msgstr "Pokaż kreator konfiguracji, nawet jeśli wszystkie kontrole zakończyły się pomyślnie."
+
+#: szafir-host-proxy/src/main.cpp:237
+msgid "Download enabled components headlessly, then exit (dev builds only)."
+msgstr "Pobierz włączone komponenty bez interfejsu graficznego, a następnie zakończ działanie (tylko kompilacje deweloperskie)."
+
+#: szafir-host-proxy/src/main.cpp:240
+msgid "Run with a throwaway XDG environment (dev builds only)."
+msgstr "Uruchom z tymczasowym środowiskiem XDG (tylko kompilacje deweloperskie)."
+
+#: szafir-host-proxy/src/main.cpp:243
+msgid "Force update checks to always report an update (dev builds only)."
+msgstr "Wymuś zgłaszanie dostępności aktualizacji przy każdym sprawdzeniu (tylko kompilacje deweloperskie)."
+
+#: szafir-host-proxy/src/main.cpp:246
+msgid "Show an empty smart card reader list without querying pcscd (dev builds only)."
+msgstr "Pokaż pustą listę czytników kart inteligentnych bez odpytywania pcscd (tylko kompilacje deweloperskie)."
+
+#: szafir-host-proxy/src/main.cpp:249
+msgid "Show several mock smart card readers without querying pcscd (dev builds only)."
+msgstr "Pokaż kilka testowych czytników kart inteligentnych bez odpytywania pcscd (tylko kompilacje deweloperskie)."
+
+# CLI error: conflicting options
+#: szafir-host-proxy/src/main.cpp:279
+msgid "Use either --install or --uninstall, not both."
+msgstr "Użyj opcji --install albo --uninstall, nie obu jednocześnie."
+
+# CLI error: dry-run without action
+#: szafir-host-proxy/src/main.cpp:284
+msgid "--dry-run requires --install or --uninstall."
+msgstr "Opcja --dry-run wymaga podania opcji --install lub --uninstall."
+
+# CLI error: install failed
+#: szafir-host-proxy/src/main.cpp:292
+msgid "Failed to install native host integration."
+msgstr "Nie udało się zainstalować integracji natywnego hosta."
+
+# CLI info: dry-run install done
+#: szafir-host-proxy/src/main.cpp:295
+msgid "Dry-run install complete."
+msgstr "Próbna instalacja zakończona."
+
+# CLI info: install succeeded
+#: szafir-host-proxy/src/main.cpp:295
+msgid "Native host integration installed."
+msgstr "Pomyślnie zainstalowano integrację natywnego hosta."
+
+# CLI error: uninstall failed
+#: szafir-host-proxy/src/main.cpp:301
+msgid "Failed to uninstall native host integration."
+msgstr "Nie udało się odinstalować integracji natywnego hosta."
+
+# CLI info: dry-run uninstall done
+#: szafir-host-proxy/src/main.cpp:304
+msgid "Dry-run uninstall complete."
+msgstr "Próbne odinstalowanie zakończone."
+
+# CLI info: uninstall succeeded
+#: szafir-host-proxy/src/main.cpp:304
+msgid "Native host integration removed."
+msgstr "Pomyślnie usunięto integrację natywnego hosta."
+
+# CLI error: D-Bus session bus unavailable
+#: szafir-host-proxy/src/main.cpp:361
+msgid "Cannot connect to the D-Bus session bus."
+msgstr "Nie można połączyć się z magistralą sesji D-Bus."
+
+# CLI info: already running
+#: szafir-host-proxy/src/main.cpp:367
+msgid "szafir-host-proxy is already running."
+msgstr "Program szafir-host-proxy jest już uruchomiony."
+
+# CLI error: D-Bus object registration failed
+#: szafir-host-proxy/src/main.cpp:373
+msgid "Failed to register D-Bus object."
+msgstr "Nie udało się zarejestrować obiektu D-Bus."
+
+# Warning: auto-install on startup failed
+#: szafir-host-proxy/src/main.cpp:378
+msgid "Failed to fully install native host integration; continuing startup."
+msgstr "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie będzie kontynuowane."
+
+#: szafir-host-proxy/src/main.cpp:468
+msgid "SzafirHost update available"
+msgstr "Dostępna aktualizacja SzafirHost"
+
+#: szafir-host-proxy/src/main.cpp:469
+msgid "Version %1 is available. Open the status window to install."
+msgstr "Dostępna jest wersja %1. Otwórz okno statusu, aby ją zainstalować."
+
+# Tray context menu: GDK_SCALE submenu for Szafir app
+#: szafir-host-proxy/src/main.cpp:476 szafir-host-proxy/qml/StatusPage.qml:125
+msgid "Szafir scaling"
+msgstr "Skalowanie Szafir"
+
+# Tray context menu: GDK_SCALE submenu for SzafirHost
+#: szafir-host-proxy/src/main.cpp:479 szafir-host-proxy/qml/StatusPage.qml:151
+msgid "SzafirHost scaling"
+msgstr "Skalowanie SzafirHost"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:8
+msgid "Download Components"
+msgstr "Pobieranie komponentów"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:37
+msgid "Discovering available components..."
+msgstr "Wyszukiwanie dostępnych komponentów..."
+
+#: szafir-host-proxy/qml/DownloadPage.qml:49
+msgid "The following components need to be downloaded to enable Szafir browser integration."
+msgstr "Poniższe komponenty muszą zostać pobrane, aby włączyć integrację Szafir z przeglądarką."
+
+#: szafir-host-proxy/qml/DownloadPage.qml:124
+msgid "Update to %1 available"
+msgstr "Dostępna aktualizacja do wersji %1"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:126
+msgid "Already installed"
+msgstr "Już zainstalowane"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:132
+#: szafir-host-proxy/qml/DownloadPage.qml:143
+msgid "%1 MB"
+msgstr "%1 MB"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:133
+#: szafir-host-proxy/qml/DownloadPage.qml:144
+msgid "~%1 MB"
+msgstr "~%1 MB"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:138
+msgid "Downloading... %1 / %2 MB"
+msgstr "Pobieranie... %1 / %2 MB"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:140
+msgid "Verifying checksum..."
+msgstr "Weryfikacja sumy kontrolnej..."
+
+#: szafir-host-proxy/qml/DownloadPage.qml:141
+msgid "Downloaded"
+msgstr "Pobrano"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:146
+msgid "Error"
+msgstr "Błąd"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:147
+msgid "Missing"
+msgstr "Brak"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:204
+msgid "Later"
+msgstr "Później"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:217
+msgid "Install && Update"
+msgstr "Zainstaluj i zaktualizuj"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:218
+msgid "Update"
+msgstr "Aktualizuj"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:219
+msgid "Install now"
+msgstr "Zainstaluj teraz"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:231
+msgid "Download"
+msgstr "Pobierz"
+
+#: szafir-host-proxy/qml/DownloadPage.qml:234
+msgid "Next"
+msgstr "Dalej"
+
+#: szafir-host-proxy/qml/LicensePage.qml:8
+msgid "SzafirHost license agreement"
+msgstr "Umowa licencyjna SzafirHost"
+
+#: szafir-host-proxy/qml/LicensePage.qml:37
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:94
+msgid "License text could not be loaded."
+msgstr "Nie udało się załadować tekstu licencji."
+
+#: szafir-host-proxy/qml/LicensePage.qml:63
+#: szafir-host-proxy/qml/StatusPage.qml:252
+msgid "Quit"
+msgstr "Zakończ"
+
+#: szafir-host-proxy/qml/LicensePage.qml:69
+msgid "Accept"
+msgstr "Akceptuj"
 
 #: szafir-host-proxy/qml/SzafirHostAboutPage.qml:8
 msgid "About SzafirHost runtime"
-msgstr "O środowisku SzafirHost"
+msgstr "O środowisku uruchomieniowym SzafirHost"
 
 #: szafir-host-proxy/qml/SzafirHostAboutPage.qml:10
 msgid "Calculating..."
@@ -29,12 +374,6 @@ msgstr "Obliczanie..."
 msgid "Szafir Software License Agreement"
 msgstr "Umowa licencyjna oprogramowania Szafir"
 
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:94
-#: szafir-host-proxy/qml/LicensePage.qml:37
-msgid "License text could not be loaded."
-msgstr "Nie udało się załadować tekstu licencji."
-
-#. ── Copyright ────────────────────────────────────────────────────
 #: szafir-host-proxy/qml/SzafirHostAboutPage.qml:136
 msgid "Copyright"
 msgstr "Prawa autorskie"
@@ -47,35 +386,25 @@ msgstr "Licencja:"
 msgid "Proprietary"
 msgstr "Własnościowa"
 
-#. ── Technical Information ────────────────────────────────────────
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:172
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:173
+msgid "Cache"
+msgstr "Pamięć podręczna"
+
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:185
+msgid "Size used: %1"
+msgstr "Wykorzystane miejsce: %1"
+
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:189
+msgid "Clear cache"
+msgstr "Wyczyść pamięć podręczną"
+
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:203
 msgid "Technical Information"
 msgstr "Informacje techniczne"
 
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:174
-msgid "Installer SHA256:"
-msgstr "Instalator SHA256:"
-
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:187
-msgid "Cache used (.java/tmp): %1"
-msgstr "Użyto pamięci podręcznej (.java/tmp): %1"
-
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:191
-msgid "Clear cache"
-msgstr "Wyczyść"
-
-#. ── libCCGraphite ────────────────────────────────────────────────
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:204
-msgid "libCCGraphite"
-msgstr "libCCGraphite"
-
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:206
+#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:234
 msgid "Version: %1"
 msgstr "Wersja: %1"
-
-#: szafir-host-proxy/qml/SzafirHostAboutPage.qml:208
-msgid "SHA256:"
-msgstr "SHA256:"
 
 #: szafir-host-proxy/qml/WelcomePage.qml:8
 msgid "Welcome"
@@ -86,316 +415,190 @@ msgid "Welcome to SzafirHost Proxy"
 msgstr "Witamy w SzafirHost Proxy"
 
 #: szafir-host-proxy/qml/WelcomePage.qml:33
-msgid ""
-"This wizard will help you set up everything needed for Szafir browser "
-"integration with qualified electronic signatures."
-msgstr ""
-"Ten kreator pomoże Ci skonfigurować wszystko, co jest potrzebne do "
-"integracji przeglądarki Szafir z kwalifikowanymi podpisami elektronicznymi."
+msgid "This wizard will help you set up everything needed for Szafir browser integration with qualified electronic signatures."
+msgstr "Ten kreator pomoże Ci skonfigurować wszystko, co jest potrzebne do integracji przeglądarki Szafir z kwalifikowanymi podpisami elektronicznymi."
 
 #: szafir-host-proxy/qml/WelcomePage.qml:41
 msgid "Click \"Get Started\" to continue."
-msgstr "Kliknij \"Rozpocznij\", aby kontynuować."
+msgstr "Kliknij „Rozpocznij”, aby kontynuować."
 
 #: szafir-host-proxy/qml/WelcomePage.qml:66
 msgid "Get Started"
 msgstr "Rozpocznij"
 
-#: szafir-host-proxy/qml/LicensePage.qml:8
-msgid "License Agreement"
-msgstr "Licencja"
-
-#: szafir-host-proxy/qml/LicensePage.qml:63
-#: szafir-host-proxy/qml/StatusPage.qml:116
-msgid "Quit"
-msgstr "Zakończ"
-
-#: szafir-host-proxy/qml/LicensePage.qml:69
-msgid "Accept"
-msgstr "Akceptuj"
-
-#: szafir-host-proxy/qml/StatusPage.qml:8
+#: szafir-host-proxy/qml/StatusPage.qml:10
 msgid "Status"
 msgstr "Status"
 
-#: szafir-host-proxy/qml/StatusPage.qml:22
+#: szafir-host-proxy/qml/StatusPage.qml:70
+msgid "Checking for updates..."
+msgstr "Sprawdzanie dostępności aktualizacji..."
+
+#: szafir-host-proxy/qml/StatusPage.qml:73
+#, javascript-format
+msgid "Downloading update... %1%"
+msgstr "Pobieranie aktualizacji... %1%"
+
+#: szafir-host-proxy/qml/StatusPage.qml:74
+msgid "Downloading update..."
+msgstr "Pobieranie aktualizacji..."
+
+#: szafir-host-proxy/qml/StatusPage.qml:76
+msgid "Stopping active connections..."
+msgstr "Zatrzymywanie aktywnych połączeń..."
+
+#: szafir-host-proxy/qml/StatusPage.qml:78
+msgid "Installing update..."
+msgstr "Instalowanie aktualizacji..."
+
+#: szafir-host-proxy/qml/StatusPage.qml:115
 msgid "Menu"
 msgstr "Menu"
 
-# Tray context menu: GDK_SCALE submenu for Szafir app
-#: szafir-host-proxy/qml/StatusPage.qml:32 szafir-host-proxy/src/main.cpp:331
-msgid "Szafir scaling"
-msgstr "Skalowanie Szafir"
-
-# Tray context menu: HiDPI submenu item — no GDK_SCALE override
-#: szafir-host-proxy/qml/StatusPage.qml:35
-#: szafir-host-proxy/qml/StatusPage.qml:61 szafir-host-proxy/src/main.cpp:109
-msgid "Auto"
-msgstr "Automatyczne"
-
-# Tray context menu: HiDPI submenu item — GDK_SCALE=2
-#: szafir-host-proxy/qml/StatusPage.qml:42
-#: szafir-host-proxy/qml/StatusPage.qml:68 szafir-host-proxy/src/main.cpp:110
-msgid "2x scaling"
-msgstr "Skalowanie 2x"
-
-# Tray context menu: HiDPI submenu item — GDK_SCALE=1
-#: szafir-host-proxy/qml/StatusPage.qml:49
-#: szafir-host-proxy/qml/StatusPage.qml:75 szafir-host-proxy/src/main.cpp:111
-msgid "1x scaling"
-msgstr "Skalowanie 1x"
-
-# Tray context menu: GDK_SCALE submenu for SzafirHost
-#: szafir-host-proxy/qml/StatusPage.qml:58 szafir-host-proxy/src/main.cpp:334
-msgid "SzafirHost scaling"
-msgstr "Skalowanie SzafirHost"
-
-#: szafir-host-proxy/qml/StatusPage.qml:86
+#: szafir-host-proxy/qml/StatusPage.qml:179
 msgid "Download components..."
 msgstr "Pobierz komponenty..."
 
-#: szafir-host-proxy/qml/StatusPage.qml:96
-msgid "About SzafirHost"
-msgstr "O środowisku SzafirHost"
+#: szafir-host-proxy/qml/StatusPage.qml:191
+msgid "Check for updates..."
+msgstr "Sprawdź dostępność aktualizacji..."
 
-#: szafir-host-proxy/qml/StatusPage.qml:105
+#: szafir-host-proxy/qml/StatusPage.qml:198
+msgid "Reinstall SzafirHost runtime"
+msgstr "Zainstaluj ponownie środowisko uruchomieniowe SzafirHost"
+
+#: szafir-host-proxy/qml/StatusPage.qml:205
+msgid "Install runtime from file..."
+msgstr "Zainstaluj środowisko uruchomieniowe z pliku..."
+
+#: szafir-host-proxy/qml/StatusPage.qml:212
+msgid "Updates"
+msgstr "Aktualizacje"
+
+#: szafir-host-proxy/qml/StatusPage.qml:216
+msgid "Automatic updates"
+msgstr "Automatyczne aktualizacje"
+
+#: szafir-host-proxy/qml/StatusPage.qml:222
+msgid "Allow downgrades"
+msgstr "Zezwalaj na obniżanie wersji"
+
+#: szafir-host-proxy/qml/StatusPage.qml:232
+msgid "About SzafirHost"
+msgstr "O środowisku uruchomieniowym SzafirHost"
+
+#: szafir-host-proxy/qml/StatusPage.qml:241
 msgid "About"
 msgstr "O programie"
 
-#: szafir-host-proxy/qml/StatusPage.qml:123
+#: szafir-host-proxy/qml/StatusPage.qml:259
 msgid "Restart Needed"
-msgstr "Wymagany restart"
+msgstr "Wymagane ponowne uruchomienie"
 
-#: szafir-host-proxy/qml/StatusPage.qml:128
-msgid ""
-"For changes to take effect, reset the connection and reload the website."
+#: szafir-host-proxy/qml/StatusPage.qml:264
+msgid "For changes to take effect, reset the connection and reload the website."
 msgstr "Aby zmiany przyniosły efekt, zresetuj połączenie i załaduj ponownie stronę."
 
-#: szafir-host-proxy/qml/StatusPage.qml:144
-msgid "Waiting for browser activity..."
-msgstr "Oczekiwanie na aktywność przeglądarki..."
+#: szafir-host-proxy/qml/StatusPage.qml:272
+msgid "Select SzafirHost installer JAR"
+msgstr "Wybierz plik JAR instalatora SzafirHost"
 
-#: szafir-host-proxy/qml/StatusPage.qml:145
-msgid "Make sure the browser extension is installed."
-msgstr "Upewnij się, że rozszerzenie w przeglądarce jest zainstalowane."
+#: szafir-host-proxy/qml/StatusPage.qml:273
+msgid "JAR files (*.jar)"
+msgstr "Pliki JAR (*.jar)"
 
-#: szafir-host-proxy/qml/StatusPage.qml:154
-msgid "Chrome extension"
-msgstr "Rozszerzenie Chrome"
+#: szafir-host-proxy/qml/StatusPage.qml:273
+msgid "All files (*)"
+msgstr "Wszystkie pliki (*)"
 
-#: szafir-host-proxy/qml/StatusPage.qml:159
-msgid "Firefox extension"
-msgstr "Rozszerzenie Firefox"
+#: szafir-host-proxy/qml/StatusPage.qml:279
+msgid "Reinstall Runtime"
+msgstr "Ponowna instalacja środowiska uruchomieniowego"
 
-#: szafir-host-proxy/qml/StatusPage.qml:210
+#: szafir-host-proxy/qml/StatusPage.qml:284
+msgid "This will stop all active SzafirHost connections and reinstall the runtime. Continue?"
+msgstr "Spowoduje to zatrzymanie wszystkich aktywnych połączeń SzafirHost i ponowną instalację środowiska uruchomieniowego. Kontynuować?"
+
+#: szafir-host-proxy/qml/StatusPage.qml:293
+msgid "Active Connections"
+msgstr "Aktywne połączenia"
+
+#: szafir-host-proxy/qml/StatusPage.qml:297
+msgid "A browser is currently connected. Updating will interrupt any signing operation in progress. Continue now or wait until idle?"
+msgstr "Przeglądarka jest obecnie połączona. Aktualizacja przerwie trwającą operację podpisywania. Kontynuować teraz czy poczekać na bezczynność?"
+
+#: szafir-host-proxy/qml/StatusPage.qml:304
+msgid "Continue now"
+msgstr "Kontynuuj teraz"
+
+#: szafir-host-proxy/qml/StatusPage.qml:308
+msgid "Wait"
+msgstr "Poczekaj"
+
+#: szafir-host-proxy/qml/StatusPage.qml:328
+msgid "You are already running the latest version."
+msgstr "Korzystasz już z najnowszej wersji."
+
+#: szafir-host-proxy/qml/StatusPage.qml:340
+msgid "SzafirHost runtime has been updated successfully."
+msgstr "Środowisko uruchomieniowe SzafirHost zostało pomyślnie zaktualizowane."
+
+#: szafir-host-proxy/qml/StatusPage.qml:393
+msgid "Smart cards"
+msgstr "Karty inteligentne"
+
+#: szafir-host-proxy/qml/StatusPage.qml:456
+msgid "Card present"
+msgstr "Karta obecna"
+
+#: szafir-host-proxy/qml/StatusPage.qml:456
+msgid "No card"
+msgstr "Brak karty"
+
+#: szafir-host-proxy/qml/StatusPage.qml:479
+msgid "No smart card readers detected"
+msgstr "Nie wykryto czytników kart inteligentnych"
+
+#: szafir-host-proxy/qml/StatusPage.qml:480
+msgid "Smart card service unavailable"
+msgstr "Usługa kart inteligentnych jest niedostępna"
+
+#: szafir-host-proxy/qml/StatusPage.qml:482
+msgid "Connect a reader to get started."
+msgstr "Podłącz czytnik, aby rozpocząć."
+
+#: szafir-host-proxy/qml/StatusPage.qml:483
+msgid "Check that the smart card daemon (pcscd) is running."
+msgstr "Sprawdź, czy demon kart inteligentnych (pcscd) jest uruchomiony."
+
+#: szafir-host-proxy/qml/StatusPage.qml:503
+msgid "Connected browsers"
+msgstr "Podłączone przeglądarki"
+
+#: szafir-host-proxy/qml/StatusPage.qml:578
 msgid "Stop"
 msgstr "Zatrzymaj"
 
-#: szafir-host-proxy/qml/DownloadPage.qml:8
-msgid "Download Components"
-msgstr "Pobieranie komponentów"
+#: szafir-host-proxy/qml/StatusPage.qml:604
+msgid "Waiting for browser activity..."
+msgstr "Oczekiwanie na aktywność przeglądarki..."
 
-#: szafir-host-proxy/qml/DownloadPage.qml:39
-msgid ""
-"The following components need to be downloaded to enable Szafir browser "
-"integration."
-msgstr ""
-"Poniższe komponenty muszą zostać pobrane, aby włączyć integrację "
-"z przeglądarką."
+#: szafir-host-proxy/qml/StatusPage.qml:605
+msgid "Make sure the browser extension is installed."
+msgstr "Upewnij się, że rozszerzenie w przeglądarce jest zainstalowane."
 
-#: szafir-host-proxy/qml/DownloadPage.qml:106
-msgid "Already installed"
-msgstr "Już zainstalowane"
+#: szafir-host-proxy/qml/StatusPage.qml:614
+msgid "Chrome extension"
+msgstr "Rozszerzenie Chrome"
 
-#. Done
-#: szafir-host-proxy/qml/DownloadPage.qml:109
-#: szafir-host-proxy/qml/DownloadPage.qml:116
-msgid "%1 MB"
-msgstr "%1 MB"
-
-#: szafir-host-proxy/qml/DownloadPage.qml:112
-msgid "Downloading... %1 / %2 MB"
-msgstr "Pobieranie... %1 / %2 MB"
-
-#: szafir-host-proxy/qml/DownloadPage.qml:114
-msgid "Verifying checksum..."
-msgstr "Weryfikacja sumy kontrolnej..."
-
-#. Verifying
-#: szafir-host-proxy/qml/DownloadPage.qml:115
-msgid "Downloaded"
-msgstr "Pobrano"
-
-#. Skipped → show size again
-#: szafir-host-proxy/qml/DownloadPage.qml:117
-msgid "Error"
-msgstr "Błąd"
-
-#: szafir-host-proxy/qml/DownloadPage.qml:174
-msgid "Downloading..."
-msgstr "Pobieranie..."
-
-#: szafir-host-proxy/qml/DownloadPage.qml:175
-msgid "Download"
-msgstr "Pobierz"
+#: szafir-host-proxy/qml/StatusPage.qml:619
+msgid "Firefox extension"
+msgstr "Rozszerzenie Firefox"
 
 #: szafir-host-proxy/qml/MainWindow.qml:14
-msgid "SzafirHost Proxy — Setup"
-msgstr "SzafirHost Proxy — Konfiguracja"
+msgid "Setup"
+msgstr "Konfiguracja"
 
 #: szafir-host-proxy/qml/MainWindow.qml:15
 msgid "SzafirHost Proxy"
 msgstr "SzafirHost Proxy"
-
-#: szafir-host-proxy/src/MainWindow.cpp:26
-msgid "KIR SzafirHost"
-msgstr "KIR SzafirHost"
-
-#: szafir-host-proxy/src/MainWindow.cpp:31
-msgid ""
-"A secure Native Messaging bridge between web browsers and qualified "
-"electronic signature smart cards."
-msgstr ""
-"Bezpieczny most komunikacyjny Native Messaging pomiędzy przeglądarkami "
-"internetowymi a kartami inteligentnymi kwalifikowanego podpisu elektronicznego."
-
-#: szafir-host-proxy/src/MainWindow.cpp:32
-msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
-msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
-
-#: szafir-host-proxy/src/MainWindow.cpp:38
-msgid "Krajowa Izba Rozliczeniowa S.A."
-msgstr "Krajowa Izba Rozliczeniowa S.A."
-
-#: szafir-host-proxy/src/MainWindow.cpp:39
-msgid "Developer and Trust Service Provider"
-msgstr "Twórca i Dostawca Usług Zaufania"
-
-#: szafir-host-proxy/src/MainWindow.cpp:44
-msgid "Szafir Technical Support"
-msgstr "Wsparcie techniczne Szafir"
-
-#: szafir-host-proxy/src/MainWindow.cpp:45
-msgid "Helpdesk and Troubleshooting"
-msgstr "Pomoc i rozwiązywanie problemów"
-
-# Tray tooltip: active host count
-#: szafir-host-proxy/src/main.cpp:71
-msgid "Active hosts: %1"
-msgstr "Aktywne hosty: %1"
-
-# Tray tooltip: no hosts active
-#: szafir-host-proxy/src/main.cpp:77 szafir-host-proxy/src/main.cpp:321
-msgid "No active hosts"
-msgstr "Brak aktywnych hostów"
-
-# KAboutData short description
-#: szafir-host-proxy/src/main.cpp:159
-msgid "Szafir native messaging proxy and host integrator."
-msgstr "Proxy komunikacji natywnej i integrator hosta aplikacji Szafir."
-
-# CLI option: --install
-#: szafir-host-proxy/src/main.cpp:184
-msgid "Install native host definitions and wrappers, then exit."
-msgstr "Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ działanie."
-"Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ "
-"działanie."
-
-# CLI option: --uninstall
-#: szafir-host-proxy/src/main.cpp:187
-msgid "Remove native host definitions/wrappers and permissions, then exit."
-msgstr "Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i zakończ działanie."
-"Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i "
-"zakończ działanie."
-
-# CLI option: --dry-run
-#: szafir-host-proxy/src/main.cpp:190
-msgid ""
-"Print planned file/permission operations without performing them. Requires --"
-"install or --uninstall."
-msgstr ""
-"Wyświetl planowane operacje na plikach/uprawnieniach bez ich wykonywania. "
-"Wymaga podania opcji --install lub --uninstall."
-
-#: szafir-host-proxy/src/main.cpp:193
-msgid "Show modeless status window when launched."
-msgstr "Pokaż niemodalne okno statusu podczas uruchamiania."
-
-#: szafir-host-proxy/src/main.cpp:196
-msgid "Show the first-run setup wizard even if all checks already pass."
-msgstr "Pokaż kreator konfiguracji nawet jeśli wszystkie testy zostały spełnione."
-
-# CLI error: conflicting options
-#: szafir-host-proxy/src/main.cpp:214
-msgid "Use either --install or --uninstall, not both."
-msgstr "Użyj opcji --install albo --uninstall, nie obu jednocześnie."
-
-# CLI error: dry-run without action
-#: szafir-host-proxy/src/main.cpp:219
-msgid "--dry-run requires --install or --uninstall."
-msgstr "Opcja --dry-run wymaga podania opcji --install lub --uninstall."
-
-# CLI error: install failed
-#: szafir-host-proxy/src/main.cpp:227
-msgid "Failed to install native host integration."
-msgstr "Nie udało się zainstalować integracji natywnego hosta."
-
-# CLI info: dry-run install done
-#: szafir-host-proxy/src/main.cpp:230
-msgid "Dry-run install complete."
-msgstr "Próbna instalacja zakończona."
-
-# CLI info: install succeeded
-#: szafir-host-proxy/src/main.cpp:230
-msgid "Native host integration installed."
-msgstr "Pomyślnie zainstalowano integrację natywnego hosta."
-
-# CLI error: uninstall failed
-#: szafir-host-proxy/src/main.cpp:236
-msgid "Failed to uninstall native host integration."
-msgstr "Nie udało się odinstalować integracji natywnego hosta."
-
-# CLI info: dry-run uninstall done
-#: szafir-host-proxy/src/main.cpp:239
-msgid "Dry-run uninstall complete."
-msgstr "Próbne odinstalowanie zakończone."
-
-# CLI info: uninstall succeeded
-#: szafir-host-proxy/src/main.cpp:239
-msgid "Native host integration removed."
-msgstr "Pomyślnie usunięto integrację natywnego hosta."
-
-# CLI error: D-Bus session bus unavailable
-#: szafir-host-proxy/src/main.cpp:245
-msgid "Cannot connect to the D-Bus session bus."
-msgstr "Nie można połączyć się z magistralą sesji D-Bus."
-
-# CLI info: already running
-#: szafir-host-proxy/src/main.cpp:251
-msgid "szafir-host-proxy is already running."
-msgstr "Program szafir-host-proxy jest już uruchomiony."
-
-# CLI error: D-Bus object registration failed
-#: szafir-host-proxy/src/main.cpp:257
-msgid "Failed to register D-Bus object."
-msgstr "Nie udało się zarejestrować obiektu D-Bus."
-
-# Warning: auto-install on startup failed
-#: szafir-host-proxy/src/main.cpp:262
-msgid "Failed to fully install native host integration; continuing startup."
-msgstr "Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie będzie kontynuowane."
-"Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
-"będzie kontynuowane."
-
-#. ── Smart card status ───────────────────────────────────────────
-#: szafir-host-proxy/qml/StatusPage.qml
-msgid "Smart card service unavailable"
-msgstr "Usługa kart inteligentnych niedostępna"
-
-#: szafir-host-proxy/qml/StatusPage.qml
-msgid "No smart cards detected"
-msgstr "Nie wykryto kart inteligentnych"
-
-#: szafir-host-proxy/qml/StatusPage.qml
-msgid "Card present: %1"
-msgstr "Wykryto kartę: %1"

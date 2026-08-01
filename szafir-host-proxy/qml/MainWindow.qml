@@ -7,13 +7,28 @@ Kirigami.ApplicationWindow {
     id: root
 
     width: 480
-    height: 420
-    minimumWidth: 400
-    minimumHeight: 300
+    height: peakHeight
+    minimumWidth: 480
+    minimumHeight: 510
         title: setupController && !setupController.isWizardComplete
             ? i18n("Setup")
             : i18n("SzafirHost Proxy")
     visible: false
+
+    // Grow-only sizing: the window starts at the minimal 480x510 and expands
+    // only when the status page content outgrows it. A high-water mark
+    // (peakHeight) remembers the tallest required height, so plugging in or
+    // removing a reader never makes the window shrink back down.
+    readonly property real statusContentHeight:
+        pageStack.currentItem?.objectName === "statusPage"
+            ? pageStack.globalToolBar.height + (pageStack.currentItem?.implicitHeight ?? 0)
+            : 0
+    property real peakHeight: 510
+
+    onStatusContentHeightChanged: {
+        if (statusContentHeight > peakHeight)
+            peakHeight = statusContentHeight
+    }
 
     Kirigami.Theme.colorSet: Kirigami.Theme.View
 

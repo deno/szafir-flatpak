@@ -4,9 +4,35 @@
 
 #include <cstring>
 
-SmartCardMonitor::SmartCardMonitor(QObject *parent)
+namespace {
+
+QVariantList mockReaders()
+{
+    return {
+        QVariantMap{{QStringLiteral("name"), QStringLiteral("Cherry SmartTerminal XX44 [Smart Terminal xx44] 00 00")},
+                    {QStringLiteral("present"), true}},
+        QVariantMap{{QStringLiteral("name"), QStringLiteral("Gemalto PC Twin Reader 01 00")},
+                    {QStringLiteral("present"), false}},
+        QVariantMap{{QStringLiteral("name"), QStringLiteral("ACS ACR122U PICC Interface 02 00")},
+                    {QStringLiteral("present"), true}},
+    };
+}
+
+} // namespace
+
+SmartCardMonitor::SmartCardMonitor(Mode mode, QObject *parent)
     : QObject(parent)
 {
+    if (mode == Mode::Empty) {
+        updateState(true, false, {});
+        return;
+    }
+    if (mode == Mode::Mock) {
+        const QVariantList readers = mockReaders();
+        updateState(true, true, readers);
+        return;
+    }
+
     m_timer.setInterval(2000);
     connect(&m_timer, &QTimer::timeout, this, &SmartCardMonitor::poll);
     m_timer.start();
