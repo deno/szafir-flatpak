@@ -29,7 +29,7 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
       <h3>SzafirHost Proxy</h3>
       <p>Otwartoźródłowy most łączący wspierane przeglądarki ze środowiskiem Szafir, aby podpis na obsługiwanych stronach WWW działał zarówno dla aplikacji hosta, jak i przeglądarek Flatpak.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
-      <img src="screenshots/proxy/pl/wizard.png" alt="Kreator konfiguracji SzafirHost Proxy" />
+      <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" />
     </td>
   </tr>
 </table>
@@ -60,7 +60,7 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
 ### SzafirHost Proxy
 
 <p>
-  <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" width="48%" />
+  <img src="screenshots/proxy/pl/wizard.png" alt="Kreator konfiguracji SzafirHost Proxy" width="48%" />
   <img src="screenshots/proxy/pl/components.png" alt="Pobieranie komponentów proxy" width="48%" />
 </p>
 

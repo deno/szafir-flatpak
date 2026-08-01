@@ -30,8 +30,8 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
       <p>An open-source bridge that connects supported browsers with the Szafir environment so signing on supported websites works from Flatpak and host-installed browsers.</p>
       <p><strong>Flatpak ID:</strong> <code>pl.deno.kir.szafirhostproxy</code></p>
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/wizard-dark.png" />
-        <img src="screenshots/proxy/en/wizard.png" alt="SzafirHost Proxy setup wizard" />
+        <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/status-dark.png" />
+        <img src="screenshots/proxy/en/status.png" alt="Proxy waiting for browser activity" />
       </picture>
     </td>
   </tr>
@@ -64,8 +64,8 @@ Install the standalone desktop signer and the browser-signing proxy from one sig
 
 <p>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/status-dark.png" />
-    <img src="screenshots/proxy/en/status.png" alt="Proxy waiting for browser activity" width="48%" />
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/wizard-dark.png" />
+    <img src="screenshots/proxy/en/wizard.png" alt="SzafirHost Proxy setup wizard" width="48%" />
   </picture>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/en/components-dark.png" />
