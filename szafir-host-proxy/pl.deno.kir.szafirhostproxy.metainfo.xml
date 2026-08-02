@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.5.3" date="2026-08-02">
+      <description>
+        <p>Improved Polish localization with a reproducible translation catalog, placeholder checks, and CI validation. Refreshed AppStream metadata and verified translation packaging.</p>
+        <p xml:lang="pl">Ulepszono polską lokalizację dzięki reprodukowalnemu katalogowi tłumaczeń, kontroli placeholderów i walidacji CI. Odświeżono metadane AppStream oraz zweryfikowano pakowanie tłumaczeń.</p>
+      </description>
+    </release>
     <release version="0.5.2" date="2026-08-01">
       <description>
         <p>Cosmetic fixes.</p>
@@ -154,28 +160,28 @@
   </requires>
   <screenshots>
     <screenshot type="default" environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/status.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/status.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/status.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/status.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/wizard.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/wizard.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/wizard.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/wizard.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/components.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/components.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/components.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/components.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/status-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/status-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/status-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/status-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/wizard-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/wizard-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/wizard-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/wizard-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/components-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/components-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/components-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/components-dark.png</image>
     </screenshot>
   </screenshots>
 </component>

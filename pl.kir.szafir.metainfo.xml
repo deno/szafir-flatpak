@@ -59,20 +59,20 @@
   </releases>
   <screenshots>
     <screenshot type="default" environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/home.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/home.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/en/home.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/pl/home.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/signing_pades.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/signing_pades.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/en/signing_pades.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/pl/signing_pades.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/home-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/home-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/en/home-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/pl/home-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/signing_pades-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/signing_pades-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/en/signing_pades-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/szafirapp/pl/signing_pades-dark.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />

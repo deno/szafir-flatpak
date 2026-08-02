@@ -1,4 +1,15 @@
 releases:
+  - version: 0.5.3
+    date: 2026-08-02
+    description:
+      en: >-
+        Improved Polish localization with a reproducible translation catalog,
+        placeholder checks, and CI validation. Refreshed AppStream metadata
+        and verified translation packaging.
+      pl: >-
+        Ulepszono polską lokalizację dzięki reprodukowalnemu katalogowi
+        tłumaczeń, kontroli placeholderów i walidacji CI. Odświeżono metadane
+        AppStream oraz zweryfikowano pakowanie tłumaczeń.
   - version: 0.5.2
     date: 2026-08-01
     description:
