@@ -12,6 +12,12 @@ manifests:
 permissions:
 	python3 scripts/render_manifest.py all
 
+.PHONY: check-translations
+check-translations:
+	./tools/i18n/update.sh --check
+	python3 tools/i18n/check-placeholders.py szafir-host-proxy/translations/*/*.po
+	@echo "translation checks passed"
+
 .PHONY: dist
 dist:
 	cmake -S szafir-host-proxy -B $(SOURCE_BUILD_DIR) \

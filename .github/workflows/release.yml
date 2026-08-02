@@ -75,6 +75,15 @@ jobs:
           flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir-proxy \
             pl.deno.kir.szafirhostproxy.yml
 
+      - name: Verify installed translation catalog
+        run: |
+          # The Flatpak build must install the compiled Polish catalog; fail loudly
+          # if the (PO filename, domain, install prefix, .mo filename) contract breaks.
+          if [ -z "$(find build-dir-proxy/files -path '*/share/locale/pl/LC_MESSAGES/szafir-host-proxy.mo' -type f)" ]; then
+            echo "Missing installed Polish catalog (.mo) in the proxy Flatpak build" >&2
+            exit 1
+          fi
+
       - name: Build standalone Szafir (repo only)
         run: |
           flatpak-builder --user --repo=repo --force-clean --disable-rofiles-fuse build-dir-szafir \

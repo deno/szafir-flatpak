@@ -15,113 +15,111 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Certificate details"
 msgstr "Szczegóły certyfikatu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/CertificateDetailsPage.qml qml/SmartCardDetailsPage.qml
 msgid "Not available"
 msgstr "Niedostępne"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "General"
 msgstr "Ogólne"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Subject"
 msgstr "Podmiot"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Issuer"
 msgstr "Wystawca"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/CertificateDetailsPage.qml qml/SmartCardDetailsPage.qml
 msgid "Serial number"
 msgstr "Numer seryjny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Serial number (hexadecimal)"
 msgstr "Numer seryjny (szesnastkowo)"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Valid from"
 msgstr "Ważny od"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Valid until"
 msgstr "Ważny do"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Public key"
 msgstr "Klucz publiczny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Algorithm"
 msgstr "Algorytm"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Key size"
 msgstr "Rozmiar klucza"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "%1 bits"
 msgstr "%1 bitów"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Signature algorithm"
 msgstr "Algorytm podpisu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Key usage"
 msgstr "Zastosowanie klucza"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Extended key usage"
 msgstr "Rozszerzone zastosowanie klucza"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Identifiers"
 msgstr "Identyfikatory"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Subject alternative names"
 msgstr "Alternatywne nazwy podmiotu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Certificate policies"
 msgstr "Zasady certyfikatu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Certificate statements"
 msgstr "Oświadczenia certyfikatu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Private key match"
 msgstr "Powiązanie z kluczem prywatnym"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "Fingerprints"
 msgstr "Odciski"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "SHA-256"
 msgstr "SHA-256"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/CertificateDetailsPage.qml
+#: qml/CertificateDetailsPage.qml
 msgid "SHA-1"
 msgstr "SHA-1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Download Components"
 msgstr "Pobieranie komponentów"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Discovering available components..."
 msgstr "Wyszukiwanie dostępnych komponentów..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid ""
 "The following components need to be downloaded to enable Szafir browser "
 "integration."
@@ -129,394 +127,384 @@ msgstr ""
 "Poniższe komponenty muszą zostać pobrane, aby włączyć integrację Szafir z "
 "przeglądarką."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Update to %1 available"
 msgstr "Dostępna aktualizacja do wersji %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Already installed"
 msgstr "Już zainstalowane"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "%1 MB"
 msgstr "%1 MB"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "~%1 MB"
 msgstr "~%1 MB"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Downloading... %1 / %2 MB"
 msgstr "Pobieranie... %1 / %2 MB"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Verifying checksum..."
 msgstr "Weryfikacja sumy kontrolnej..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Downloaded"
 msgstr "Pobrano"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Error"
 msgstr "Błąd"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Missing"
 msgstr "Brak"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Later"
 msgstr "Później"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Install && Update"
 msgstr "Zainstaluj i zaktualizuj"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Update"
 msgstr "Aktualizuj"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Install now"
 msgstr "Zainstaluj teraz"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Download"
 msgstr "Pobierz"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/DownloadPage.qml
+#: qml/DownloadPage.qml
 msgid "Next"
 msgstr "Dalej"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/LicensePage.qml
+#: qml/LicensePage.qml
 msgid "SzafirHost license agreement"
 msgstr "Umowa licencyjna SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/LicensePage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/LicensePage.qml qml/SzafirHostAboutPage.qml
 msgid "License text could not be loaded."
 msgstr "Nie udało się załadować tekstu licencji."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/LicensePage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/LicensePage.qml qml/StatusPage.qml
 msgid "Quit"
 msgstr "Zakończ"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/LicensePage.qml
+#: qml/LicensePage.qml
 msgid "Accept"
 msgstr "Akceptuj"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/MainWindow.qml
+#: qml/MainWindow.qml
 msgid "Setup"
 msgstr "Konfiguracja"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/MainWindow.qml
+#: qml/MainWindow.qml
 msgid "SzafirHost Proxy"
 msgstr "SzafirHost Proxy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Smart card details"
 msgstr "Szczegóły karty inteligentnej"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "The Graphite cryptographic provider is not installed."
 msgstr "Dostawca kryptograficzny Graphite nie jest zainstalowany."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "No token was found through the cryptographic provider."
 msgstr "Dostawca kryptograficzny nie znalazł tokenu."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "No public certificates were found on this card."
 msgstr "Na tej karcie nie znaleziono publicznych certyfikatów."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "The card requires authentication before its certificates can be read."
 msgstr ""
 "Karta wymaga uwierzytelnienia, aby można było odczytać jej certyfikaty."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid ""
 "The cryptographic provider could not associate a token with this reader."
 msgstr "Dostawca kryptograficzny nie może przypisać tokenu do tego czytnika."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "The cryptographic provider did not respond in time."
 msgstr "Dostawca kryptograficzny nie odpowiedział w wymaganym czasie."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "The cryptographic provider could not be loaded."
 msgstr "Nie można załadować dostawcy kryptograficznego."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Certificate details are not available."
 msgstr "Szczegóły certyfikatu są niedostępne."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Reader"
 msgstr "Czytnik"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Reader name"
 msgstr "Nazwa czytnika"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/SmartCardDetailsPage.qml qml/StatusPage.qml
 msgid "Status"
 msgstr "Status"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Reader is no longer available"
 msgstr "Czytnik nie jest już dostępny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/SmartCardDetailsPage.qml qml/StatusPage.qml
 msgid "Card present"
 msgstr "Karta obecna"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/SmartCardDetailsPage.qml qml/StatusPage.qml
 msgid "No card"
 msgstr "Brak karty"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Vendor"
 msgstr "Producent"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Model"
 msgstr "Model"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Firmware version"
 msgstr "Wersja oprogramowania sprzętowego"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Card"
 msgstr "Karta"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "ATR"
 msgstr "ATR"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Protocol"
 msgstr "Protokół"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Card type"
 msgstr "Typ karty"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Retry"
 msgstr "Ponów"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Token"
 msgstr "Token"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Token label"
 msgstr "Etykieta tokenu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Manufacturer"
 msgstr "Producent"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Token serial number"
 msgstr "Numer seryjny tokenu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Hardware version"
 msgstr "Wersja sprzętu"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Slot"
 msgstr "Gniazdo"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Provider"
 msgstr "Dostawca"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Provider name"
 msgstr "Nazwa dostawcy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Provider manufacturer"
 msgstr "Producent dostawcy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Provider description"
 msgstr "Opis dostawcy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Cryptoki version"
 msgstr "Wersja Cryptoki"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Library version"
 msgstr "Wersja biblioteki"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Certificates"
 msgstr "Certyfikaty"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Certificate"
 msgstr "Certyfikat"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Issuer not available"
 msgstr "Wystawca niedostępny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Valid %1 to %2"
 msgstr "Ważny od %1 do %2"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SmartCardDetailsPage.qml
+#: qml/SmartCardDetailsPage.qml
 msgid "Validity period not available"
 msgstr "Okres ważności niedostępny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Checking for updates..."
 msgstr "Sprawdzanie dostępności aktualizacji..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Downloading update... %1%"
 msgstr "Pobieranie aktualizacji... %1%"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Downloading update..."
 msgstr "Pobieranie aktualizacji..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Stopping active connections..."
 msgstr "Zatrzymywanie aktywnych połączeń..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Installing update..."
 msgstr "Instalowanie aktualizacji..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Menu"
 msgstr "Menu"
 
 # Tray context menu: GDK_SCALE submenu for Szafir app
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
+#: qml/StatusPage.qml src/main.cpp
 msgid "Szafir scaling"
 msgstr "Skalowanie Szafir"
 
 # Tray context menu: HiDPI submenu item — no GDK_SCALE override
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
+#: qml/StatusPage.qml src/main.cpp
 msgid "Auto"
 msgstr "Automatycznie"
 
 # Tray context menu: HiDPI submenu item — GDK_SCALE=2
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
+#: qml/StatusPage.qml src/main.cpp
 msgid "2x scaling"
 msgstr "Skalowanie 2x"
 
 # Tray context menu: HiDPI submenu item — GDK_SCALE=1
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
+#: qml/StatusPage.qml src/main.cpp
 msgid "1x scaling"
 msgstr "Skalowanie 1x"
 
 # Tray context menu: GDK_SCALE submenu for SzafirHost
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
+#: qml/StatusPage.qml src/main.cpp
 msgid "SzafirHost scaling"
 msgstr "Skalowanie SzafirHost"
 
 # Hamburger menu: Theme submenu title
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Theme"
 msgstr "Motyw"
 
 # Hamburger menu: Theme submenu item — follow the desktop color scheme
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "System"
 msgstr "Systemowy"
 
 # Hamburger menu: Theme submenu item — force light colors
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Light"
 msgstr "Jasny"
 
 # Hamburger menu: Theme submenu item — force dark colors
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Dark"
 msgstr "Ciemny"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Download components..."
 msgstr "Pobierz komponenty..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Check for updates..."
 msgstr "Sprawdź dostępność aktualizacji..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Reinstall SzafirHost runtime"
 msgstr "Zainstaluj ponownie środowisko uruchomieniowe SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Install runtime from file..."
 msgstr "Zainstaluj środowisko uruchomieniowe z pliku..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Updates"
 msgstr "Aktualizacje"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Automatic updates"
 msgstr "Automatyczne aktualizacje"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Allow downgrades"
 msgstr "Zezwalaj na obniżanie wersji"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "About SzafirHost"
 msgstr "O środowisku uruchomieniowym SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "About"
 msgstr "O programie"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Restart Needed"
 msgstr "Wymagane ponowne uruchomienie"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid ""
 "For changes to take effect, reset the connection and reload the website."
 msgstr ""
 "Aby zmiany przyniosły efekt, zresetuj połączenie i załaduj ponownie stronę."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Select SzafirHost installer JAR"
 msgstr "Wybierz plik JAR instalatora SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "JAR files (*.jar)"
 msgstr "Pliki JAR (*.jar)"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "All files (*)"
 msgstr "Wszystkie pliki (*)"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Reinstall Runtime"
 msgstr "Ponowna instalacja środowiska uruchomieniowego"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid ""
 "This will stop all active SzafirHost connections and reinstall the runtime. "
 "Continue?"
@@ -524,11 +512,11 @@ msgstr ""
 "Spowoduje to zatrzymanie wszystkich aktywnych połączeń SzafirHost i ponowną "
 "instalację środowiska uruchomieniowego. Kontynuować?"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Active Connections"
 msgstr "Aktywne połączenia"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid ""
 "A browser is currently connected. Updating will interrupt any signing "
 "operation in progress. Continue now or wait until idle?"
@@ -536,119 +524,119 @@ msgstr ""
 "Przeglądarka jest obecnie połączona. Aktualizacja przerwie trwającą operację "
 "podpisywania. Kontynuować teraz czy poczekać na bezczynność?"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Continue now"
 msgstr "Kontynuuj teraz"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Wait"
 msgstr "Poczekaj"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "You are already running the latest version."
 msgstr "Korzystasz już z najnowszej wersji."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "SzafirHost runtime has been updated successfully."
 msgstr "Środowisko uruchomieniowe SzafirHost zostało pomyślnie zaktualizowane."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Smart cards"
 msgstr "Karty inteligentne"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "No smart card readers detected"
 msgstr "Nie wykryto czytników kart inteligentnych"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Smart card service unavailable"
 msgstr "Usługa kart inteligentnych jest niedostępna"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Connect a reader to get started."
 msgstr "Podłącz czytnik, aby rozpocząć."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Check that the smart card daemon (pcscd) is running."
 msgstr "Sprawdź, czy demon kart inteligentnych (pcscd) jest uruchomiony."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Connected browsers"
 msgstr "Podłączone przeglądarki"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Stop"
 msgstr "Zatrzymaj"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Waiting for browser activity..."
 msgstr "Oczekiwanie na aktywność przeglądarki..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Make sure the browser extension is installed."
 msgstr "Upewnij się, że rozszerzenie w przeglądarce jest zainstalowane."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Chrome extension"
 msgstr "Rozszerzenie Chrome"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/StatusPage.qml
+#: qml/StatusPage.qml
 msgid "Firefox extension"
 msgstr "Rozszerzenie Firefox"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "About SzafirHost runtime"
 msgstr "O środowisku uruchomieniowym SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Calculating..."
 msgstr "Obliczanie..."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Szafir Software License Agreement"
 msgstr "Umowa licencyjna oprogramowania Szafir"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Copyright"
 msgstr "Prawa autorskie"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "License:"
 msgstr "Licencja:"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Proprietary"
 msgstr "Własnościowa"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Cache"
 msgstr "Pamięć podręczna"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Size used: %1"
 msgstr "Wykorzystane miejsce: %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Clear cache"
 msgstr "Wyczyść pamięć podręczną"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Technical Information"
 msgstr "Informacje techniczne"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/SzafirHostAboutPage.qml
+#: qml/SzafirHostAboutPage.qml
 msgid "Version: %1"
 msgstr "Wersja: %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/WelcomePage.qml
+#: qml/WelcomePage.qml
 msgid "Welcome"
 msgstr "Witamy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/WelcomePage.qml
+#: qml/WelcomePage.qml
 msgid "Welcome to SzafirHost Proxy"
 msgstr "Witamy w SzafirHost Proxy"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/WelcomePage.qml
+#: qml/WelcomePage.qml
 msgid ""
 "This wizard will help you set up everything needed for Szafir browser "
 "integration with qualified electronic signatures."
@@ -656,217 +644,47 @@ msgstr ""
 "Ten kreator pomoże Ci skonfigurować wszystko, co jest potrzebne do "
 "integracji przeglądarki Szafir z kwalifikowanymi podpisami elektronicznymi."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/WelcomePage.qml
+#: qml/WelcomePage.qml
 msgid "Click \"Get Started\" to continue."
 msgstr "Kliknij „Rozpocznij”, aby kontynuować."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/qml/WelcomePage.qml
+#: qml/WelcomePage.qml
 msgid "Get Started"
 msgstr "Rozpocznij"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentDownloader.cpp
+#: src/ComponentDownloader.cpp
 msgid "SzafirHost Runtime"
 msgstr "Środowisko uruchomieniowe SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentDownloader.cpp
+#: src/ComponentDownloader.cpp
 msgid "libCCGraphite Cryptographic Provider"
 msgstr "Dostawca kryptograficzny libCCGraphite"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentDownloader.cpp
+#: src/ComponentDownloader.cpp
 msgid "SHA256 (installer):"
 msgstr "SHA256 (instalatora):"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentDownloader.cpp
+#: src/ComponentDownloader.cpp
 msgid "SHA256:"
 msgstr "SHA256:"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentInfo.cpp
+#: src/ComponentInfo.cpp
 msgid "App system component"
 msgstr "Komponent systemowy aplikacji"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentInfo.cpp
+#: src/ComponentInfo.cpp
 msgid "Runtime system component"
 msgstr "Komponent systemowy środowiska uruchomieniowego"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/ComponentInfo.cpp
+#: src/ComponentInfo.cpp
 msgid "SHA256 (source):"
 msgstr "SHA256 (źródła):"
 
-# Tray tooltip: active host count
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Active hosts: %1"
-msgstr "Aktywne hosty: %1"
-
-# Tray tooltip: no hosts active
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "No active hosts"
-msgstr "Brak aktywnych hostów"
-
-# KAboutData short description
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Szafir native messaging proxy and host integrator."
-msgstr "Proxy komunikacji natywnej i integrator hosta aplikacji Szafir."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Enable debug logging."
-msgstr "Włącz rejestrowanie komunikatów debugowania."
-
-# CLI option: --install
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Install native host definitions and wrappers, then exit."
-msgstr ""
-"Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ "
-"działanie."
-
-# CLI option: --uninstall
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Remove native host definitions/wrappers and permissions, then exit."
-msgstr ""
-"Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i "
-"zakończ działanie."
-
-# CLI option: --dry-run
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid ""
-"Print planned file/permission operations without performing them. Requires --"
-"install or --uninstall."
-msgstr ""
-"Wyświetl planowane operacje na plikach/uprawnieniach bez ich wykonywania. "
-"Wymaga podania opcji --install lub --uninstall."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Show modeless status window when launched."
-msgstr "Pokaż niemodalne okno statusu podczas uruchamiania."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Show the first-run setup wizard even if all checks already pass."
-msgstr ""
-"Pokaż kreator konfiguracji, nawet jeśli wszystkie kontrole zakończyły się "
-"pomyślnie."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Download enabled components headlessly, then exit (dev builds only)."
-msgstr ""
-"Pobierz włączone komponenty bez interfejsu graficznego, a następnie zakończ "
-"działanie (tylko kompilacje deweloperskie)."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Run with a throwaway XDG environment (dev builds only)."
-msgstr ""
-"Uruchom z tymczasowym środowiskiem XDG (tylko kompilacje deweloperskie)."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Force update checks to always report an update (dev builds only)."
-msgstr ""
-"Wymuś zgłaszanie dostępności aktualizacji przy każdym sprawdzeniu (tylko "
-"kompilacje deweloperskie)."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid ""
-"Show an empty smart card reader list without querying pcscd (dev builds "
-"only)."
-msgstr ""
-"Pokaż pustą listę czytników kart inteligentnych bez odpytywania pcscd (tylko "
-"kompilacje deweloperskie)."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid ""
-"Show several mock smart card readers without querying pcscd (dev builds "
-"only)."
-msgstr ""
-"Pokaż kilka testowych czytników kart inteligentnych bez odpytywania pcscd "
-"(tylko kompilacje deweloperskie)."
-
-# CLI option: --mock-browsers
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid ""
-"Show several mock connected browsers without accepting native messaging "
-"connections (dev builds only)."
-msgstr ""
-"Pokaż kilka testowych połączonych przeglądarek bez akceptowania połączeń "
-"natywnego przesyłania wiadomości (tylko kompilacje deweloperskie)."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Enable smart card and PKCS#11 debug logging (dev builds only)."
-msgstr ""
-"Włącz debugowanie kart inteligentnych i PKCS#11 (tylko kompilacje "
-"deweloperskie)."
-
-# CLI error: conflicting options
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Use either --install or --uninstall, not both."
-msgstr "Użyj opcji --install albo --uninstall, nie obu jednocześnie."
-
-# CLI error: dry-run without action
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "--dry-run requires --install or --uninstall."
-msgstr "Opcja --dry-run wymaga podania opcji --install lub --uninstall."
-
-# CLI error: install failed
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Failed to install native host integration."
-msgstr "Nie udało się zainstalować integracji natywnego hosta."
-
-# CLI info: dry-run install done
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Dry-run install complete."
-msgstr "Próbna instalacja zakończona."
-
-# CLI info: install succeeded
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Native host integration installed."
-msgstr "Pomyślnie zainstalowano integrację natywnego hosta."
-
-# CLI error: uninstall failed
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Failed to uninstall native host integration."
-msgstr "Nie udało się odinstalować integracji natywnego hosta."
-
-# CLI info: dry-run uninstall done
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Dry-run uninstall complete."
-msgstr "Próbne odinstalowanie zakończone."
-
-# CLI info: uninstall succeeded
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Native host integration removed."
-msgstr "Pomyślnie usunięto integrację natywnego hosta."
-
-# CLI error: D-Bus session bus unavailable
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Cannot connect to the D-Bus session bus."
-msgstr "Nie można połączyć się z magistralą sesji D-Bus."
-
-# CLI info: already running
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "szafir-host-proxy is already running."
-msgstr "Program szafir-host-proxy jest już uruchomiony."
-
-# CLI error: D-Bus object registration failed
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Failed to register D-Bus object."
-msgstr "Nie udało się zarejestrować obiektu D-Bus."
-
-# Warning: auto-install on startup failed
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Failed to fully install native host integration; continuing startup."
-msgstr ""
-"Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
-"będzie kontynuowane."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "SzafirHost update available"
-msgstr "Dostępna aktualizacja SzafirHost"
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/main.cpp
-msgid "Version %1 is available. Open the status window to install."
-msgstr "Dostępna jest wersja %1. Otwórz okno statusu, aby ją zainstalować."
-
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "KIR SzafirHost"
 msgstr "KIR SzafirHost"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid ""
 "A secure Native Messaging bridge between web browsers and qualified "
 "electronic signature smart cards."
@@ -874,27 +692,27 @@ msgstr ""
 "Bezpieczny most Native Messaging między przeglądarkami internetowymi a "
 "kartami inteligentnymi używanymi do kwalifikowanego podpisu elektronicznego."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
 msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "Krajowa Izba Rozliczeniowa S.A."
 msgstr "Krajowa Izba Rozliczeniowa S.A."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "Developer and Trust Service Provider"
 msgstr "Twórca i dostawca usług zaufania"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "Szafir Technical Support"
 msgstr "Wsparcie techniczne Szafir"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/MainWindow.cpp
+#: src/MainWindow.cpp
 msgid "Helpdesk and Troubleshooting"
 msgstr "Pomoc i rozwiązywanie problemów"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid ""
 "Could not find SzafirHost download link on the website. The site layout may "
 "have changed. You can install from a local file instead."
@@ -903,40 +721,210 @@ msgstr ""
 "internetowej. Układ strony mógł się zmienić. Zamiast tego możesz "
 "zainstalować program z pliku lokalnego."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Download failed: %1"
 msgstr "Pobieranie nie powiodło się: %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Installation failed. The previous runtime may still be usable."
 msgstr ""
 "Instalacja nie powiodła się. Poprzednie środowisko uruchomieniowe może nadal "
 "działać."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Invalid file path."
 msgstr "Nieprawidłowa ścieżka pliku."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "File not found or not readable: %1"
 msgstr "Nie znaleziono pliku lub nie można go odczytać: %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "File size is outside expected range (1 KB – 500 MB)."
 msgstr "Rozmiar pliku wykracza poza oczekiwany zakres (1 KB – 500 MB)."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Cannot open file: %1"
 msgstr "Nie można otworzyć pliku: %1"
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "The selected file does not appear to be a valid JAR/ZIP archive."
 msgstr "Wybrany plik nie wygląda na prawidłowe archiwum JAR/ZIP."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Failed to compute file checksum."
 msgstr "Nie udało się obliczyć sumy kontrolnej pliku."
 
-#: /home/deno/Code/Projects/szafir-flatpak/szafir-host-proxy/src/UpdateController.cpp
+#: src/UpdateController.cpp
 msgid "Failed to import file into component store."
 msgstr "Nie udało się zaimportować pliku do magazynu komponentów."
+
+# Tray tooltip: active host count
+#: src/main.cpp
+msgid "Active hosts: %1"
+msgstr "Aktywne hosty: %1"
+
+# Tray tooltip: no hosts active
+#: src/main.cpp
+msgid "No active hosts"
+msgstr "Brak aktywnych hostów"
+
+# KAboutData short description
+#: src/main.cpp
+msgid "Szafir native messaging proxy and host integrator."
+msgstr "Proxy komunikacji natywnej i integrator hosta aplikacji Szafir."
+
+#: src/main.cpp
+msgid "Enable debug logging."
+msgstr "Włącz rejestrowanie komunikatów debugowania."
+
+# CLI option: --install
+#: src/main.cpp
+msgid "Install native host definitions and wrappers, then exit."
+msgstr ""
+"Zainstaluj definicje oraz skrypty pośredniczące natywnego hosta i zakończ "
+"działanie."
+
+# CLI option: --uninstall
+#: src/main.cpp
+msgid "Remove native host definitions/wrappers and permissions, then exit."
+msgstr ""
+"Usuń definicje/skrypty pośredniczące natywnego hosta oraz uprawnienia i "
+"zakończ działanie."
+
+# CLI option: --dry-run
+#: src/main.cpp
+msgid ""
+"Print planned file/permission operations without performing them. Requires --"
+"install or --uninstall."
+msgstr ""
+"Wyświetl planowane operacje na plikach/uprawnieniach bez ich wykonywania. "
+"Wymaga podania opcji --install lub --uninstall."
+
+#: src/main.cpp
+msgid "Show modeless status window when launched."
+msgstr "Pokaż niemodalne okno statusu podczas uruchamiania."
+
+#: src/main.cpp
+msgid "Show the first-run setup wizard even if all checks already pass."
+msgstr ""
+"Pokaż kreator konfiguracji, nawet jeśli wszystkie kontrole zakończyły się "
+"pomyślnie."
+
+#: src/main.cpp
+msgid "Download enabled components headlessly, then exit (dev builds only)."
+msgstr ""
+"Pobierz włączone komponenty bez interfejsu graficznego, a następnie zakończ "
+"działanie (tylko kompilacje deweloperskie)."
+
+#: src/main.cpp
+msgid "Run with a throwaway XDG environment (dev builds only)."
+msgstr ""
+"Uruchom z tymczasowym środowiskiem XDG (tylko kompilacje deweloperskie)."
+
+#: src/main.cpp
+msgid "Force update checks to always report an update (dev builds only)."
+msgstr ""
+"Wymuś zgłaszanie dostępności aktualizacji przy każdym sprawdzeniu (tylko "
+"kompilacje deweloperskie)."
+
+#: src/main.cpp
+msgid ""
+"Show an empty smart card reader list without querying pcscd (dev builds "
+"only)."
+msgstr ""
+"Pokaż pustą listę czytników kart inteligentnych bez odpytywania pcscd (tylko "
+"kompilacje deweloperskie)."
+
+#: src/main.cpp
+msgid ""
+"Show several mock smart card readers without querying pcscd (dev builds "
+"only)."
+msgstr ""
+"Pokaż kilka testowych czytników kart inteligentnych bez odpytywania pcscd "
+"(tylko kompilacje deweloperskie)."
+
+# CLI option: --mock-browsers
+#: src/main.cpp
+msgid ""
+"Show several mock connected browsers without accepting native messaging "
+"connections (dev builds only)."
+msgstr ""
+"Pokaż kilka testowych połączonych przeglądarek bez akceptowania połączeń "
+"natywnego przesyłania wiadomości (tylko kompilacje deweloperskie)."
+
+#: src/main.cpp
+msgid "Enable smart card and PKCS#11 debug logging (dev builds only)."
+msgstr ""
+"Włącz debugowanie kart inteligentnych i PKCS#11 (tylko kompilacje "
+"deweloperskie)."
+
+# CLI error: conflicting options
+#: src/main.cpp
+msgid "Use either --install or --uninstall, not both."
+msgstr "Użyj opcji --install albo --uninstall, nie obu jednocześnie."
+
+# CLI error: dry-run without action
+#: src/main.cpp
+msgid "--dry-run requires --install or --uninstall."
+msgstr "Opcja --dry-run wymaga podania opcji --install lub --uninstall."
+
+# CLI error: install failed
+#: src/main.cpp
+msgid "Failed to install native host integration."
+msgstr "Nie udało się zainstalować integracji natywnego hosta."
+
+# CLI info: dry-run install done
+#: src/main.cpp
+msgid "Dry-run install complete."
+msgstr "Próbna instalacja zakończona."
+
+# CLI info: install succeeded
+#: src/main.cpp
+msgid "Native host integration installed."
+msgstr "Pomyślnie zainstalowano integrację natywnego hosta."
+
+# CLI error: uninstall failed
+#: src/main.cpp
+msgid "Failed to uninstall native host integration."
+msgstr "Nie udało się odinstalować integracji natywnego hosta."
+
+# CLI info: dry-run uninstall done
+#: src/main.cpp
+msgid "Dry-run uninstall complete."
+msgstr "Próbne odinstalowanie zakończone."
+
+# CLI info: uninstall succeeded
+#: src/main.cpp
+msgid "Native host integration removed."
+msgstr "Pomyślnie usunięto integrację natywnego hosta."
+
+# CLI error: D-Bus session bus unavailable
+#: src/main.cpp
+msgid "Cannot connect to the D-Bus session bus."
+msgstr "Nie można połączyć się z magistralą sesji D-Bus."
+
+# CLI info: already running
+#: src/main.cpp
+msgid "szafir-host-proxy is already running."
+msgstr "Program szafir-host-proxy jest już uruchomiony."
+
+# CLI error: D-Bus object registration failed
+#: src/main.cpp
+msgid "Failed to register D-Bus object."
+msgstr "Nie udało się zarejestrować obiektu D-Bus."
+
+# Warning: auto-install on startup failed
+#: src/main.cpp
+msgid "Failed to fully install native host integration; continuing startup."
+msgstr ""
+"Nie udało się w pełni zainstalować integracji natywnego hosta; uruchamianie "
+"będzie kontynuowane."
+
+#: src/main.cpp
+msgid "SzafirHost update available"
+msgstr "Dostępna aktualizacja SzafirHost"
+
+#: src/main.cpp
+msgid "Version %1 is available. Open the status window to install."
+msgstr "Dostępna jest wersja %1. Otwórz okno statusu, aby ją zainstalować."

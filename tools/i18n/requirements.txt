@@ -1,0 +1,4 @@
+# Dev/CI-only Python dependencies for the i18n checks.
+# The application itself does not use these; they are only needed to run
+# tools/i18n/check-placeholders.py.
+polib>=1.2.0

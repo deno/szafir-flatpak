@@ -1,0 +1,75 @@
+name: i18n
+
+# Check-only: never rewrites PO catalogs. Runs the same scripts developers and
+# release processes use, so the checks are always exercised on pull requests.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  check:
+    name: Translation checks
+    runs-on: ubuntu-latest
+    env:
+      LC_ALL: C
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install gettext and polib
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext python3-pip
+          python3 -m pip install --quiet -r tools/i18n/requirements.txt
+
+      - name: Validate PO syntax
+        run: |
+          failed=0
+          while IFS= read -r -d '' po; do
+            if ! msgfmt --check --check-header --check-format --output-file=/dev/null "$po"; then
+              echo "syntax error: $po" >&2
+              failed=1
+            fi
+          done < <(find szafir-host-proxy/translations -name '*.po' -print0)
+          exit "$failed"
+
+      - name: Validate KI18n placeholders
+        run: |
+          python3 tools/i18n/check-placeholders.py szafir-host-proxy/translations/*/*.po
+
+      - name: Check source/catalog drift
+        run: |
+          ./tools/i18n/update.sh --check
+
+      - name: Check untranslated / fuzzy coverage
+        run: |
+          failed=0
+          for po in szafir-host-proxy/translations/*/*.po; do
+            untranslated="$(msgattrib --no-obsolete --untranslated "$po" | grep -c '^msgid ' || true)"
+            fuzzy="$(msgattrib --no-obsolete --fuzzy "$po" | grep -c '^msgid ' || true)"
+            if [ "$untranslated" -gt 0 ] || [ "$fuzzy" -gt 0 ]; then
+              echo "Coverage gap in $po: untranslated=$untranslated fuzzy=$fuzzy" >&2
+              failed=1
+            fi
+          done
+          exit "$failed"
+
+      - name: Publish translation statistics
+        if: always()
+        run: |
+          {
+            echo '## Translation statistics'
+            echo ''
+            echo '```text'
+            for po in szafir-host-proxy/translations/*/*.po; do
+              echo "== $po =="
+              msgfmt --statistics "$po" || true
+              echo "untranslated: $(msgattrib --no-obsolete --untranslated "$po" | grep -c '^msgid ' || true)"
+              echo "fuzzy: $(msgattrib --no-obsolete --fuzzy "$po" | grep -c '^msgid ' || true)"
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

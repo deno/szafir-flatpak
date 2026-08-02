@@ -9,6 +9,7 @@ set(CMAKE_AUTOMOC ON)
 
 # ----- Build-time configuration ---------------------------------------------
 set(APP_ID "pl.deno.kir.szafirhostproxy" CACHE STRING "Flatpak application ID")
+set(TRANSLATION_DOMAIN "szafir-host-proxy" CACHE STRING "gettext translation domain")
 option(ENABLE_FLATPAK_HOST_ICONS_LOOKUP "Add host icons to path" ON)
 option(SZAFIR_HOST_PROXY_SOURCE_PACKAGE_ONLY "Configure only source packaging (skip build deps/targets)" OFF)
 set(CHROME_EXTENSION_URL "https://chromewebstore.google.com/detail/szafir-sdk-web/gjalhnomhafafofonpdihihjnbafkipc" CACHE STRING "URL to Chrome extension")
@@ -50,6 +51,12 @@ foreach(required_file IN LISTS SZAFIR_HOST_PROXY_REQUIRED_LOCAL_FILES)
         message(FATAL_ERROR "Missing required local source file: ${required_file}. Keep proxy build inputs in szafir-host-proxy/.")
     endif()
 endforeach()
+
+# The Polish UI catalog is the only advertised translation; make its presence
+# explicit at configure time so builds fail fast instead of silently skipping i18n.
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/translations/pl/${TRANSLATION_DOMAIN}.po")
+    message(FATAL_ERROR "Missing Polish translation catalog: translations/pl/${TRANSLATION_DOMAIN}.po")
+endif()
 
 # -----------------------------------------------------------------------------
 

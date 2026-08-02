@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
         qInfo() << "Landlock Phase 1 disabled by environment.";
     }
 
-    KLocalizedString::setApplicationDomain("szafir-host-proxy");
+    KLocalizedString::setApplicationDomain(TRANSLATION_DOMAIN);
 
     KAboutData aboutData(
         QStringLiteral("szafirhostproxy"),

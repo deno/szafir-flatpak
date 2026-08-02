@@ -10,6 +10,14 @@ build-dev/
 szafir-host-proxy/build
 szafir-host-proxy/generated_permissions.h
 
+# gettext / i18n products
+*.mo
+*.po~
+*.po.tmp
+*.pot
+*.pot.tmp
+szafir-host-proxy/translations/**/LC_MESSAGES/
+
 # packit / mock build output
 szafir-host-proxy-*.tar.gz
 *.src.rpm
