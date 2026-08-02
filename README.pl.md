@@ -23,7 +23,10 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
       </picture>
     </td>
     <td width="50%" valign="top">
-      <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" />
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/pl/status-dark.png" />
+        <img src="screenshots/proxy/pl/status.png" alt="Proxy oczekujące na aktywność przeglądarki" />
+      </picture>
     </td>
   </tr>
   <tr>
@@ -68,7 +71,10 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
 ### SzafirHost Proxy
 
 <p>
-  <img src="screenshots/proxy/pl/wizard.png" alt="Kreator konfiguracji SzafirHost Proxy" width="48%" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/pl/wizard-dark.png" />
+    <img src="screenshots/proxy/pl/wizard.png" alt="Kreator konfiguracji SzafirHost Proxy" width="48%" />
+  </picture>
   <img src="screenshots/proxy/pl/components.png" alt="Pobieranie komponentów proxy" width="48%" />
 </p>
 
