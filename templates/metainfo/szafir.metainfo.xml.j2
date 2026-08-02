@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>pl.kir.szafir</id>
-  <name>Szafir</name>
-  <summary>Qualified electronic signature desktop application</summary>
-  <summary xml:lang="pl">Aplikacja desktopowa do kwalifikowanego podpisu elektronicznego</summary>
+  <id>{{ app_id }}</id>
+  <name>{{ name }}</name>
+  <summary>{{ summary_en }}</summary>
+  <summary xml:lang="pl">{{ summary_pl }}</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary=https://www.elektronicznypodpis.pl/</project_license>
   <developer id="pl.com.kir">
@@ -58,22 +58,13 @@
     </release>
   </releases>
   <screenshots>
-    <screenshot type="default" environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/home.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/home.png</image>
+{% for shot in screenshots %}
+    <screenshot{% if shot.default %} type="default"{% endif %}{% if shot.environment %} environment="{{ shot.environment }}"{% endif %}>
+{% for img in shot.images %}
+      <image{% if img.lang %} xml:lang="{{ img.lang }}"{% endif %}>{{ img.url }}</image>
+{% endfor %}
     </screenshot>
-    <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/signing_pades.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/signing_pades.png</image>
-    </screenshot>
-    <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/home-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/home-dark.png</image>
-    </screenshot>
-    <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/en/signing_pades-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/szafirapp/pl/signing_pades-dark.png</image>
-    </screenshot>
+{% endfor %}
   </screenshots>
   <content_rating type="oars-1.1" />
   <requires>

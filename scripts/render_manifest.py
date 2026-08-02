@@ -163,6 +163,68 @@ def _load_releases() -> list[dict[str, Any]]:
 RELEASES: list[dict[str, Any]] = _load_releases()
 APP_VERSION: str = RELEASES[0]["version"]
 
+# Metainfo screenshots — explicitly synchronized with what the READMEs reference
+# (no parsing; keep this list in sync with the READMEs by hand).
+#
+# For each component we list the app screenshot directory, the ordered screens to
+# include, and which screen is the AppStream "default". All light screenshots come
+# first (environment="plasma"), followed by all dark screenshots at the end
+# (environment="plasma:dark"). URLs are pinned to the release version tag so the
+# metainfo only changes when the version does.
+_SCREENSHOT_APPS: dict[str, dict[str, Any]] = {
+    "proxy": {
+        "dir": "proxy",
+        "screens": ["status", "wizard", "components"],
+        "default": "status",
+    },
+    "szafir": {
+        "dir": "szafirapp",
+        "screens": ["home", "signing_pades"],
+        "default": "home",
+    },
+}
+
+
+def _build_screenshots(app: str) -> list[dict[str, Any]]:
+    """Build the AppStream <screenshot> block list for one component.
+
+    Each block lists the English <image> plus a Polish (xml:lang="pl") variant.
+    Light blocks are emitted first (in screen order), then all dark blocks.
+    The designated default screen gets type="default" on its light block.
+    """
+    cfg = _SCREENSHOT_APPS[app]
+    app_dir = cfg["dir"]
+    default_screen = cfg["default"]
+    blocks: list[dict[str, Any]] = []
+    for dark in (False, True):
+        environment = "plasma:dark" if dark else "plasma"
+        ext = "-dark.png" if dark else ".png"
+        for screen in cfg["screens"]:
+            blocks.append(
+                {
+                    "default": (not dark and screen == default_screen),
+                    "environment": environment,
+                    "images": [
+                        {
+                            "lang": None,
+                            "url": (
+                                "https://raw.githubusercontent.com/deno/szafir-flatpak/"
+                                f"v{APP_VERSION}/screenshots/{app_dir}/en/{screen}{ext}"
+                            ),
+                        },
+                        {
+                            "lang": "pl",
+                            "url": (
+                                "https://raw.githubusercontent.com/deno/szafir-flatpak/"
+                                f"v{APP_VERSION}/screenshots/{app_dir}/pl/{screen}{ext}"
+                            ),
+                        },
+                    ],
+                }
+            )
+    return blocks
+
+
 
 def _load_system_components() -> list[dict[str, Any]]:
     data = json.loads(
@@ -229,6 +291,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "releases": RELEASES,
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
+            "screenshots": _build_screenshots("proxy"),
         },
     },
     "proxy.meta.local": {
@@ -240,6 +303,19 @@ VARIANTS: dict[str, dict[str, Any]] = {
             "releases": RELEASES,
             "summary_en": "Browser bridge for Szafir website signing",
             "summary_pl": "Most przeglądarkowy dla podpisu Szafir na stronach WWW",
+            "screenshots": _build_screenshots("proxy"),
+        },
+    },
+    "szafir.meta": {
+        "output": "pl.kir.szafir.metainfo.xml",
+        "template_root": "metainfo",
+        "template": "szafir.metainfo.xml.j2",
+        "context": {
+            "app_id": "pl.kir.szafir",
+            "name": "Szafir",
+            "summary_en": "Qualified electronic signature desktop application",
+            "summary_pl": "Aplikacja desktopowa do kwalifikowanego podpisu elektronicznego",
+            "screenshots": _build_screenshots("szafir"),
         },
     },
     # RPM spec and Nix flake (version + changelog driven by releases.yml)

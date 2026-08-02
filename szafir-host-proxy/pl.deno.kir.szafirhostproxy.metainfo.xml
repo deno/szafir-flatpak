@@ -153,25 +153,29 @@
     <display_length compare="ge">768</display_length>
   </requires>
   <screenshots>
-    <screenshot type="default">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/en/wizard.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/pl/wizard.png</image>
+    <screenshot type="default" environment="plasma">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/status.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/status.png</image>
     </screenshot>
-    <screenshot>
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/en/components.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/pl/components.png</image>
+    <screenshot environment="plasma">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/wizard.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/wizard.png</image>
     </screenshot>
-    <screenshot>
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/en/status.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/pl/status.png</image>
+    <screenshot environment="plasma">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/components.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/components.png</image>
     </screenshot>
-    <screenshot>
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/en/browsers.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/pl/browsers.png</image>
+    <screenshot environment="plasma:dark">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/status-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/status-dark.png</image>
     </screenshot>
-    <screenshot>
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/en/scaling.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/d512cef00373af347da270bbcc83aba4226ca13c/screenshots/proxy/pl/scaling.png</image>
+    <screenshot environment="plasma:dark">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/wizard-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/wizard-dark.png</image>
+    </screenshot>
+    <screenshot environment="plasma:dark">
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/en/components-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.2/screenshots/proxy/pl/components-dark.png</image>
     </screenshot>
   </screenshots>
 </component>

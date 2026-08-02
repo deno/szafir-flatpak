@@ -84,5 +84,13 @@
     <control>pointing</control>
     <display_length compare="ge">768</display_length>
   </requires>
-{% include 'fragments/proxy_screenshots.xml.j2' %}
+  <screenshots>
+{% for shot in screenshots %}
+    <screenshot{% if shot.default %} type="default"{% endif %}{% if shot.environment %} environment="{{ shot.environment }}"{% endif %}>
+{% for img in shot.images %}
+      <image{% if img.lang %} xml:lang="{{ img.lang }}"{% endif %}>{{ img.url }}</image>
+{% endfor %}
+    </screenshot>
+{% endfor %}
+  </screenshots>
 </component>
