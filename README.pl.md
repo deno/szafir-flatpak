@@ -75,7 +75,10 @@ Zainstaluj samodzielną aplikację desktopową oraz proxy do podpisu w przegląd
     <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/pl/wizard-dark.png" />
     <img src="screenshots/proxy/pl/wizard.png" alt="Kreator konfiguracji SzafirHost Proxy" width="48%" />
   </picture>
-  <img src="screenshots/proxy/pl/components.png" alt="Pobieranie komponentów proxy" width="48%" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/proxy/pl/components-dark.png" />
+    <img src="screenshots/proxy/pl/components.png" alt="Pobieranie komponentów proxy" width="48%" />
+  </picture>
 </p>
 
 ## Instalacja
