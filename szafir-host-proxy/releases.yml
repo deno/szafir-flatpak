@@ -1,4 +1,11 @@
 releases:
+  - version: 0.5.2
+    date: 2026-08-01
+    description:
+      en: >-
+        Cosmetic fixes.
+      pl: >-
+        Poprawki kosmetyczne.
   - version: 0.5.1
     date: 2026-08-01
     description:

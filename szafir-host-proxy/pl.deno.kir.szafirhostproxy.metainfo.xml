@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.5.2" date="2026-08-01">
+      <description>
+        <p>Cosmetic fixes.</p>
+        <p xml:lang="pl">Poprawki kosmetyczne.</p>
+      </description>
+    </release>
     <release version="0.5.1" date="2026-08-01">
       <description>
         <p>Documentation and packaging improvements.</p>
