@@ -7,7 +7,7 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      version = "0.5.3";
+      version = "0.5.4";
 
       mkProxy = { dev }: pkgs.stdenv.mkDerivation {
         pname = "szafir-host-proxy";

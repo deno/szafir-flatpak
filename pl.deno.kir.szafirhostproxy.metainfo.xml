@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.5.4" date="2026-08-03">
+      <description>
+        <p>Upgraded the bundled Szafir desktop app to 2.0.0 build 706.</p>
+        <p xml:lang="pl">Zaktualizowano dołączoną aplikację desktopową Szafir do wersji 2.0.0 build 706.</p>
+      </description>
+    </release>
     <release version="0.5.3" date="2026-08-02">
       <description>
         <p>Improved Polish localization with a reproducible translation catalog, placeholder checks, and CI validation. Refreshed AppStream metadata and verified translation packaging.</p>
@@ -160,28 +166,28 @@
   </requires>
   <screenshots>
     <screenshot type="default" environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/status.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/status.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/status.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/status.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/wizard.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/wizard.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/wizard.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/wizard.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/components.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/components.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/components.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/components.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/status-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/status-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/status-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/status-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/wizard-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/wizard-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/wizard-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/wizard-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/en/components-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.3/screenshots/proxy/pl/components-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/components-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/components-dark.png</image>
     </screenshot>
   </screenshots>
 </component>

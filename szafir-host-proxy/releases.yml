@@ -1,4 +1,13 @@
 releases:
+  - version: 0.5.4
+    date: 2026-08-03
+    description:
+      en: >-
+        Upgraded the bundled Szafir desktop app to 2.0.0 build 706.
+      pl: >-
+        Zaktualizowano dołączoną aplikację desktopową Szafir do wersji
+        2.0.0 build 706.
+
   - version: 0.5.3
     date: 2026-08-02
     description:
