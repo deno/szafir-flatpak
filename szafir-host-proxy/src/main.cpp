@@ -29,6 +29,7 @@
 #include "SelfTest.h"
 #include "ComponentDownloader.h"
 #include "SmartCardMonitor.h"
+#include "SmartCardNotifier.h"
 #include "UpdateController.h"
 #include "ThemeController.h"
 
@@ -259,6 +260,9 @@ int main(int argc, char *argv[])
     const QCommandLineOption debugSmartCardsOpt(
         QStringLiteral("debug-smart-cards"),
         i18n("Enable smart card and PKCS#11 debug logging (dev builds only)."));
+    const QCommandLineOption simulateCardsOpt(
+        QStringLiteral("simulate-card-events"),
+        i18n("Simulate smart card insertion/removal cycles without querying pcscd (dev builds only)."));
 #endif
 
     parser.addOption(debugOpt);
@@ -275,14 +279,17 @@ int main(int argc, char *argv[])
     parser.addOption(mockReadersOpt);
     parser.addOption(mockBrowsersOpt);
     parser.addOption(debugSmartCardsOpt);
+    parser.addOption(simulateCardsOpt);
 #endif
 
     parser.process(app);
     aboutData.processCommandLine(&parser);
 
     bool debugSmartCards = false;
+    bool simulateCards = false;
 #ifdef SZAFIR_DEV_BUILD
     debugSmartCards = parser.isSet(debugSmartCardsOpt);
+    simulateCards = parser.isSet(simulateCardsOpt);
 #endif
 
     if (parser.isSet(debugOpt) || qgetenv("SZAFIR_DEBUG") == "1")
@@ -451,7 +458,15 @@ int main(int argc, char *argv[])
     else if (parser.isSet(mockReadersOpt))
         scMode = SmartCardMonitor::Mode::Mock;
 #endif
-    auto *smartCardMonitor = new SmartCardMonitor(scMode, componentDownloader, &app, debugSmartCards);
+    auto *smartCardMonitor = new SmartCardMonitor(scMode, componentDownloader, &app, debugSmartCards, simulateCards);
+
+    // Desktop notifications for smart card hotplug events; independent of the
+    // tray item so events are reported even before the tray is created.
+    auto *smartCardNotifier = new SmartCardNotifier(&app);
+    QObject::connect(smartCardMonitor, &SmartCardMonitor::cardInserted,
+                     smartCardNotifier, &SmartCardNotifier::cardInserted);
+    QObject::connect(smartCardMonitor, &SmartCardMonitor::cardRemoved,
+                     smartCardNotifier, &SmartCardNotifier::cardRemoved);
 
     // Applies the persisted color scheme before any window is shown.
     auto *themeController = new ThemeController(&app);

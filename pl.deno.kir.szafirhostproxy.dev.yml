@@ -12,10 +12,11 @@ finish-args:
   - --socket=wayland
   - --share=ipc
   - --device=dri
-  # D-Bus name ownership and talk permissions for the proxy's well-known D-Bus service name
-  # and system tray integration.
+  # D-Bus name ownership and talk permissions for the proxy's well-known D-Bus service name,
+  # system tray integration, and desktop notifications for smart card hotplug events.
   - --own-name=pl.deno.kir.szafirhostproxy
   - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.freedesktop.Notifications
   # Browser configuration directories for native messaging host installation. Access required
   # during Landlock Phase 1 (limitOverrides) to install the native messaging manifest and
   # wrapper; dropped in Phase 2 (dropBrowserAccess) after installation completes.

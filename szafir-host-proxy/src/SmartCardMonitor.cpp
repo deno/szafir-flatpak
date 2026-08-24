@@ -346,7 +346,8 @@ QVariantList mockReaders()
 SmartCardMonitor::SmartCardMonitor(Mode mode,
                                    ComponentDownloader *componentDownloader,
                                    QObject *parent,
-                                   bool debugLogging)
+                                   bool debugLogging,
+                                   bool simulateHotplug)
     : QObject(parent)
     , m_mode(mode)
     , m_componentDownloader(componentDownloader)
@@ -371,6 +372,24 @@ SmartCardMonitor::SmartCardMonitor(Mode mode,
         debugLog(QStringLiteral("started in mock mode with synthetic readers"));
         const QVariantList readers = mockReaders();
         updateState(true, true, readers);
+        return;
+    }
+
+    if (simulateHotplug) {
+        // Dev-only synthetic hotplug cycle: alternates card presence for a
+        // single fake reader through updateState so notification wiring can be
+        // exercised without physical hardware. Real polling stays disabled.
+        m_timer.stop();
+        connect(&m_hotplugSimTimer, &QTimer::timeout, this, [this]() {
+            m_hotplugSimPresent = !m_hotplugSimPresent;
+            const QVariantMap reader =
+                readerEntry(QStringLiteral("Szafir simulated reader"), m_hotplugSimPresent);
+            updateState(true, m_hotplugSimPresent, {reader});
+        });
+        m_hotplugSimTimer.setInterval(4000);
+        updateState(true, false, {});
+        m_hotplugSimTimer.start();
+        debugLog(QStringLiteral("started in live mode with simulated card events"));
         return;
     }
 
@@ -545,6 +564,34 @@ void SmartCardMonitor::updateState(bool available, bool cardPresent, const QVari
 {
     if (m_available == available && m_cardPresent == cardPresent && m_readers == readers)
         return;
+
+    // Report per-reader card insertions/removals only between two consecutive
+    // states with a working PC/SC service: the first state after startup or
+    // after service recovery establishes a silent baseline, and losing pcscd
+    // must not be reported as cards being removed.
+    if (m_available && available) {
+        QHash<QString, bool> previous;
+        for (const QVariant &value : m_readers) {
+            const QVariantMap reader = value.toMap();
+            previous.insert(reader.value(QStringLiteral("name")).toString(),
+                            reader.value(QStringLiteral("present")).toBool());
+        }
+        QHash<QString, bool> next;
+        for (const QVariant &value : readers) {
+            const QVariantMap reader = value.toMap();
+            next.insert(reader.value(QStringLiteral("name")).toString(),
+                        reader.value(QStringLiteral("present")).toBool());
+        }
+        for (auto it = next.constBegin(); it != next.constEnd(); ++it) {
+            if (it.value() && !previous.value(it.key(), false))
+                emit cardInserted(it.key());
+        }
+        for (auto it = previous.constBegin(); it != previous.constEnd(); ++it) {
+            if (it.value() && !next.value(it.key(), false))
+                emit cardRemoved(it.key());
+        }
+    }
+
     m_available = available;
     m_cardPresent = cardPresent;
     m_readers = readers;

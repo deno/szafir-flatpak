@@ -26,7 +26,8 @@ public:
     explicit SmartCardMonitor(Mode mode = Mode::Live,
                               ComponentDownloader *componentDownloader = nullptr,
                               QObject *parent = nullptr,
-                              bool debugLogging = false);
+                              bool debugLogging = false,
+                              bool simulateHotplug = false);
     ~SmartCardMonitor() override;
 
     bool available() const { return m_available; }
@@ -41,6 +42,12 @@ public:
 
 Q_SIGNALS:
     void statusChanged();
+
+    // Card appeared in / disappeared from a reader while the PC/SC service was
+    // up. Not emitted for the baseline state established at startup or after
+    // the PC/SC service recovers.
+    void cardInserted(const QString &readerName);
+    void cardRemoved(const QString &readerName);
 
 private:
     bool ensureContext();
@@ -66,6 +73,8 @@ private:
 
     SCARDCONTEXT m_context = 0;
     QTimer m_timer;
+    QTimer m_hotplugSimTimer;
+    bool m_hotplugSimPresent = false;
     bool m_available = false;
     bool m_cardPresent = false;
     QVariantList m_readers;

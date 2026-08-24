@@ -132,6 +132,8 @@ set(SZAFIR_HOST_PROXY_SOURCES
     src/SecureNetwork.h
     src/SmartCardMonitor.h
     src/SmartCardMonitor.cpp
+    src/SmartCardNotifier.h
+    src/SmartCardNotifier.cpp
     src/UpdateController.h
     src/UpdateController.cpp
     src/ThemeController.h

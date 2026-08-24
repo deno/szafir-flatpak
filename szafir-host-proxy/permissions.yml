@@ -142,11 +142,13 @@ permission_groups:
   dbus_names:
     description: >-
       D-Bus name ownership and talk permissions for the proxy's well-known
-      D-Bus service name and system tray integration.
+      D-Bus service name, system tray integration, and desktop notifications
+      for smart card hotplug events.
       [fe]Flatpak D-Bus names — no filesystem path; Landlock does not apply.[/fe]
     flatpak_args:
       - {arg: "--own-name=pl.deno.kir.szafirhostproxy"}
       - {arg: "--talk-name=org.kde.StatusNotifierWatcher"}
+      - {arg: "--talk-name=org.freedesktop.Notifications"}
 
   # Browser filesystem permissions
 

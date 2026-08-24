@@ -680,85 +680,6 @@ msgstr "Komponent systemowy środowiska uruchomieniowego"
 msgid "SHA256 (source):"
 msgstr "SHA256 (źródła):"
 
-#: src/MainWindow.cpp
-msgid "KIR SzafirHost"
-msgstr "KIR SzafirHost"
-
-#: src/MainWindow.cpp
-msgid ""
-"A secure Native Messaging bridge between web browsers and qualified "
-"electronic signature smart cards."
-msgstr ""
-"Bezpieczny most Native Messaging między przeglądarkami internetowymi a "
-"kartami inteligentnymi używanymi do kwalifikowanego podpisu elektronicznego."
-
-#: src/MainWindow.cpp
-msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
-msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
-
-#: src/MainWindow.cpp
-msgid "Krajowa Izba Rozliczeniowa S.A."
-msgstr "Krajowa Izba Rozliczeniowa S.A."
-
-#: src/MainWindow.cpp
-msgid "Developer and Trust Service Provider"
-msgstr "Twórca i dostawca usług zaufania"
-
-#: src/MainWindow.cpp
-msgid "Szafir Technical Support"
-msgstr "Wsparcie techniczne Szafir"
-
-#: src/MainWindow.cpp
-msgid "Helpdesk and Troubleshooting"
-msgstr "Pomoc i rozwiązywanie problemów"
-
-#: src/UpdateController.cpp
-msgid ""
-"Could not find SzafirHost download link on the website. The site layout may "
-"have changed. You can install from a local file instead."
-msgstr ""
-"Nie udało się znaleźć odnośnika do pobrania SzafirHost na stronie "
-"internetowej. Układ strony mógł się zmienić. Zamiast tego możesz "
-"zainstalować program z pliku lokalnego."
-
-#: src/UpdateController.cpp
-msgid "Download failed: %1"
-msgstr "Pobieranie nie powiodło się: %1"
-
-#: src/UpdateController.cpp
-msgid "Installation failed. The previous runtime may still be usable."
-msgstr ""
-"Instalacja nie powiodła się. Poprzednie środowisko uruchomieniowe może nadal "
-"działać."
-
-#: src/UpdateController.cpp
-msgid "Invalid file path."
-msgstr "Nieprawidłowa ścieżka pliku."
-
-#: src/UpdateController.cpp
-msgid "File not found or not readable: %1"
-msgstr "Nie znaleziono pliku lub nie można go odczytać: %1"
-
-#: src/UpdateController.cpp
-msgid "File size is outside expected range (1 KB – 500 MB)."
-msgstr "Rozmiar pliku wykracza poza oczekiwany zakres (1 KB – 500 MB)."
-
-#: src/UpdateController.cpp
-msgid "Cannot open file: %1"
-msgstr "Nie można otworzyć pliku: %1"
-
-#: src/UpdateController.cpp
-msgid "The selected file does not appear to be a valid JAR/ZIP archive."
-msgstr "Wybrany plik nie wygląda na prawidłowe archiwum JAR/ZIP."
-
-#: src/UpdateController.cpp
-msgid "Failed to compute file checksum."
-msgstr "Nie udało się obliczyć sumy kontrolnej pliku."
-
-#: src/UpdateController.cpp
-msgid "Failed to import file into component store."
-msgstr "Nie udało się zaimportować pliku do magazynu komponentów."
-
 # Tray tooltip: active host count
 #: src/main.cpp
 msgid "Active hosts: %1"
@@ -859,6 +780,14 @@ msgstr ""
 "Włącz debugowanie kart inteligentnych i PKCS#11 (tylko kompilacje "
 "deweloperskie)."
 
+#: src/main.cpp
+msgid ""
+"Simulate smart card insertion/removal cycles without querying pcscd (dev "
+"builds only)."
+msgstr ""
+"Symuluj cykle wkładania i wyjmowania karty inteligentnej bez odpytywania "
+"pcscd (tylko kompilacje deweloperskie)."
+
 # CLI error: conflicting options
 #: src/main.cpp
 msgid "Use either --install or --uninstall, not both."
@@ -928,3 +857,94 @@ msgstr "Dostępna aktualizacja SzafirHost"
 #: src/main.cpp
 msgid "Version %1 is available. Open the status window to install."
 msgstr "Dostępna jest wersja %1. Otwórz okno statusu, aby ją zainstalować."
+
+#: src/MainWindow.cpp
+msgid "KIR SzafirHost"
+msgstr "KIR SzafirHost"
+
+#: src/MainWindow.cpp
+msgid ""
+"A secure Native Messaging bridge between web browsers and qualified "
+"electronic signature smart cards."
+msgstr ""
+"Bezpieczny most Native Messaging między przeglądarkami internetowymi a "
+"kartami inteligentnymi używanymi do kwalifikowanego podpisu elektronicznego."
+
+#: src/MainWindow.cpp
+msgid "© 2026 Krajowa Izba Rozliczeniowa S.A."
+msgstr "© 2026 Krajowa Izba Rozliczeniowa S.A."
+
+#: src/MainWindow.cpp
+msgid "Krajowa Izba Rozliczeniowa S.A."
+msgstr "Krajowa Izba Rozliczeniowa S.A."
+
+#: src/MainWindow.cpp
+msgid "Developer and Trust Service Provider"
+msgstr "Twórca i dostawca usług zaufania"
+
+#: src/MainWindow.cpp
+msgid "Szafir Technical Support"
+msgstr "Wsparcie techniczne Szafir"
+
+#: src/MainWindow.cpp
+msgid "Helpdesk and Troubleshooting"
+msgstr "Pomoc i rozwiązywanie problemów"
+
+#: src/SmartCardNotifier.cpp
+msgid "Smart card inserted"
+msgstr "Włożono kartę inteligentną"
+
+#: src/SmartCardNotifier.cpp
+msgid "Reader: %1"
+msgstr "Czytnik: %1"
+
+#: src/SmartCardNotifier.cpp
+msgid "Smart card removed"
+msgstr "Wyjęto kartę inteligentną"
+
+#: src/UpdateController.cpp
+msgid ""
+"Could not find SzafirHost download link on the website. The site layout may "
+"have changed. You can install from a local file instead."
+msgstr ""
+"Nie udało się znaleźć odnośnika do pobrania SzafirHost na stronie "
+"internetowej. Układ strony mógł się zmienić. Zamiast tego możesz "
+"zainstalować program z pliku lokalnego."
+
+#: src/UpdateController.cpp
+msgid "Download failed: %1"
+msgstr "Pobieranie nie powiodło się: %1"
+
+#: src/UpdateController.cpp
+msgid "Installation failed. The previous runtime may still be usable."
+msgstr ""
+"Instalacja nie powiodła się. Poprzednie środowisko uruchomieniowe może nadal "
+"działać."
+
+#: src/UpdateController.cpp
+msgid "Invalid file path."
+msgstr "Nieprawidłowa ścieżka pliku."
+
+#: src/UpdateController.cpp
+msgid "File not found or not readable: %1"
+msgstr "Nie znaleziono pliku lub nie można go odczytać: %1"
+
+#: src/UpdateController.cpp
+msgid "File size is outside expected range (1 KB – 500 MB)."
+msgstr "Rozmiar pliku wykracza poza oczekiwany zakres (1 KB – 500 MB)."
+
+#: src/UpdateController.cpp
+msgid "Cannot open file: %1"
+msgstr "Nie można otworzyć pliku: %1"
+
+#: src/UpdateController.cpp
+msgid "The selected file does not appear to be a valid JAR/ZIP archive."
+msgstr "Wybrany plik nie wygląda na prawidłowe archiwum JAR/ZIP."
+
+#: src/UpdateController.cpp
+msgid "Failed to compute file checksum."
+msgstr "Nie udało się obliczyć sumy kontrolnej pliku."
+
+#: src/UpdateController.cpp
+msgid "Failed to import file into component store."
+msgstr "Nie udało się zaimportować pliku do magazynu komponentów."

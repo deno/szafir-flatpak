@@ -6,6 +6,7 @@ repo
 .logs
 result
 result-dev
+result-rel
 build-dev/
 szafir-host-proxy/build
 szafir-host-proxy/generated_permissions.h
