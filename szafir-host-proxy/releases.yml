@@ -1,4 +1,12 @@
 releases:
+  - version: 0.5.5
+    date: 2026-09-13
+    description:
+      en: >-
+        Desktop notifications on smart card hotplug events.
+      pl: >-
+        Powiadomienia o włożeniu lub wyjęciu karty.
+
   - version: 0.5.4
     date: 2026-08-03
     description:

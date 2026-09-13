@@ -10,6 +10,12 @@
     <name>deno</name>
   </developer>
   <releases>
+    <release version="0.5.5" date="2026-09-13">
+      <description>
+        <p>Desktop notifications on smart card hotplug events.</p>
+        <p xml:lang="pl">Powiadomienia o włożeniu lub wyjęciu karty.</p>
+      </description>
+    </release>
     <release version="0.5.4" date="2026-08-03">
       <description>
         <p>Upgraded the bundled Szafir desktop app to 2.0.0 build 706.</p>
@@ -166,28 +172,28 @@
   </requires>
   <screenshots>
     <screenshot type="default" environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/status.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/status.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/status.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/status.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/wizard.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/wizard.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/wizard.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/wizard.png</image>
     </screenshot>
     <screenshot environment="plasma">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/components.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/components.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/components.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/components.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/status-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/status-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/status-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/status-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/wizard-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/wizard-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/wizard-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/wizard-dark.png</image>
     </screenshot>
     <screenshot environment="plasma:dark">
-      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/en/components-dark.png</image>
-      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.4/screenshots/proxy/pl/components-dark.png</image>
+      <image>https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/en/components-dark.png</image>
+      <image xml:lang="pl">https://raw.githubusercontent.com/deno/szafir-flatpak/v0.5.5/screenshots/proxy/pl/components-dark.png</image>
     </screenshot>
   </screenshots>
 </component>

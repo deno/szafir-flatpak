@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.4
+Version:        0.5.5
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,6 +76,9 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Sun Sep 13 2026 deno <deno@users.noreply.github.com> - 0.5.5-1
+- Desktop notifications on smart card hotplug events.
+
 * Mon Aug 03 2026 deno <deno@users.noreply.github.com> - 0.5.4-1
 - Upgraded the bundled Szafir desktop app to 2.0.0 build 706.
 
