@@ -8,6 +8,7 @@
 # OUTDIR defaults to <app>/translations/; tools/i18n/update.sh sets OUTDIR to a
 # temporary directory so the template is never committed.
 set -euo pipefail
+export LC_ALL=C
 
 SRCDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTDIR="${OUTDIR:-$SRCDIR/translations}"

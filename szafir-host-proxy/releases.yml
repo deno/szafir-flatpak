@@ -1,4 +1,12 @@
 releases:
+  - version: 0.5.6
+    date: 2026-09-16
+    description:
+      en: >-
+        Fix translation catalog drift and header validation.
+      pl: >-
+        Poprawka rozbieżności katalogu tłumaczeń i walidacji nagłówka.
+
   - version: 0.5.5
     date: 2026-09-13
     description:

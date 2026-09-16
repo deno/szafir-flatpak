@@ -8,6 +8,7 @@
 # stale references, omitted QML). Translation completeness (untranslated/fuzzy) is a
 # separate coverage step in CI.
 set -euo pipefail
+export LC_ALL=C
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP="$ROOT/szafir-host-proxy"
@@ -38,10 +39,11 @@ trap 'rm -rf "$TMP"' EXIT
 OUTDIR="$TMP" "$MESSAGES_SH"
 POT="$TMP/$DOMAIN.pot"
 
-# Timestamps churn on every extraction; strip them so drift comparison and
-# re-running update mode are byte-deterministic.
+# Timestamps churn on every extraction; strip POT-Creation-Date and normalize
+# PO-Revision-Date so drift comparison and re-running update mode are byte-deterministic
+# while keeping msgfmt --check-header satisfied.
 strip_header_timestamps() {
-    sed -E '/^"(POT-Creation-Date|PO-Revision-Date):/d' "$1"
+    sed -E '/^"POT-Creation-Date:/d; s/^"PO-Revision-Date: .*/"PO-Revision-Date: \\n"/' "$1"
 }
 
 mapfile -t POS < <(find "$TRANSLATIONS" -name '*.po')
