@@ -72,6 +72,7 @@ modules:
         path: szafir_icon.svg
       - type: extra-data
         filename: szafir_Linux.zip
-        url: https://storage.googleapis.com/cdn.elektronicznypodpis.pl/Szafir/szafir_Linux.zip?generation=1781084677299060
-        sha256: 6a3eab0a048b776dda719b1db786221ca44bbfff57347479aca8402942305bce
-        size: 94035042
+        # Upstream: https://www.elektronicznypodpis.pl/aplikacje-i-sterowniki
+        url: https://storage.googleapis.com/cdn.elektronicznypodpis.pl/Szafir/Szafir_Linux.zip?generation=1789718011936999
+        sha256: a5f325288020ced7703f183fdc1fbaf38a33575c190d88a0486eb854cb6f6ad5
+        size: 48674260
