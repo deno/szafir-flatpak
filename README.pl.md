@@ -2,7 +2,7 @@
 
 # Repozytorium Flatpak Szafir
 
-[English](README.md) | [Polski](README.pl.md)
+[English](README.en.md) | [Polski](README.pl.md)
 
 Społecznościowe pakiety Flatpak dla środowiska Szafir na Linuksie.
 
