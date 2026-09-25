@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.6
+Version:        0.5.7
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,6 +76,9 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Fri Sep 25 2026 deno <deno@users.noreply.github.com> - 0.5.7-1
+- Upgraded Szafir desktop app to 2.0.0 build 708.
+
 * Wed Sep 16 2026 deno <deno@users.noreply.github.com> - 0.5.6-1
 - Fix translation catalog drift and header validation.
 
