@@ -279,9 +279,10 @@ permission_groups:
   native_xdg_dirs:
     description: >-
       The proxy's own XDG subdirectories used in non-Flatpak (native/Nix) builds
-      where XDG_DATA_HOME, XDG_CACHE_HOME, and XDG_CONFIG_HOME point to the real
-      ~/.local/share, ~/.cache, and ~/.config. In Flatpak these paths do not exist
-      (XDG is redirected to ~/.var/app/<APP_ID>) so the rules are inert.
+      where XDG_DATA_HOME, XDG_CACHE_HOME, XDG_CONFIG_HOME, and XDG_STATE_HOME
+      point to the real ~/.local/share, ~/.cache, ~/.config, and ~/.local/state.
+      In Flatpak these paths do not exist (XDG is redirected to
+      ~/.var/app/<APP_ID>) so the rules are inert.
       [fe]No Flatpak --filesystem entry needed; these are only relevant outside
       the Flatpak sandbox.[/fe]
     paths:
@@ -297,7 +298,19 @@ permission_groups:
         type: dir
         landlock_access: make_subdir
         flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.local
+        type: dir
+        landlock_access: make_subdir
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.local/state
+        type: dir
+        landlock_access: make_subdir
+        flatpak_note: "not applicable inside Flatpak"
       - path: ~/.local/share/szafir-host-proxy
+        type: dir
+        landlock_access: read_write_create
+        flatpak_note: "not applicable inside Flatpak"
+      - path: ~/.local/state/szafir-host-proxy
         type: dir
         landlock_access: read_write_create
         flatpak_note: "not applicable inside Flatpak"

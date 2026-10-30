@@ -87,15 +87,15 @@ inline std::filesystem::path componentDownloadPath()
 }
 
 // Returns the path to the JSON file where state of downloaded and verified
-// components is kept. Lives inside XDG_DATA_HOME.
+// components is kept. Lives inside XDG_STATE_HOME.
 inline std::filesystem::path componentStatePath()
 {
-    const QString dataHomeEnv = qEnvironmentVariable("XDG_DATA_HOME");
-    const std::filesystem::path dataHome = dataHomeEnv.isEmpty()
-        ? PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation))
-        : PathUtils::toFsPath(dataHomeEnv);
+    const QString stateHomeEnv = qEnvironmentVariable("XDG_STATE_HOME");
+    const std::filesystem::path stateHome = stateHomeEnv.isEmpty()
+        ? PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericStateLocation))
+        : PathUtils::toFsPath(stateHomeEnv);
 
-    return dataHome / "szafir-host-proxy" / "components-state.json";
+    return stateHome / "szafir-host-proxy" / "components-state.json";
 }
 
 // Returns the path to the external providers XML consumed by SzafirHost.
