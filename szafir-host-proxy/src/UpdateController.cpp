@@ -8,7 +8,9 @@
 #include "LandlockEnv.h"
 #include "LandlockSandbox.h"
 
+#include <KConfigGroup>
 #include <KLocalizedString>
+#include <KSharedConfig>
 
 #include <QCryptographicHash>
 #include <QDateTime>
@@ -16,31 +18,16 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QRegularExpression>
-#include <QSaveFile>
-#include <QStandardPaths>
 #include <QVersionNumber>
-
-#include <filesystem>
 
 namespace {
 
 constexpr int kInstallerTimeoutMs = 5 * 60 * 1000;
-
-std::filesystem::path updateSettingsPath()
-{
-    const QString configHomeEnv = qEnvironmentVariable("XDG_CONFIG_HOME");
-    const std::filesystem::path configHome = configHomeEnv.isEmpty()
-        ? PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-        : PathUtils::toFsPath(configHomeEnv);
-    return configHome / "szafir-host-proxy" / "update-settings.json";
-}
 
 } // namespace
 
@@ -96,36 +83,25 @@ void UpdateController::setError(const QString &msg)
 
 void UpdateController::loadSettings()
 {
-    QFile f(PathUtils::toQString(updateSettingsPath()));
-    if (!f.open(QIODevice::ReadOnly))
-        return;
-
-    QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
-    m_autoUpdate = obj[QStringLiteral("autoUpdate")].toBool(false);
-    m_allowDowngrades = obj[QStringLiteral("allowDowngrades")].toBool(true);
-    m_lastCheckTime = obj[QStringLiteral("lastCheckTime")].toString();
-    m_lastDeclinedUrlHash = obj[QStringLiteral("lastDeclinedUrlHash")].toString();
-    m_lastDeclinedLibUrlHash = obj[QStringLiteral("lastDeclinedLibUrlHash")].toString();
-    m_checkIntervalHours = obj[QStringLiteral("checkIntervalHours")].toInt(24);
+    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Updates"));
+    m_autoUpdate = group.readEntry(QStringLiteral("AutoUpdate"), false);
+    m_allowDowngrades = group.readEntry(QStringLiteral("AllowDowngrades"), true);
+    m_lastCheckTime = group.readEntry(QStringLiteral("LastCheckTime"), QString());
+    m_lastDeclinedUrlHash = group.readEntry(QStringLiteral("LastDeclinedUrlHash"), QString());
+    m_lastDeclinedLibUrlHash = group.readEntry(QStringLiteral("LastDeclinedLibUrlHash"), QString());
+    m_checkIntervalHours = group.readEntry(QStringLiteral("CheckIntervalHours"), 24);
 }
 
 void UpdateController::saveSettings()
 {
-    QJsonObject obj;
-    obj[QStringLiteral("autoUpdate")] = m_autoUpdate;
-    obj[QStringLiteral("allowDowngrades")] = m_allowDowngrades;
-    obj[QStringLiteral("lastCheckTime")] = m_lastCheckTime;
-    obj[QStringLiteral("lastDeclinedUrlHash")] = m_lastDeclinedUrlHash;
-    obj[QStringLiteral("lastDeclinedLibUrlHash")] = m_lastDeclinedLibUrlHash;
-    obj[QStringLiteral("checkIntervalHours")] = m_checkIntervalHours;
-
-    std::error_code ec;
-    std::filesystem::create_directories(updateSettingsPath().parent_path(), ec);
-    QSaveFile f(PathUtils::toQString(updateSettingsPath()));
-    if (f.open(QIODevice::WriteOnly)) {
-        f.write(QJsonDocument(obj).toJson());
-        f.commit();
-    }
+    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Updates"));
+    group.writeEntry(QStringLiteral("AutoUpdate"), m_autoUpdate);
+    group.writeEntry(QStringLiteral("AllowDowngrades"), m_allowDowngrades);
+    group.writeEntry(QStringLiteral("LastCheckTime"), m_lastCheckTime);
+    group.writeEntry(QStringLiteral("LastDeclinedUrlHash"), m_lastDeclinedUrlHash);
+    group.writeEntry(QStringLiteral("LastDeclinedLibUrlHash"), m_lastDeclinedLibUrlHash);
+    group.writeEntry(QStringLiteral("CheckIntervalHours"), m_checkIntervalHours);
+    group.sync();
 }
 
 QString UpdateController::installedVersion() const

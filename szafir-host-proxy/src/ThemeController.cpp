@@ -1,29 +1,36 @@
 #include "ThemeController.h"
-#include "PathUtils.h"
 
 #include <QAbstractItemModel>
-#include <QFile>
 #include <QGuiApplication>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QModelIndex>
-#include <QSaveFile>
-#include <QStandardPaths>
 #include <QStyleHints>
 
 #include <KColorSchemeManager>
-
-#include <filesystem>
+#include <KConfigGroup>
+#include <KSharedConfig>
 
 namespace {
 
-std::filesystem::path themeSettingsPath()
+QString themeName(ThemeController::Theme theme)
 {
-    const QString configHomeEnv = qEnvironmentVariable("XDG_CONFIG_HOME");
-    const std::filesystem::path configHome = configHomeEnv.isEmpty()
-        ? PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-        : PathUtils::toFsPath(configHomeEnv);
-    return configHome / "szafir-host-proxy" / "theme-settings.json";
+    switch (theme) {
+    case ThemeController::Light:
+        return QStringLiteral("Light");
+    case ThemeController::Dark:
+        return QStringLiteral("Dark");
+    case ThemeController::System:
+        break;
+    }
+    return QStringLiteral("System");
+}
+
+ThemeController::Theme themeFromName(const QString &name)
+{
+    if (name == QLatin1String("Light"))
+        return ThemeController::Light;
+    if (name == QLatin1String("Dark"))
+        return ThemeController::Dark;
+    return ThemeController::System;
 }
 
 } // namespace
@@ -31,7 +38,7 @@ std::filesystem::path themeSettingsPath()
 ThemeController::ThemeController(QObject *parent)
     : QObject(parent)
 {
-    // We persist the choice ourselves in theme-settings.json.
+    // We persist the choice ourselves in the app config.
     KColorSchemeManager::instance()->setAutosaveChanges(false);
     loadSettings();
     applyTheme();
@@ -87,24 +94,13 @@ void ThemeController::applyTheme()
 
 void ThemeController::loadSettings()
 {
-    QFile f(PathUtils::toQString(themeSettingsPath()));
-    if (!f.open(QIODevice::ReadOnly))
-        return;
-
-    const QJsonObject obj = QJsonDocument::fromJson(f.readAll()).object();
-    m_theme = static_cast<Theme>(obj[QStringLiteral("theme")].toInt(System));
+    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Appearance"));
+    m_theme = themeFromName(group.readEntry(QStringLiteral("Theme"), QStringLiteral("System")));
 }
 
 void ThemeController::saveSettings()
 {
-    QJsonObject obj;
-    obj[QStringLiteral("theme")] = static_cast<int>(m_theme);
-
-    std::error_code ec;
-    std::filesystem::create_directories(themeSettingsPath().parent_path(), ec);
-    QSaveFile f(PathUtils::toQString(themeSettingsPath()));
-    if (f.open(QIODevice::WriteOnly)) {
-        f.write(QJsonDocument(obj).toJson());
-        f.commit();
-    }
+    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Appearance"));
+    group.writeEntry(QStringLiteral("Theme"), themeName(m_theme));
+    group.sync();
 }
