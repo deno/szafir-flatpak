@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.7
+Version:        0.5.8
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,6 +76,9 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Fri Oct 30 2026 deno <deno@users.noreply.github.com> - 0.5.8-1
+- Move scaling options from the tray icon to the main menu. Smart card notifications can now be toggled off. Refactor and simplify app settings.
+
 * Fri Sep 25 2026 deno <deno@users.noreply.github.com> - 0.5.7-1
 - Upgraded Szafir desktop app to 2.0.0 build 708.
 

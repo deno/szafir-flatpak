@@ -1,4 +1,16 @@
 releases:
+  - version: 0.5.8
+    date: 2026-10-30
+    description:
+      en: >-
+        Move scaling options from the tray icon to the main menu. Smart card
+        notifications can now be toggled off. Refactor and simplify app
+        settings.
+      pl: >-
+        Przeniesiono opcje skalowania z ikony w zasobniku do menu głównego.
+        Powiadomienia o kartach kryptograficznych można teraz wyłączyć.
+        Uproszczono i uporządkowano ustawienia aplikacji.
+
   - version: 0.5.7
     date: 2026-09-25
     description:
