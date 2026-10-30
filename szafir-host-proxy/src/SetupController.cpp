@@ -3,7 +3,9 @@
 #include "ComponentDownloader.h"
 
 #include <QDebug>
-#include <QFile>
+
+#include <KConfigGroup>
+#include <KSharedConfig>
 
 SetupController::SetupController(QObject *parent)
     : QObject(parent)
@@ -61,17 +63,10 @@ void SetupController::advance()
 
 void SetupController::acceptLicense()
 {
-    const std::filesystem::path markerPath = licenseAcceptedMarkerPath();
-    const std::filesystem::path markerDir = markerPath.parent_path();
-    std::error_code ec;
-    std::filesystem::create_directories(markerDir, ec);
-
-    QFile marker(markerPath);
-    if (marker.open(QIODevice::WriteOnly)) {
-        qDebug() << "License accepted, marker written";
-    } else {
-        qWarning() << "Failed to write license marker";
-    }
+    KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Setup"));
+    group.writeEntry(QStringLiteral("LicenseAccepted"), true);
+    group.sync();
+    qDebug() << "License accepted";
 
     goToNextPage();
 }
@@ -98,6 +93,6 @@ bool SetupController::isRuntimePresent() const
 
 bool SetupController::isLicenseAccepted() const
 {
-    std::error_code ec;
-    return std::filesystem::exists(licenseAcceptedMarkerPath(), ec);
+    const KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Setup"));
+    return group.readEntry(QStringLiteral("LicenseAccepted"), false);
 }

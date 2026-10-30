@@ -44,19 +44,6 @@ inline std::filesystem::path bundledHostOverridePath()
     return configHome / "flatpak-overrides" / "pl.kir.szafirhost";
 }
 
-// Returns the path to the marker file that records the user's acceptance of the
-// Szafir license agreement.  Stored inside the sandbox's XDG_CONFIG_HOME so it
-// survives Flatpak updates but is not visible to the host system.
-inline std::filesystem::path licenseAcceptedMarkerPath()
-{
-    const QString configHomeEnv = qEnvironmentVariable("XDG_CONFIG_HOME");
-    const std::filesystem::path configHome = configHomeEnv.isEmpty()
-        ? PathUtils::toFsPath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-        : PathUtils::toFsPath(configHomeEnv);
-
-    return configHome / "szafir-host-proxy" / "license-accepted";
-}
-
 // Returns the fallback directory for components downloaded at runtime.
 // Lives inside XDG_DATA_HOME so it persists across Flatpak updates.
 inline std::filesystem::path downloadedExtraPath()
