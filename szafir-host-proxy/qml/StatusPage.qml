@@ -174,6 +174,8 @@ Kirigami.Page {
             }
         }
 
+        MenuSeparator {}
+
         Menu {
             title: i18n("Theme")
 
@@ -241,6 +243,8 @@ Kirigami.Page {
             visible: typeof updateController !== "undefined" && updateController !== null
             onTriggered: jarFileDialog.open()
         }
+
+        MenuSeparator {}
 
         Menu {
             title: i18n("Updates")

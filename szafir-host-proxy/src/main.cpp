@@ -1,7 +1,7 @@
 #include <memory>
 #include "config.h"
 
-#include <QActionGroup>
+#include <QAction>
 #include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -58,48 +58,6 @@ void updateTray(KStatusNotifierItem *tray, int activeHostCount)
             QStringLiteral("SzafirHost Proxy"),
             i18n("No active hosts"));
     }
-}
-
-// Appends a submenu (Auto / 2x / 1x) to parentMenu.
-// Returns an updater callable that re-checks the correct action given a new scale string.
-std::function<void(const QString &)> addHiDpiMenu(
-    QMenu *parentMenu,
-    const QString &label,
-    const QString &initialScale,
-    std::function<void(const QString &)> setter)
-{
-    auto *submenu = parentMenu->addMenu(label);
-    auto *group = new QActionGroup(submenu);
-    group->setExclusive(true);
-
-    // Pairs of (action, scale value) captured by value in the returned updater.
-    // Actions are parented to submenu which lives for the full app lifetime.
-    struct Entry { QAction *action; QString value; };
-    QList<Entry> entries;
-
-    auto addScaleAction = [&](const QString &actionLabel, const QString &value) {
-        auto *action = submenu->addAction(actionLabel);
-        action->setCheckable(true);
-        action->setChecked(false);
-        group->addAction(action);
-        entries.append({action, value});
-        QObject::connect(action, &QAction::triggered, submenu, [setter, value]() {
-            setter(value);
-        });
-    };
-
-    addScaleAction(i18n("Auto"), {});
-    addScaleAction(i18n("2x scaling"), QStringLiteral("2"));
-    addScaleAction(i18n("1x scaling"), QStringLiteral("1"));
-
-    auto updater = [entries](const QString &scale) {
-        for (const Entry &e : entries)
-            e.action->setChecked(e.value == scale);
-    };
-
-    updater(initialScale);
-
-    return updater;
 }
 
 } // namespace
@@ -476,6 +434,7 @@ int main(int argc, char *argv[])
                                        componentDownloader,
                                        updateController,
                                        smartCardMonitor,
+                                       smartCardNotifier,
                                        themeController));
 
     auto showMainWindow = [&mainWindow]() {
@@ -487,7 +446,7 @@ int main(int argc, char *argv[])
     // ----- Tray icon setup (created only after wizard completes) -----
     KStatusNotifierItem *tray = nullptr;
 
-    auto createTray = [&app, &tray, service, scalingController, updateController, &mainWindow, &showMainWindow]() {
+    auto createTray = [&app, &tray, service, updateController, &mainWindow, &showMainWindow]() {
         if (tray)
             return;  // Already created
 
@@ -513,20 +472,10 @@ int main(int argc, char *argv[])
                     QStringLiteral(APP_ID));
             });
 
-        // HiDPI scaling submenus
         QMenu *trayMenu = tray->contextMenu();
         trayMenu->addSeparator();
-        auto szafirUpdater = addHiDpiMenu(trayMenu, i18n("Szafir scaling"),
-            scalingController->szafirScale(),
-            [scalingController](const QString &s) { scalingController->setSzafirScale(s); });
-        auto hostUpdater = addHiDpiMenu(trayMenu, i18n("SzafirHost scaling"),
-            scalingController->hostScale(),
-            [scalingController](const QString &s) { scalingController->setHostScale(s); });
-
-        QObject::connect(scalingController, &ScalingController::szafirScaleChanged,
-            &app, [szafirUpdater](const QString &s) { szafirUpdater(s); });
-        QObject::connect(scalingController, &ScalingController::hostScaleChanged,
-            &app, [hostUpdater](const QString &s) { hostUpdater(s); });
+        QAction *restoreAction = trayMenu->addAction(i18n("Restore window"));
+        QObject::connect(restoreAction, &QAction::triggered, &app, showMainWindow);
 
         // Update tray on host count changes
         QObject::connect(service, &NativeMessagingService::activeHostCountChanged,

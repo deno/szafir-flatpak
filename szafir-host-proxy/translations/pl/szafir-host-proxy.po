@@ -398,28 +398,28 @@ msgstr "Instalowanie aktualizacji..."
 msgid "Menu"
 msgstr "Menu"
 
-# Tray context menu: GDK_SCALE submenu for Szafir app
-#: qml/StatusPage.qml src/main.cpp
+# Hamburger menu: scaling submenu title for Szafir app
+#: qml/StatusPage.qml
 msgid "Szafir scaling"
 msgstr "Skalowanie Szafir"
 
-# Tray context menu: HiDPI submenu item — no GDK_SCALE override
-#: qml/StatusPage.qml src/main.cpp
+# Hamburger menu: scaling item — no GDK_SCALE override
+#: qml/StatusPage.qml
 msgid "Auto"
 msgstr "Automatycznie"
 
-# Tray context menu: HiDPI submenu item — GDK_SCALE=2
-#: qml/StatusPage.qml src/main.cpp
+# Hamburger menu: scaling item — GDK_SCALE=2
+#: qml/StatusPage.qml
 msgid "2x scaling"
 msgstr "Skalowanie 2x"
 
-# Tray context menu: HiDPI submenu item — GDK_SCALE=1
-#: qml/StatusPage.qml src/main.cpp
+# Hamburger menu: scaling item — GDK_SCALE=1
+#: qml/StatusPage.qml
 msgid "1x scaling"
 msgstr "Skalowanie 1x"
 
-# Tray context menu: GDK_SCALE submenu for SzafirHost
-#: qml/StatusPage.qml src/main.cpp
+# Hamburger menu: scaling submenu title for SzafirHost
+#: qml/StatusPage.qml
 msgid "SzafirHost scaling"
 msgstr "Skalowanie SzafirHost"
 
@@ -954,3 +954,8 @@ msgstr "Dostępna aktualizacja SzafirHost"
 #: src/main.cpp
 msgid "Version %1 is available. Open the status window to install."
 msgstr "Dostępna jest wersja %1. Otwórz okno statusu, aby ją zainstalować."
+
+# Tray context menu: show and focus the status window
+#: src/main.cpp
+msgid "Restore window"
+msgstr "Przywróć okno"
