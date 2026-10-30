@@ -11,6 +11,7 @@
 #include <KLocalizedString>
 #include <KSharedConfig>
 
+#include "AppSettings.h"
 #include "config.h"
 
 namespace {
@@ -47,13 +48,13 @@ void SmartCardNotifier::cardRemoved(const QString &readerName)
 
 void SmartCardNotifier::loadSettings()
 {
-    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Notifications"));
+    const KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Notifications"));
     m_notificationsEnabled = group.readEntry(QStringLiteral("Enabled"), true);
 }
 
 void SmartCardNotifier::saveSettings()
 {
-    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Notifications"));
+    KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Notifications"));
     group.writeEntry(QStringLiteral("Enabled"), m_notificationsEnabled);
     group.sync();
 }

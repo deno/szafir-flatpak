@@ -13,6 +13,14 @@ using namespace std::literals::string_view_literals;
 // Flatpak app IDs.
 inline constexpr std::string_view kSzafirAppId    = "pl.kir.szafir"sv;
 
+// App-wide KConfig file. Kept inside the app's own config subdirectory so that
+// Landlock can grant atomic KConfig writes in native/Nix builds without opening
+// up all of ~/.config.
+inline QString appConfigFileName()
+{
+    return QStringLiteral("szafir-host-proxy/szafirhostproxyrc");
+}
+
 // Returns the path to a Flatpak override keyfile for appId.
 // Uses $HOME/.local/share (XDG default), which is bind-mounted at that path inside the sandbox.
 inline std::filesystem::path hostOverridePath(const QString &appId)

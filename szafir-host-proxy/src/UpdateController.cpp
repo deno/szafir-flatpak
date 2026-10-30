@@ -83,7 +83,7 @@ void UpdateController::setError(const QString &msg)
 
 void UpdateController::loadSettings()
 {
-    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Updates"));
+    const KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Updates"));
     m_autoUpdate = group.readEntry(QStringLiteral("AutoUpdate"), false);
     m_allowDowngrades = group.readEntry(QStringLiteral("AllowDowngrades"), true);
     m_lastCheckTime = group.readEntry(QStringLiteral("LastCheckTime"), QString());
@@ -94,7 +94,7 @@ void UpdateController::loadSettings()
 
 void UpdateController::saveSettings()
 {
-    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Updates"));
+    KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Updates"));
     group.writeEntry(QStringLiteral("AutoUpdate"), m_autoUpdate);
     group.writeEntry(QStringLiteral("AllowDowngrades"), m_allowDowngrades);
     group.writeEntry(QStringLiteral("LastCheckTime"), m_lastCheckTime);

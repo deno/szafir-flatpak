@@ -1,4 +1,5 @@
 #include "ThemeController.h"
+#include "AppSettings.h"
 
 #include <QAbstractItemModel>
 #include <QGuiApplication>
@@ -94,13 +95,13 @@ void ThemeController::applyTheme()
 
 void ThemeController::loadSettings()
 {
-    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Appearance"));
+    const KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Appearance"));
     m_theme = themeFromName(group.readEntry(QStringLiteral("Theme"), QStringLiteral("System")));
 }
 
 void ThemeController::saveSettings()
 {
-    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Appearance"));
+    KConfigGroup group = KSharedConfig::openConfig(appConfigFileName())->group(QStringLiteral("Appearance"));
     group.writeEntry(QStringLiteral("Theme"), themeName(m_theme));
     group.sync();
 }
