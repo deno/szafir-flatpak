@@ -92,20 +92,20 @@ https://deno.github.io/szafir-flatpak/szafir.flatpakrepo
 Dodaj je tylko raz:
 
 ```bash
-flatpak remote-add --user --if-not-exists szafir https://deno.github.io/szafir-flatpak/szafir.flatpakrepo
+flatpak remote-add --if-not-exists szafir https://deno.github.io/szafir-flatpak/szafir.flatpakrepo
 ```
 
 Zainstaluj wybrany pakiet:
 
 ```bash
-flatpak install --user szafir pl.kir.szafir
-flatpak install --user szafir pl.deno.kir.szafirhostproxy
+flatpak install szafir pl.kir.szafir
+flatpak install szafir pl.deno.kir.szafirhostproxy
 ```
 
 Albo zainstaluj oba naraz:
 
 ```bash
-flatpak install --user szafir pl.kir.szafir pl.deno.kir.szafirhostproxy
+flatpak install szafir pl.kir.szafir pl.deno.kir.szafirhostproxy
 ```
 
 ## Pierwsze uruchomienie
