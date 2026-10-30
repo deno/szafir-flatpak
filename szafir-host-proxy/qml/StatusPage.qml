@@ -200,6 +200,13 @@ Kirigami.Page {
             }
         }
 
+        MenuItem {
+            text: i18n("Smart card notifications")
+            checkable: true
+            checked: smartCardNotifier?.notificationsEnabled ?? true
+            onTriggered: smartCardNotifier.notificationsEnabled = checked
+        }
+
         MenuSeparator {}
 
         MenuItem {

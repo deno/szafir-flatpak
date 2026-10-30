@@ -7,7 +7,9 @@
 #include <QDBusPendingReply>
 #include <QDebug>
 
+#include <KConfigGroup>
 #include <KLocalizedString>
+#include <KSharedConfig>
 
 #include "config.h"
 
@@ -20,6 +22,17 @@ constexpr int kExpireTimeoutDefault = -1;
 SmartCardNotifier::SmartCardNotifier(QObject *parent)
     : QObject(parent)
 {
+    loadSettings();
+}
+
+void SmartCardNotifier::setNotificationsEnabled(bool enabled)
+{
+    if (m_notificationsEnabled == enabled)
+        return;
+
+    m_notificationsEnabled = enabled;
+    saveSettings();
+    Q_EMIT notificationsEnabledChanged();
 }
 
 void SmartCardNotifier::cardInserted(const QString &readerName)
@@ -32,8 +45,23 @@ void SmartCardNotifier::cardRemoved(const QString &readerName)
     notify(i18n("Smart card removed"), i18n("Reader: %1", readerName));
 }
 
+void SmartCardNotifier::loadSettings()
+{
+    const KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Notifications"));
+    m_notificationsEnabled = group.readEntry(QStringLiteral("Enabled"), true);
+}
+
+void SmartCardNotifier::saveSettings()
+{
+    KConfigGroup group = KSharedConfig::openConfig()->group(QStringLiteral("Notifications"));
+    group.writeEntry(QStringLiteral("Enabled"), m_notificationsEnabled);
+    group.sync();
+}
+
 void SmartCardNotifier::notify(const QString &summary, const QString &body)
 {
+    if (!m_notificationsEnabled)
+        return;
     // org.freedesktop.Notifications.Notify argument order: app_name,
     // replaces_id, app_icon, summary, body, actions, hints, expire_timeout.
     QVariantMap hints;

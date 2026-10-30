@@ -6,6 +6,7 @@
 #include "NativeMessagingService.h"
 #include "ComponentDownloader.h"
 #include "SmartCardMonitor.h"
+#include "SmartCardNotifier.h"
 #include "UpdateController.h"
 #include "ThemeController.h"
 #include "config.h"
@@ -58,6 +59,7 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
                        ComponentDownloader *componentDownloader,
                        UpdateController *updateController,
                        SmartCardMonitor *smartCardMonitor,
+                       SmartCardNotifier *smartCardNotifier,
                        ThemeController *themeController,
                        QObject *parent)
     : QObject(parent)
@@ -68,6 +70,7 @@ MainWindow::MainWindow(NativeMessagingService *service, ScalingController *scali
     , m_componentDownloader(componentDownloader)
     , m_updateController(updateController)
     , m_smartCardMonitor(smartCardMonitor)
+    , m_smartCardNotifier(smartCardNotifier)
     , m_themeController(themeController)
     , m_activeHostCount(service->activeHostCount())
 {
@@ -184,6 +187,7 @@ void MainWindow::ensureWindow()
     m_engine->rootContext()->setContextProperty(QStringLiteral("componentDownloader"), m_componentDownloader);
     m_engine->rootContext()->setContextProperty(QStringLiteral("updateController"), m_updateController);
     m_engine->rootContext()->setContextProperty(QStringLiteral("smartCardMonitor"), m_smartCardMonitor);
+    m_engine->rootContext()->setContextProperty(QStringLiteral("smartCardNotifier"), m_smartCardNotifier);
     m_engine->rootContext()->setContextProperty(QStringLiteral("themeController"), m_themeController);
     m_engine->load(QUrl(QStringLiteral("qrc:/qt/qml/SzafirHostProxy/qml/MainWindow.qml")));
 

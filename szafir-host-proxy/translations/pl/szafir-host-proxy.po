@@ -443,6 +443,11 @@ msgstr "Jasny"
 msgid "Dark"
 msgstr "Ciemny"
 
+# Hamburger menu: toggle desktop notifications for smart card hotplug events
+#: qml/StatusPage.qml
+msgid "Smart card notifications"
+msgstr "Powiadomienia o kartach inteligentnych"
+
 #: qml/StatusPage.qml
 msgid "Download components..."
 msgstr "Pobierz komponenty..."
