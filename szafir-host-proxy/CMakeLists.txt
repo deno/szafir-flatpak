@@ -151,6 +151,7 @@ qt_add_qml_module(szafir-host-proxy
         qml/DownloadPage.qml
         qml/LicensePage.qml
         qml/StatusPage.qml
+        qml/SmartCardStatusIcon.qml
         qml/SmartCardDetailsPage.qml
         qml/CertificateDetailsPage.qml
         qml/SzafirHostAboutPage.qml
