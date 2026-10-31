@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.8
+Version:        0.5.9
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,6 +76,9 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Sat Oct 31 2026 deno <deno@users.noreply.github.com> - 0.5.9-1
+- Fix smart card icon not displaying correctly.
+
 * Fri Oct 30 2026 deno <deno@users.noreply.github.com> - 0.5.8-1
 - Move scaling options from the tray icon to the main menu. Smart card notifications can now be toggled off. Refactor and simplify app settings.
 

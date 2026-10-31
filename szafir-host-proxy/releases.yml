@@ -1,4 +1,12 @@
 releases:
+  - version: 0.5.9
+    date: 2026-10-31
+    description:
+      en: >-
+        Fix smart card icon not displaying correctly.
+      pl: >-
+        Poprawka nieprawidłowego wyświetlania ikony karty kryptograficznej.
+
   - version: 0.5.8
     date: 2026-10-30
     description:
