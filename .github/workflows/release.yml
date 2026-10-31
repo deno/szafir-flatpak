@@ -125,6 +125,18 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Release bodies come from the same releases.yml entry that feeds the
+      # AppStream metainfo, so the tag must carry a version with notes.
+      - name: Compose release notes
+        id: notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python3 scripts/query_releases.py --notes "$VERSION" > release-notes.md
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Download bundle
         uses: actions/download-artifact@v4
         with:
@@ -138,6 +150,8 @@ jobs:
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
+          name: SzafirHost Proxy ${{ steps.notes.outputs.version }}
+          body_path: release-notes.md
           files: |
             pl.deno.kir.szafirhostproxy.flatpak
             szafir-host-proxy-*-source.tar.gz
