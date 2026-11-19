@@ -1,5 +1,5 @@
 Name:           szafir-host-proxy
-Version:        0.5.9
+Version:        0.5.10
 Release:        1%{?dist}
 Summary:        Browser bridge for Szafir website signing
 
@@ -76,6 +76,9 @@ install -D -p -m 0644 proxy_icon.svg \
 %{_datadir}/locale/
 
 %changelog
+* Thu Nov 19 2026 deno <deno@users.noreply.github.com> - 0.5.10-1
+- Updated the standalone Szafir desktop app to 2.0.0 build 711.
+
 * Sat Oct 31 2026 deno <deno@users.noreply.github.com> - 0.5.9-1
 - Fix smart card icon not displaying correctly.
 
